@@ -28,7 +28,7 @@ class ManaShowCode extends ManaPluggable {
   String get name => 'mana_show_code';
 
   @override
-  Future<void> load() async {
+  Future<void> initialize() async {
     await Highlighter.initialize(['dart']);
     final theme = await HighlighterTheme.loadLightTheme();
     highlighter = Highlighter(
