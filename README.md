@@ -46,7 +46,7 @@ void main() async {
     ..register(ManaSharedPreferencesViewer())
     ..register(ManaAlignRuler());
 
-  runApp(ManaWidget(child: MyApp()));
+  runApp(ManaWidget(child: App()));
 }
 
 class App extends StatelessWidget {
@@ -72,20 +72,20 @@ class App extends StatelessWidget {
 ```
 
 
-- [x] [🟢 标尺 - AlignRuler](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_align_ruler)
-- [x] [🟡 日志查看器 - LogViewer](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_logger)
-- [x] [🟢 设备信息 - DeviceInfo](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_device_info)
-- [x] [🟢 颜色吸管 - ColorSucker](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_color_sucker)
-- [x] [🟢 Dio网络检查器 - DioInspector](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_dio)
-- [x] [🔴 Widget详情 - WidgetInfoInspector](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_widget_info_inspector)
-- [x] [🟢 帧率监控 - FpsMonitor](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_fps_monitor)
-- [x] [🟢 SharedPreferences查看器 - SharedPreferencesViewer](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_shared_preferences_viewer)
-- [x] [🔴 显示代码 - ShowCode](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_show_code)
-- [x] [🔴 内存信息 - MemoryInfo](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_memory_info)
-- [x] [🟢 包信息 - PackageInfo](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_package_info)
-- [x] [🟢 许可 - License](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_license)
-- [x] [🟢 网格 - Grid](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_grid)
-- [x] [🟡 视觉辅助 - VisualHelper](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_visual_helper)
+- [x] [🟢 标尺 - AlignRuler](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_align_ruler)
+- [x] [🟡 日志查看器 - LogViewer](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_logger)
+- [x] [🟢 设备信息 - DeviceInfo](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_device_info)
+- [x] [🟢 颜色吸管 - ColorSucker](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_color_sucker)
+- [x] [🟢 Dio网络检查器 - DioInspector](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_dio)
+- [x] [🔴 Widget详情 - WidgetInfoInspector](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_widget_info_inspector)
+- [x] [🟢 帧率监控 - FpsMonitor](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_fps_monitor)
+- [x] [🟢 SharedPreferences查看器 - SharedPreferencesViewer](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_shared_preferences_viewer)
+- [x] [🔴 显示代码 - ShowCode](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_show_code)
+- [x] [🔴 内存信息 - MemoryInfo](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_memory_info)
+- [x] [🟢 包信息 - PackageInfo](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_package_info)
+- [x] [🟢 许可 - License](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_license)
+- [x] [🟢 网格 - Grid](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_grid)
+- [x] [🟡 视觉辅助 - VisualHelper](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_visual_helper)
 
 | 插件                                                                                                                    |                                                                                                                                                    |                                                                                                                          |
 |-----------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
@@ -102,7 +102,7 @@ class App extends StatelessWidget {
 
 ## 插件开发
 
-- [参考](https://github.com/lhlyu/flutter_mana/tree/master/kits/lib/src/plugins/demo)
+- [参考](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/demo)
 
 - 安装依赖
 
@@ -170,7 +170,7 @@ class Demo extends ManaPluggable {
 void main() {
   ManaPluginManager.instance.register(Demo());
 
-  runApp(ManaWidget(child: MyApp()));
+  runApp(ManaWidget(child: App()));
 }
 
 class App extends StatelessWidget {
