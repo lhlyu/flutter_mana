@@ -11,6 +11,4 @@ export 'src/services/vm_inspector.dart' show VmInspector;
 export 'src/services/vm_inspector_mixin.dart' show VmInspectorMixin;
 export 'src/utils/hit_test_utils.dart' show HitTestUtils;
 export 'src/widgets/check_icon_button.dart' show CheckIconButton;
-export 'src/widgets/floating_window/index.dart'
-    show ManaFloatingWindow, PositionType;
-export 'src/widgets/mana_navigator.dart' show ManaNavigator, manaNavigatorKey;
+export 'src/widgets/floating_window/index.dart' show ManaFloatingWindow, PositionType;

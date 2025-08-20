@@ -64,14 +64,11 @@ class _ManaLicenseState extends State<ManaLicense> {
               ),
               cardColor: Colors.white,
             ),
-            child: ManaNavigator(
-              child: LicensePage(
-                applicationName: snapshot.requireData.appName,
-                applicationIcon: FlutterLogo(),
-                applicationVersion:
-                    'v${snapshot.requireData.version}+${snapshot.requireData.buildNumber}',
-                applicationLegalese: snapshot.requireData.packageName,
-              ),
+            child: LicensePage(
+              applicationName: snapshot.requireData.appName,
+              applicationIcon: FlutterLogo(),
+              applicationVersion: 'v${snapshot.requireData.version}+${snapshot.requireData.buildNumber}',
+              applicationLegalese: snapshot.requireData.packageName,
             ),
           );
         },

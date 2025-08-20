@@ -16,7 +16,7 @@ class DioInspector extends StatelessWidget {
       initialWidth: double.infinity,
       position: PositionType.bottom,
       drag: false,
-      content: ManaNavigator(child: DioInspectorContent()),
+      content: DioInspectorContent(),
     );
   }
 }

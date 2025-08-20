@@ -114,9 +114,8 @@ class _FloatingWindowState extends State<FloatingWindow> {
   }
 
   Widget _buildContent(Size screenSize, Size windowSize, bool fullscreen) {
-    final radius = (fullscreen || widget.initialHeight == double.infinity)
-        ? BorderRadius.zero
-        : BorderRadius.circular(8);
+    final radius =
+        (fullscreen || widget.initialHeight == double.infinity) ? BorderRadius.zero : BorderRadius.circular(8);
 
     return Container(
       clipBehavior: Clip.antiAlias,
@@ -179,46 +178,53 @@ class _FloatingWindowState extends State<FloatingWindow> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        if (widget.showBarrier) _buildBarrier(),
-        if (widget.content != null)
-          AnimatedBuilder(
-            animation: Listenable.merge([
-              _controller.manaState.floatWindowMainVisible,
-              _controller.fullscreen,
-              _controller.offset,
-            ]), // 合并多个 ValueListenable
-            builder: (context, _) {
-              final visible =
-                  _controller.manaState.floatWindowMainVisible.value;
-              final fullscreen = _controller.fullscreen.value;
-              final offset = _controller.offset.value;
-              final double currentLeft = fullscreen ? 0 : offset.dx;
-              final double currentTop = fullscreen ? 0 : offset.dy;
-              final double currentWidth = fullscreen
-                  ? _controller.screenSize.width
-                  : _controller.windowSize.width;
-              final double currentHeight = fullscreen
-                  ? _controller.screenSize.height
-                  : _controller.windowSize.height;
-              return Positioned(
-                left: currentLeft,
-                top: currentTop,
-                width: currentWidth,
-                height: currentHeight,
-                child: Visibility(
-                  visible: visible,
-                  replacement: nil,
-                  maintainState: widget.maintainContent,
-                  maintainAnimation: widget.maintainContent,
-                  child: _buildContent(_controller.screenSize,
-                      _controller.windowSize, fullscreen),
-                ),
-              );
-            },
-          ),
-      ],
+    return PopScope(
+      canPop: false, // 拦截返回
+      onPopInvokedWithResult: (bool didPop, void result) {
+        if (!didPop) {
+          if (_controller.manaState.activePluginName.value.isEmpty) {
+            _controller.manaState.pluginManagementPanelVisible.value = false;
+            return;
+          }
+          _controller.manaState.floatWindowMainVisible.value = false;
+          _controller.manaState.floatingButtonVisible.value = true;
+        }
+      },
+      child: Stack(
+        children: [
+          if (widget.showBarrier) _buildBarrier(),
+          if (widget.content != null)
+            AnimatedBuilder(
+              animation: Listenable.merge([
+                _controller.manaState.floatWindowMainVisible,
+                _controller.fullscreen,
+                _controller.offset,
+              ]), // 合并多个 ValueListenable
+              builder: (context, _) {
+                final visible = _controller.manaState.floatWindowMainVisible.value;
+                final fullscreen = _controller.fullscreen.value;
+                final offset = _controller.offset.value;
+                final double currentLeft = fullscreen ? 0 : offset.dx;
+                final double currentTop = fullscreen ? 0 : offset.dy;
+                final double currentWidth = fullscreen ? _controller.screenSize.width : _controller.windowSize.width;
+                final double currentHeight = fullscreen ? _controller.screenSize.height : _controller.windowSize.height;
+                return Positioned(
+                  left: currentLeft,
+                  top: currentTop,
+                  width: currentWidth,
+                  height: currentHeight,
+                  child: Visibility(
+                    visible: visible,
+                    replacement: nil,
+                    maintainState: widget.maintainContent,
+                    maintainAnimation: widget.maintainContent,
+                    child: _buildContent(_controller.screenSize, _controller.windowSize, fullscreen),
+                  ),
+                );
+              },
+            ),
+        ],
+      ),
     );
   }
 }

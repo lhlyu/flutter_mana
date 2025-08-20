@@ -21,38 +21,14 @@ class ManaOverlay extends StatefulWidget {
   State<ManaOverlay> createState() => _ManaOverlayState();
 }
 
-class _ManaOverlayState extends State<ManaOverlay> with WidgetsBindingObserver {
+class _ManaOverlayState extends State<ManaOverlay> {
   /// The state object for Mana, which must be preserved using a StatefulWidget.
   ///
   /// Mana 的状态对象，必须使用 StatefulWidget 进行状态保存。
   final ManaState _manaState = ManaStore.instance.getManaState();
 
   @override
-  void initState() {
-    WidgetsBinding.instance.addObserver(this);
-    super.initState();
-  }
-
-  @override
-  Future<bool> didPopRoute() async {
-    if ((await manaNavigatorKey.currentState?.maybePop()) ?? false) {
-      return true;
-    }
-    if (_manaState.pluginManagementPanelVisible.value) {
-      _manaState.pluginManagementPanelVisible.value = false;
-      return true;
-    }
-    if (_manaState.floatWindowMainVisible.value) {
-      _manaState.floatWindowMainVisible.value = false;
-      _manaState.floatingButtonVisible.value = true;
-      return true;
-    }
-    return false;
-  }
-
-  @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     _manaState.dispose();
     super.dispose();
   }
