@@ -12,7 +12,8 @@ class VisualHelperContent extends StatefulWidget {
 
 class _VisualHelperContentState extends State<VisualHelperContent> with I18nMixin {
   double _raw = 1;
-  double get _speed => 1 / _raw; // 实际倍速（倒数）
+
+  double get _speed => 1 / _raw;
 
   void markWholeRenderTreeNeedsPaint() {
     late RenderObjectVisitor visitor;
@@ -47,9 +48,9 @@ class _VisualHelperContentState extends State<VisualHelperContent> with I18nMixi
           // 动画减速（标题 + 文案 + Slider）
           Row(
             children: [
-              Text(t('visual_helper.animate_speed'), style: TextStyle(fontSize: 14)),
+              Text(t('visual_helper.animate_speed'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
               const Spacer(),
-              Text('×${_raw.toStringAsFixed(2)}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              Text('×${_raw.toStringAsFixed(2)}', style: const TextStyle(fontSize: 12, color: Colors.black54)),
             ],
           ),
           Slider(
@@ -69,7 +70,6 @@ class _VisualHelperContentState extends State<VisualHelperContent> with I18nMixi
               });
             },
           ),
-          const SizedBox(height: 8),
 
           // 三项紧凑行
           _compactRow(t('visual_helper.layout_bounds'), t('visual_helper.show_widget_borders'), debugPaintSizeEnabled,
@@ -102,8 +102,8 @@ class _VisualHelperContentState extends State<VisualHelperContent> with I18nMixi
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(title, style: const TextStyle(fontSize: 14)),
-                Text(desc, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                Text(desc, style: const TextStyle(fontSize: 11, color: Colors.black54)),
               ],
             ),
           ),

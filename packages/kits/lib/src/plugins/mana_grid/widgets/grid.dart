@@ -40,7 +40,7 @@ class _GridState extends State<Grid> {
   Widget build(BuildContext context) {
     return ManaFloatingWindow(
       name: widget.name,
-      initialHeight: 180,
+      initialHeight: 170,
       content: GridContent(
         gap: _gap,
         showNumbers: _showNumbers,

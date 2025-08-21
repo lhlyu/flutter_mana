@@ -212,31 +212,33 @@ class _ElementDetailPage extends StatelessWidget {
         } else if (snapshot.hasData) {
           final text = snapshot.data!.join('\n');
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildTitle("Widget Description"),
-              Container(
-                constraints: const BoxConstraints(maxHeight: 200),
-                child: SingleChildScrollView(
-                  physics: const ClampingScrollPhysics(),
-                  padding: const EdgeInsets.all(16),
-                  child: Text(element.widget.toStringDeep()),
-                ),
-              ),
-              _buildTitle("RenderObject Description"),
-              Expanded(
-                child: SingleChildScrollView(
-                  physics: const ClampingScrollPhysics(),
-                  scrollDirection: Axis.horizontal,
+          return SelectionArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildTitle("Widget Description"),
+                Container(
+                  constraints: const BoxConstraints(maxHeight: 200),
                   child: SingleChildScrollView(
                     physics: const ClampingScrollPhysics(),
                     padding: const EdgeInsets.all(16),
-                    child: Text(text),
+                    child: Text(element.widget.toStringDeep()),
                   ),
                 ),
-              ),
-            ],
+                _buildTitle("RenderObject Description"),
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: const ClampingScrollPhysics(),
+                    scrollDirection: Axis.horizontal,
+                    child: SingleChildScrollView(
+                      physics: const ClampingScrollPhysics(),
+                      padding: const EdgeInsets.all(16),
+                      child: Text(text),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           );
         } else {
           return const Center(child: Text('Load failed'));

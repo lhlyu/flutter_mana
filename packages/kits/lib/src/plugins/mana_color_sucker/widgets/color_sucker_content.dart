@@ -54,10 +54,30 @@ class _ColorSuckerContentState extends State<ColorSuckerContent> with I18nMixin 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(12),
       child: Column(
-        spacing: 8,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            children: [
+              Text(t('color_sucker.magnification'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+              const Spacer(),
+              Text('${_zoomLevel.toInt()}x', style: const TextStyle(fontSize: 12, color: Colors.black54)),
+            ],
+          ),
+          Slider(
+            value: _zoomLevel,
+            min: _zoomOptions.first,
+            max: _zoomOptions.last,
+            divisions: _zoomOptions.length - 1,
+            label: '${_zoomLevel.toInt()}x',
+            onChanged: (value) {
+              // 吸附到最近的预设值（可选）
+              _zoomLevel = _zoomOptions.reduce((a, b) => (value - a).abs() < (value - b).abs() ? a : b);
+              widget.onMagnificationChanged?.call(_zoomLevel);
+              setState(() {});
+            },
+          ),
           Row(
             children: [
               AnimatedContainer(
@@ -78,7 +98,7 @@ class _ColorSuckerContentState extends State<ColorSuckerContent> with I18nMixin 
               Expanded(
                 child: Text(
                   colorHex,
-                  style: const TextStyle(fontSize: 16),
+                  style: const TextStyle(fontSize: 14),
                 ),
               ),
               CheckIconButton(
@@ -86,27 +106,6 @@ class _ColorSuckerContentState extends State<ColorSuckerContent> with I18nMixin 
                 changedIcon: KitIcons.copy_success,
                 onPressed: _copyToClipboard,
               )
-            ],
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 8,
-            children: [
-              Text('${t('color_sucker.magnification')}: ${_zoomLevel.toInt()}x', style: TextStyle(fontSize: 16)),
-              Slider(
-                padding: EdgeInsets.zero,
-                value: _zoomLevel,
-                min: _zoomOptions.first,
-                max: _zoomOptions.last,
-                divisions: _zoomOptions.length - 1,
-                label: '${_zoomLevel.toInt()}x',
-                onChanged: (value) {
-                  // 吸附到最近的预设值（可选）
-                  _zoomLevel = _zoomOptions.reduce((a, b) => (value - a).abs() < (value - b).abs() ? a : b);
-                  widget.onMagnificationChanged?.call(_zoomLevel);
-                  setState(() {});
-                },
-              ),
             ],
           ),
         ],

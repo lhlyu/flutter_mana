@@ -112,7 +112,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 width: double.infinity,
                 color: Colors.grey.shade200,
                 padding: EdgeInsets.all(16),
-                child: SelectableText('测试动画'),
+                child: SelectableText('Test Animation'),
               ),
               AnimatedBall(),
               SizedBox(width: 300, child: Image.asset('assets/test.jpeg', fit: BoxFit.cover)),

@@ -49,36 +49,22 @@ class _GridContentState extends State<GridContent> with I18nMixin {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
-        spacing: 8,
         children: [
-          Row(
-            spacing: 8,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Switch(
-                value: _showNumbers,
-                onChanged: _onShowNumbersChanged,
-                activeColor: Colors.red,
-              ),
-              Expanded(
-                child: Text(
-                  t('grid.show_numbers'),
-                  style: const TextStyle(
-                    color: Colors.red,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ],
-          ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 8,
             children: [
-              Text('${t('grid.gap')}: ${_gap.toInt()}px', style: TextStyle(fontSize: 16)),
+              Row(
+                children: [
+                  Text(t('grid.gap'),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      )),
+                  const Spacer(),
+                  Text('${_gap.toInt()}px', style: const TextStyle(fontSize: 12, color: Colors.black54)),
+                ],
+              ),
               Slider(
-                padding: EdgeInsets.zero,
                 value: _gap,
                 min: _gapOptions.first,
                 max: _gapOptions.last,
@@ -90,6 +76,29 @@ class _GridContentState extends State<GridContent> with I18nMixin {
                   widget.onGapChanged?.call(_gap);
                   setState(() {});
                 },
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      t('grid.show_numbers'),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Switch(
+                value: _showNumbers,
+                onChanged: _onShowNumbersChanged,
               ),
             ],
           ),

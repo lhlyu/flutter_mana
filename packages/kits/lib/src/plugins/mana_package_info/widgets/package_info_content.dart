@@ -37,24 +37,26 @@ class PackageInfoContent extends StatelessWidget {
         }
 
         final data = snapshot.data!;
-        return SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          child: Table(
-            border: _tableBorder,
-            columnWidths: const {
-              0: IntrinsicColumnWidth(),
-              1: FlexColumnWidth(),
-            },
-            children: data.entries
-                .map(
-                  (e) => TableRow(
-                    children: [
-                      _Cell(e.key, bold: true),
-                      _Cell(e.value),
-                    ],
-                  ),
-                )
-                .toList(),
+        return SelectionArea(
+          child: SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            child: Table(
+              border: _tableBorder,
+              columnWidths: const {
+                0: IntrinsicColumnWidth(),
+                1: FlexColumnWidth(),
+              },
+              children: data.entries
+                  .map(
+                    (e) => TableRow(
+                      children: [
+                        _Cell(e.key, bold: true),
+                        _Cell(e.value),
+                      ],
+                    ),
+                  )
+                  .toList(),
+            ),
           ),
         );
       },
@@ -72,7 +74,7 @@ class _Cell extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.all(8),
-        child: SelectableText(
+        child: Text(
           text,
           style: TextStyle(fontWeight: bold ? FontWeight.bold : FontWeight.normal),
         ),
