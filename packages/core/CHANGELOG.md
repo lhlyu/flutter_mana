@@ -1,3 +1,9 @@
+# 1.1.0
+
+- refactor: migrate legacy Flutter project to Dart workspace and streamline codebase
+- feat: add platform support checks to plugins and update docs
+- style: reduce icon size
+
 # 1.0.4
 
 - feat: add mana_visual_helper plugin and documentation
