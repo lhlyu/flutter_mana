@@ -1,0 +1,31 @@
+name: flutter_mana_kits
+description: "Flutter Mana Kits"
+version: 1.1.0
+homepage: https://github.com/lhlyu/flutter_mana/tree/master/packages/kits
+repository: https://github.com/lhlyu/flutter_mana
+documentation: https://github.com/lhlyu/flutter_mana
+issue_tracker: https://github.com/lhlyu/flutter_mana/issues
+topics: [ debug, in-app-debug, diagnostics, plugin ]
+
+environment:
+  sdk: ^3.6.0
+  flutter: ">=1.17.0"
+resolution: workspace 
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  flutter_mana: ^1.1.0
+  dio: ^5.9.0
+  logger: ^2.6.1
+  shared_preferences: ^2.5.3
+  device_info_plus: ^11.5.0
+  syntax_highlight: ^0.5.0
+  package_info_plus: ^8.3.1
+  vm_service: ^15.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0

@@ -22,15 +22,15 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
-        working-directory: ./example
+        working-directory: ./packages/example
 
       - name: Build APK
         run: flutter build apk --debug
-        working-directory: ./example
+        working-directory: ./packages/example
 
       - name: Upload APK to Release
         uses: softprops/action-gh-release@v2
         with:
-          files: ./example/build/app/outputs/flutter-apk/app-debug.apk
+          files: ./packages/example/build/app/outputs/flutter-apk/app-debug.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

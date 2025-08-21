@@ -31,6 +31,7 @@ import 'package:flutter_mana_kits/flutter_mana_kits.dart';
 
 void main() async {
   ManaPluginManager.instance
+    ..register(ManaTouchIndicator())
     ..register(ManaVisualHelper())
     ..register(ManaGrid())
     ..register(ManaLicense())
@@ -46,7 +47,7 @@ void main() async {
     ..register(ManaSharedPreferencesViewer())
     ..register(ManaAlignRuler());
 
-  runApp(ManaWidget(child: MyApp()));
+  runApp(ManaWidget(child: App()));
 }
 
 class App extends StatelessWidget {
@@ -66,43 +67,52 @@ class App extends StatelessWidget {
 ## 插件&使用
 
 ```
-🟢 全部功能在正式与开发环境生效  
-🟡 部分功能在正式环境生效  
-🔴 全部功能仅在开发环境生效  
+✅ - 支持
+❌ - 不支持
+⭕️ - 部分支持
 ```
 
 
-- [x] [🟢 标尺 - AlignRuler](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_align_ruler)
-- [x] [🟡 日志查看器 - LogViewer](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_logger)
-- [x] [🟢 设备信息 - DeviceInfo](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_device_info)
-- [x] [🟢 颜色吸管 - ColorSucker](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_color_sucker)
-- [x] [🟢 Dio网络检查器 - DioInspector](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_dio)
-- [x] [🔴 Widget详情 - WidgetInfoInspector](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_widget_info_inspector)
-- [x] [🟢 帧率监控 - FpsMonitor](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_fps_monitor)
-- [x] [🟢 SharedPreferences查看器 - SharedPreferencesViewer](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_shared_preferences_viewer)
-- [x] [🔴 显示代码 - ShowCode](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_show_code)
-- [x] [🔴 内存信息 - MemoryInfo](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_memory_info)
-- [x] [🟢 包信息 - PackageInfo](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_package_info)
-- [x] [🟢 许可 - License](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_license)
-- [x] [🟢 网格 - Grid](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_grid)
-- [x] [🟡 视觉辅助 - VisualHelper](https://github.com/lhlyu/flutter_mana/tree/master/flutter_mana_kits/lib/src/plugins/mana_visual_helper)
+| 插件&文档                                                                                                                                                            | android | ios | macos | windows | linux | web | debug | release |
+|------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|-----|-------|---------|-------|-----|-------|---------|
+| [标尺 - AlignRuler](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_align_ruler)                                              | ✅       | ✅   | ✅     | ✅       | ✅     | ✅   | ✅     | ✅       |
+| [日志查看器 - LogViewer](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_logger)                                                 | ✅       | ✅   | ✅     | ✅       | ✅     | ✅   | ✅     | ⭕️      |
+| [设备信息 - DeviceInfo](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_device_info)                                            | ✅       | ✅   | ✅     | ✅       | ✅     | ✅   | ✅     | ✅       |
+| [颜色吸管 - ColorSucker](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_color_sucker)                                          | ✅       | ✅   | ✅     | ✅       | ✅     | ✅   | ✅     | ✅       |
+| [Dio网络检查器 - DioInspector](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_dio_inspector)                                    | ✅       | ✅   | ✅     | ✅       | ✅     | ✅   | ✅     | ✅       |
+| [Widget详情 - WidgetInfoInspector](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_widget_info_inspector)                     | ✅       | ✅   | ✅     | ✅       | ✅     | ✅   | ✅     | ❌       |
+| [帧率监控 - FpsMonitor](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_fps_monitor)                                            | ✅       | ✅   | ✅     | ✅       | ✅     | ❌   | ✅     | ✅       |
+| [SharedPreferences查看器 - SharedPreferencesViewer](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_shared_preferences_viewer) | ✅       | ✅   | ✅     | ✅       | ✅     | ✅   | ✅     | ✅       |
+| [显示代码 - ShowCode](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_show_code)                                                | ✅       | ✅   | ✅     | ✅       | ✅     | ❌   | ✅     | ❌       |
+| [内存信息 - MemoryInfo](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_memory_info)                                            | ✅       | ✅   | ✅     | ✅       | ✅     | ❌   | ✅     | ❌       |
+| [包信息 - PackageInfo](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_package_info)                                           | ✅       | ✅   | ✅     | ✅       | ✅     | ✅   | ✅     | ✅       |
+| [许可 - License](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_license)                                                     | ✅       | ✅   | ✅     | ✅       | ✅     | ✅   | ✅     | ✅       |
+| [网格 - Grid](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_grid)                                                           | ✅       | ✅   | ✅     | ✅       | ✅     | ✅   | ✅     | ✅       |
+| [视觉辅助 - VisualHelper](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_visual_helper)                                        | ✅       | ✅   | ✅     | ✅       | ✅     | ✅   | ✅     | ⭕️      |
+| [触摸指示器 - TouchIndicator](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_touch_indicator)                                   | ✅       | ✅   | ✅     | ✅       | ✅     | ✅   | ✅     | ✅       |
 
-| 插件                                                                                                                    |                                                                                                                                                    |                                                                                                                          |
-|-----------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
-| 面板                                                                                                                    | 日志查看器                                                                                                                                              | 设备信息                                                                                                                     |
-| <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_preview.png" alt="面板">        | <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_log_viewer.png" alt="日志查看器">                               | <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_device_info.png" alt="设备信息">     |
-| 颜色吸管                                                                                                                  | Dio网络检查器                                                                                                                                           | Widget详情                                                                                                                 |
-| <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_color_sucker.png" alt="颜色吸管"> | <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_dio_inspector.png" alt="Dio网络检查器">                         | <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_widget_info.png" alt="Widget详情"> |
-| 帧率监控                                                                                                                  | SharedPreferences查看器                                                                                                                               | 标尺                                                                                                                       |
-| <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_fps_monitor.png" alt="帧率监控">  | <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_shared_preferences_viewer.png" alt="SharedPreferences查看器"> | <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_align_ruler.png" alt="标尺">       |
-| 显示代码                                                                                                                  | 内存信息                                                                                                                                               | 包信息                                                                                                                      |
-| <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_show_code.png" alt="显示代码">    | <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_memory_info.png" alt="内存信息">                               | <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_package_info.png" alt="包信息">     |
-| 许可                                                                                                                    | 网格                                                                                                                                                 | 视觉辅助                                                                                                                     |
-| <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_license.png" alt="许可">        | <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_grid.png" alt="网格">                                        | <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_visual_helper.png" alt="视觉辅助">   |
+
+## 预览图
+
+| 插件                                                                                                                        |                                                                                                                                                    |                                                                                                                          |
+|---------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
+| 面板                                                                                                                        | 日志查看器                                                                                                                                              | 设备信息                                                                                                                     |
+| <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_preview.png" alt="面板">            | <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_log_viewer.png" alt="日志查看器">                               | <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_device_info.png" alt="设备信息">     |
+| 颜色吸管                                                                                                                      | Dio网络检查器                                                                                                                                           | Widget详情                                                                                                                 |
+| <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_color_sucker.png" alt="颜色吸管">     | <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_dio_inspector.png" alt="Dio网络检查器">                         | <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_widget_info.png" alt="Widget详情"> |
+| 帧率监控                                                                                                                      | SharedPreferences查看器                                                                                                                               | 标尺                                                                                                                       |
+| <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_fps_monitor.png" alt="帧率监控">      | <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_shared_preferences_viewer.png" alt="SharedPreferences查看器"> | <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_align_ruler.png" alt="标尺">       |
+| 显示代码                                                                                                                      | 内存信息                                                                                                                                               | 包信息                                                                                                                      |
+| <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_show_code.png" alt="显示代码">        | <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_memory_info.png" alt="内存信息">                               | <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_package_info.png" alt="包信息">     |
+| 许可                                                                                                                        | 网格                                                                                                                                                 | 视觉辅助                                                                                                                     |
+| <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_license.png" alt="许可">            | <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_grid.png" alt="网格">                                        | <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_visual_helper.png" alt="视觉辅助">   |
+| 触摸指示器                                                                                                                     |                                                                                                                                                    |                                                                                                                          |
+| <img width="200" src="https://github.com/lhlyu/flutter_mana/raw/master/screenshots/mana_touch_indicator.png" alt="触摸指示器"> |                                                                                                                                                    |                                                                                                                          |
+
 
 ## 插件开发
 
-- [参考](https://github.com/lhlyu/flutter_mana/tree/master/kits/lib/src/plugins/demo)
+- [参考](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/demo)
 
 - 安装依赖
 
@@ -127,8 +137,6 @@ final iconImage = MemoryImage(_iconBytes);
 
 /// 自定义接口
 class Demo extends ManaPluggable {
-
-  Demo();
 
   @override
   Widget? buildWidget(BuildContext? context) {
@@ -161,6 +169,8 @@ class Demo extends ManaPluggable {
 
   @override
   Future<void> initialize() async {}
+  
+  bool get isSupported => true;
 }
 ```
 
@@ -170,7 +180,7 @@ class Demo extends ManaPluggable {
 void main() {
   ManaPluginManager.instance.register(Demo());
 
-  runApp(ManaWidget(child: MyApp()));
+  runApp(ManaWidget(child: App()));
 }
 
 class App extends StatelessWidget {
