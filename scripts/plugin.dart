@@ -46,6 +46,10 @@ void main(List<String> args) {
     final targetPath = renderTemplate(templatePath, replacements);
     final file = File('${rootDir.path}$targetPath');
 
+    if (file.existsSync()) {
+      return;
+    }
+
     // 确保父目录存在
     file.parent.createSync(recursive: true);
 
@@ -201,7 +205,7 @@ String renderTemplate(String content, Map<String, String> replacements) {
   var result = content;
   for (final key in sortedKeys) {
     final placeholder = '{{$key}}';
-    result = result.replaceAll(placeholder, replacements[key] ?? '');
+    result = result.replaceAll(placeholder, replacements[key] ?? placeholder);
   }
   return result;
 }

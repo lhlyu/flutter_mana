@@ -54,7 +54,7 @@ class _ColorSuckerContentState extends State<ColorSuckerContent> with I18nMixin 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -66,6 +66,7 @@ class _ColorSuckerContentState extends State<ColorSuckerContent> with I18nMixin 
             ],
           ),
           Slider(
+            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
             value: _zoomLevel,
             min: _zoomOptions.first,
             max: _zoomOptions.last,
@@ -98,7 +99,7 @@ class _ColorSuckerContentState extends State<ColorSuckerContent> with I18nMixin 
               Expanded(
                 child: Text(
                   colorHex,
-                  style: const TextStyle(fontSize: 14),
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                 ),
               ),
               CheckIconButton(

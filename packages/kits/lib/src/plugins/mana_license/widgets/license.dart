@@ -36,6 +36,7 @@ class _LicenseState extends State<License> {
               appBarTheme: AppBarTheme(
                 elevation: 0,
                 scrolledUnderElevation: 0,
+                backgroundColor: Colors.white,
               ),
               cardColor: Colors.white,
             ),

@@ -12,7 +12,7 @@ class VisualHelper extends StatelessWidget {
   Widget build(BuildContext context) {
     return ManaFloatingWindow(
       name: name,
-      initialHeight: 280,
+      initialHeight: 290,
       showBarrier: false,
       content: VisualHelperContent(),
     );

@@ -41,7 +41,7 @@ class _VisualHelperContentState extends State<VisualHelperContent> with I18nMixi
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -50,10 +50,11 @@ class _VisualHelperContentState extends State<VisualHelperContent> with I18nMixi
             children: [
               Text(t('visual_helper.animate_speed'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
               const Spacer(),
-              Text('×${_raw.toStringAsFixed(2)}', style: const TextStyle(fontSize: 12, color: Colors.black54)),
+              Text('×${_raw.toStringAsFixed(2)}', style: const TextStyle(fontSize: 14, color: Colors.black54)),
             ],
           ),
           Slider(
+            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
             value: _raw,
             min: 0.1,
             max: 2,
@@ -72,21 +73,33 @@ class _VisualHelperContentState extends State<VisualHelperContent> with I18nMixi
           ),
 
           // 三项紧凑行
-          _compactRow(t('visual_helper.layout_bounds'), t('visual_helper.show_widget_borders'), debugPaintSizeEnabled,
-              (v) {
-            setState(() => debugPaintSizeEnabled = v);
-            markWholeRenderTreeNeedsPaint();
-          }),
-          _compactRow(t('visual_helper.repaint_highlight'), t('visual_helper.frame_repaint_highlight'),
-              debugRepaintRainbowEnabled, (v) {
-            setState(() => debugRepaintRainbowEnabled = v);
-            markWholeRenderTreeNeedsPaint();
-          }),
-          _compactRow(t('visual_helper.invert_oversized_images'), t('visual_helper.invert_oversized_images_label'),
-              debugInvertOversizedImages, (v) {
-            setState(() => debugInvertOversizedImages = v);
-            markWholeRenderTreeNeedsPaint();
-          }),
+          _compactRow(
+            t('visual_helper.layout_bounds'),
+            t('visual_helper.show_widget_borders'),
+            debugPaintSizeEnabled,
+            (v) {
+              setState(() => debugPaintSizeEnabled = v);
+              markWholeRenderTreeNeedsPaint();
+            },
+          ),
+          _compactRow(
+            t('visual_helper.repaint_highlight'),
+            t('visual_helper.frame_repaint_highlight'),
+            debugRepaintRainbowEnabled,
+            (v) {
+              setState(() => debugRepaintRainbowEnabled = v);
+              markWholeRenderTreeNeedsPaint();
+            },
+          ),
+          _compactRow(
+            t('visual_helper.invert_oversized_images'),
+            t('visual_helper.invert_oversized_images_label'),
+            debugInvertOversizedImages,
+            (v) {
+              setState(() => debugInvertOversizedImages = v);
+              markWholeRenderTreeNeedsPaint();
+            },
+          ),
         ],
       ),
     );
@@ -107,7 +120,12 @@ class _VisualHelperContentState extends State<VisualHelperContent> with I18nMixi
               ],
             ),
           ),
-          Switch(value: value, onChanged: onChanged, materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+          Switch(
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            padding: EdgeInsets.zero,
+            value: value,
+            onChanged: onChanged,
+          ),
         ],
       ),
     );

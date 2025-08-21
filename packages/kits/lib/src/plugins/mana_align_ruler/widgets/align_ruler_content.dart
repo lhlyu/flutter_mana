@@ -73,20 +73,20 @@ class AlignRulerContent extends StatelessWidget with I18nMixin {
               spacing: 8,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                Text(
+                  t('align_ruler.tip'),
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
                 Switch(
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  padding: EdgeInsets.zero,
                   value: snapToWidgetEnabled,
                   onChanged: onSnapToWidgetChanged,
-                  activeColor: Colors.red,
-                ),
-                Expanded(
-                  child: Text(
-                    t('align_ruler.tip'),
-                    style: const TextStyle(
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
+                  activeThumbColor: Colors.red,
                 ),
               ],
             )

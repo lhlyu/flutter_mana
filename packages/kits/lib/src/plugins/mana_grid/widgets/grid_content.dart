@@ -47,7 +47,7 @@ class _GridContentState extends State<GridContent> with I18nMixin {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(16),
       child: Column(
         children: [
           Column(
@@ -65,6 +65,7 @@ class _GridContentState extends State<GridContent> with I18nMixin {
                 ],
               ),
               Slider(
+                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
                 value: _gap,
                 min: _gapOptions.first,
                 max: _gapOptions.last,
@@ -97,6 +98,8 @@ class _GridContentState extends State<GridContent> with I18nMixin {
                 ),
               ),
               Switch(
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                padding: EdgeInsets.zero,
                 value: _showNumbers,
                 onChanged: _onShowNumbersChanged,
               ),

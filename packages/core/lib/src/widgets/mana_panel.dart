@@ -121,7 +121,7 @@ class ManaPanel extends StatelessWidget {
     }
 
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
       spacing: 4,
       children: [
