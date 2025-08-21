@@ -133,8 +133,6 @@ final iconImage = MemoryImage(_iconBytes);
 /// 自定义接口
 class Demo extends ManaPluggable {
 
-  Demo();
-
   @override
   Widget? buildWidget(BuildContext? context) {
     return Container(
@@ -166,6 +164,8 @@ class Demo extends ManaPluggable {
 
   @override
   Future<void> initialize() async {}
+  
+  bool get isSupported => true;
 }
 ```
 
