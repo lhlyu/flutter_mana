@@ -66,28 +66,28 @@ class App extends StatelessWidget {
 ## 插件&使用
 
 ```
-√ - 支持
-× - 不支持
-○ - 部分支持
+✅ - 支持
+❌ - 不支持
+⭕️ - 部分支持
 ```
 
 
 | 插件&文档                                                                                                                                                            | android | ios | macos | windows | linux | web | debug | release |
 |------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|-----|-------|---------|-------|-----|-------|---------|
-| [标尺 - AlignRuler](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_align_ruler)                                              | √       | √   | √     | √       | √     | √   | √     | √       |
-| [日志查看器 - LogViewer](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_logger)                                                 | √       | √   | √     | √       | √     | √   | √     | ○       |
-| [设备信息 - DeviceInfo](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_device_info)                                            | √       | √   | √     | √       | √     | √   | √     | √       |
-| [颜色吸管 - ColorSucker](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_color_sucker)                                          | √       | √   | √     | √       | √     | √   | √     | √       |
-| [Dio网络检查器 - DioInspector](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_dio)                                              | √       | √   | √     | √       | √     | √   | √     | √       |
-| [Widget详情 - WidgetInfoInspector](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_widget_info_inspector)                     | √       | √   | √     | √       | √     | √   | √     | ×       |
-| [帧率监控 - FpsMonitor](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_fps_monitor)                                            | √       | √   | √     | √       | √     | ×   | √     | √       |
-| [SharedPreferences查看器 - SharedPreferencesViewer](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_shared_preferences_viewer) | √       | √   | √     | √       | √     | √   | √     | √       |
-| [显示代码 - ShowCode](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_show_code)                                                | √       | √   | √     | √       | √     | ×   | √     | ×       |
-| [内存信息 - MemoryInfo](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_memory_info)                                            | √       | √   | √     | √       | √     | ×   | √     | ×       |
-| [包信息 - PackageInfo](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_package_info)                                           | √       | √   | √     | √       | √     | √   | √     | √       |
-| [许可 - License](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_license)                                                     | √       | √   | √     | √       | √     | √   | √     | √       |
-| [网格 - Grid](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_grid)                                                           | √       | √   | √     | √       | √     | √   | √     | √       |
-| [视觉辅助 - VisualHelper](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_visual_helper)                                        | √       | √   | √     | √       | √     | √   | √     | ○       |
+| [标尺 - AlignRuler](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_align_ruler)                                              | ✅       | ✅   | ✅     | ✅       | ✅     | ✅   | ✅     | ✅       |
+| [日志查看器 - LogViewer](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_logger)                                                 | ✅       | ✅   | ✅     | ✅       | ✅     | ✅   | ✅     | ⭕️      |
+| [设备信息 - DeviceInfo](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_device_info)                                            | ✅       | ✅   | ✅     | ✅       | ✅     | ✅   | ✅     | ✅       |
+| [颜色吸管 - ColorSucker](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_color_sucker)                                          | ✅       | ✅   | ✅     | ✅       | ✅     | ✅   | ✅     | ✅       |
+| [Dio网络检查器 - DioInspector](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_dio)                                              | ✅       | ✅   | ✅     | ✅       | ✅     | ✅   | ✅     | ✅       |
+| [Widget详情 - WidgetInfoInspector](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_widget_info_inspector)                     | ✅       | ✅   | ✅     | ✅       | ✅     | ✅   | ✅     | ❌       |
+| [帧率监控 - FpsMonitor](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_fps_monitor)                                            | ✅       | ✅   | ✅     | ✅       | ✅     | ❌   | ✅     | ✅       |
+| [SharedPreferences查看器 - SharedPreferencesViewer](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_shared_preferences_viewer) | ✅       | ✅   | ✅     | ✅       | ✅     | ✅   | ✅     | ✅       |
+| [显示代码 - ShowCode](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_show_code)                                                | ✅       | ✅   | ✅     | ✅       | ✅     | ❌   | ✅     | ❌       |
+| [内存信息 - MemoryInfo](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_memory_info)                                            | ✅       | ✅   | ✅     | ✅       | ✅     | ❌   | ✅     | ❌       |
+| [包信息 - PackageInfo](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_package_info)                                           | ✅       | ✅   | ✅     | ✅       | ✅     | ✅   | ✅     | ✅       |
+| [许可 - License](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_license)                                                     | ✅       | ✅   | ✅     | ✅       | ✅     | ✅   | ✅     | ✅       |
+| [网格 - Grid](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_grid)                                                           | ✅       | ✅   | ✅     | ✅       | ✅     | ✅   | ✅     | ✅       |
+| [视觉辅助 - VisualHelper](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_visual_helper)                                        | ✅       | ✅   | ✅     | ✅       | ✅     | ✅   | ✅     | ⭕️      |
 
 
 
