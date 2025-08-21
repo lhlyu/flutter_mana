@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mana/flutter_mana.dart';
 
@@ -25,4 +26,7 @@ class ManaMemoryInfo extends ManaPluggable {
 
   @override
   String get name => 'mana_memory_info';
+
+  @override
+  bool get isSupported => !kIsWeb && kDebugMode;
 }

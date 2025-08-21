@@ -21,7 +21,7 @@ dependencies:
   logger: ^2.6.1
   shared_preferences: ^2.5.3
   device_info_plus: ^11.5.0
-  syntax_highlight: ^0.4.0
+  syntax_highlight: ^0.5.0
   package_info_plus: ^8.3.1
   vm_service: ^15.0.0
 

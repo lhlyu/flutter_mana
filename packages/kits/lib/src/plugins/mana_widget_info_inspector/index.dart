@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mana/flutter_mana.dart';
 
@@ -23,4 +24,7 @@ class ManaWidgetInfoInspector extends ManaPluggable {
 
   @override
   String get name => 'mana_widget_info_inspector';
+
+  @override
+  bool get isSupported => kDebugMode;
 }

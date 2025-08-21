@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mana/flutter_mana.dart';
 import 'package:syntax_highlight/syntax_highlight.dart';
@@ -26,6 +27,9 @@ class ManaShowCode extends ManaPluggable {
 
   @override
   String get name => 'mana_show_code';
+
+  @override
+  bool get isSupported => !kIsWeb && kDebugMode;
 
   @override
   Future<void> initialize() async {
