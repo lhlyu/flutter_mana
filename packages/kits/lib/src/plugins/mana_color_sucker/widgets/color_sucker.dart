@@ -30,7 +30,7 @@ class _ColorSuckerState extends State<ColorSucker> {
       ),
       position: PositionType.top,
       initialWidth: 300,
-      initialHeight: 180,
+      initialHeight: 200,
       content: ColorSuckerContent(
         color: _color,
         onMagnificationChanged: (value) {

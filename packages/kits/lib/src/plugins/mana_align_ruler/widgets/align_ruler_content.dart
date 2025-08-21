@@ -70,15 +70,18 @@ class AlignRulerContent extends StatelessWidget with I18nMixin {
           children: [
             _buildDotPosition(),
             Row(
-              spacing: 8,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              spacing: 16,
               children: [
-                Text(
-                  t('align_ruler.tip'),
-                  style: const TextStyle(
-                    color: Colors.red,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
+                Expanded(
+                  child: Text(
+                    t('align_ruler.tip'),
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
                 Switch(
