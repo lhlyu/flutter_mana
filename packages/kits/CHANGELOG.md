@@ -1,3 +1,7 @@
+# 1.1.1
+
+- fix: remove activeThumbColor property from Switch
+
 # 1.1.0
 
 - refactor: migrate legacy Flutter project to Dart workspace and streamline codebase

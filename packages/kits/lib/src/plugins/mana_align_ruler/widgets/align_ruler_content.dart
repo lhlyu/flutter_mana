@@ -89,7 +89,6 @@ class AlignRulerContent extends StatelessWidget with I18nMixin {
                   padding: EdgeInsets.zero,
                   value: snapToWidgetEnabled,
                   onChanged: onSnapToWidgetChanged,
-                  activeThumbColor: Colors.red,
                 ),
               ],
             )
