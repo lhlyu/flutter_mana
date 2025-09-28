@@ -1,3 +1,8 @@
+# 1.2.0
+
+- feat: add mana_screen_info plugin and documentation
+- chore: restrict the development environment
+
 # 1.1.1
 
 - fix: remove activeThumbColor property from Switch

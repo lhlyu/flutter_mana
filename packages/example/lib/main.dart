@@ -14,6 +14,7 @@ import 'widgets/custom_button.dart';
 
 void main() async {
   ManaPluginManager.instance
+    ..register(ManaScreenInfo())
     ..register(ManaTouchIndicator())
     ..register(ManaVisualHelper())
     ..register(ManaGrid())

@@ -1,5 +1,9 @@
 allprojects {
     repositories {
+        // ===== 国内镜像 =====
+        maven("https://maven.aliyun.com/repository/google")
+        maven("https://maven.aliyun.com/repository/central")
+        maven("https://mirrors.tuna.tsinghua.edu.cn/flutter/download.flutter.io")
         google()
         mavenCentral()
     }

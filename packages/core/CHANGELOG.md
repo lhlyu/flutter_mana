@@ -1,3 +1,7 @@
+# 1.2.0
+
+- chore: restrict the development environment
+
 # 1.1.0
 
 - refactor: migrate legacy Flutter project to Dart workspace and streamline codebase
