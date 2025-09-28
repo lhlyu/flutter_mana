@@ -16,7 +16,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  flutter_mana: ^1.1.0
+  flutter_mana: ^1.2.0
   dio: ^5.9.0
   logger: ^2.6.1
   shared_preferences: ^2.5.3
