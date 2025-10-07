@@ -1,16 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mana/flutter_mana.dart';
-import 'package:syntax_highlight/syntax_highlight.dart';
 
 import 'icon.dart';
 import 'widgets/show_code.dart';
 
-late Highlighter highlighter;
-
 class ManaShowCode extends ManaPluggable {
   @override
-  Widget? buildWidget(BuildContext? context) => ShowCode(name: name, highlighter: highlighter);
+  Widget? buildWidget(BuildContext? context) => ShowCode(name: name);
 
   @override
   String getLocalizedDisplayName(Locale locale) {
@@ -30,14 +27,4 @@ class ManaShowCode extends ManaPluggable {
 
   @override
   bool get isSupported => !kIsWeb && kDebugMode;
-
-  @override
-  Future<void> initialize() async {
-    await Highlighter.initialize(['dart']);
-    final theme = await HighlighterTheme.loadLightTheme();
-    highlighter = Highlighter(
-      language: 'dart',
-      theme: theme,
-    );
-  }
 }

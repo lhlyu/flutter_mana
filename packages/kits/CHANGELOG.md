@@ -1,3 +1,8 @@
+# 1.3.0
+
+- feat: implement custom syntax highlighting and refactor the code to display components
+- chore: update dependencies
+
 # 1.2.0
 
 - feat: add mana_screen_info plugin and documentation

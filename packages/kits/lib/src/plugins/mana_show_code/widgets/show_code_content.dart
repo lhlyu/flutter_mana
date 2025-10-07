@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:syntax_highlight/syntax_highlight.dart';
 
+import '../code/code_widget.dart';
+import '../code/highlighter_style.dart';
 import '../utils/page_info_helper.dart';
 
 /// 直接缓存高亮后的代码
-final Map<String, TextSpan> _sourceCodes = {};
+final Map<String, _CodeInfo> _codeInfos = {};
 
 class ShowCodeContent extends StatefulWidget {
-  final Highlighter highlighter;
-
-  const ShowCodeContent({super.key, required this.highlighter});
+  const ShowCodeContent({super.key});
 
   @override
   State<ShowCodeContent> createState() => _ShowCodeContentState();
@@ -22,7 +21,7 @@ class _ShowCodeContentState extends State<ShowCodeContent> {
   // 分割线颜色
   static final Color _dividerColor = Colors.grey.shade200;
 
-  late Future<_ShowCodeData> _future;
+  late Future<_CodeInfo> _future;
 
   @override
   void initState() {
@@ -30,21 +29,21 @@ class _ShowCodeContentState extends State<ShowCodeContent> {
     _future = _loadData();
   }
 
-  Future<_ShowCodeData> _loadData() async {
+  Future<_CodeInfo> _loadData() async {
     final helper = PageInfoHelper();
     final packagePath = helper.packagePathConvertFromFilePath(helper.filePath);
 
-    if (_sourceCodes.containsKey(packagePath)) {
-      return _ShowCodeData(packagePath, _sourceCodes[packagePath]!);
+    if (_codeInfos.containsKey(packagePath)) {
+      return _codeInfos[packagePath]!;
     }
 
-    final code = await helper.getCode(packagePath);
+    final code = await helper.getCode(packagePath) ?? '';
 
-    final textSpan = widget.highlighter.highlight(code ?? '');
+    final codeInfo = _CodeInfo(packagePath, code);
 
-    _sourceCodes[packagePath] = textSpan;
+    _codeInfos[packagePath] = codeInfo;
 
-    return _ShowCodeData(packagePath, textSpan);
+    return codeInfo;
   }
 
   @override
@@ -55,7 +54,7 @@ class _ShowCodeContentState extends State<ShowCodeContent> {
         if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
 
         final packagePath = snapshot.data!.packagePath;
-        final textSpan = snapshot.data!.textSpan;
+        final code = snapshot.data!.code;
 
         return SelectionArea(
           child: Column(
@@ -68,35 +67,17 @@ class _ShowCodeContentState extends State<ShowCodeContent> {
                 padding: const EdgeInsets.all(16),
                 child: SelectableText(
                   packagePath,
-                  style: TextStyle(
-                    fontSize: _fontSize,
-                    color: Colors.blueAccent,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: _fontSize, color: Colors.blueAccent, fontWeight: FontWeight.bold),
                 ),
               ),
               Divider(height: 1, color: _dividerColor),
+
               Expanded(
                 child: SizedBox(
                   width: double.infinity,
-                  child: SingleChildScrollView(
-                    physics: const ClampingScrollPhysics(),
-                    scrollDirection: Axis.horizontal,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minWidth: MediaQuery.of(context).size.width,
-                      ),
-                      child: SingleChildScrollView(
-                        physics: const ClampingScrollPhysics(),
-                        padding: const EdgeInsets.all(16),
-                        child: Text.rich(
-                          textSpan,
-                        ),
-                      ),
-                    ),
-                  ),
+                  child: CodeWidget(code: code, style: HighlighterStyle.fromColors(HighlighterStyle.gitHub)),
                 ),
-              )
+              ),
             ],
           ),
         );
@@ -105,9 +86,9 @@ class _ShowCodeContentState extends State<ShowCodeContent> {
   }
 }
 
-class _ShowCodeData {
+class _CodeInfo {
   final String packagePath;
-  final TextSpan textSpan;
+  final String code;
 
-  const _ShowCodeData(this.packagePath, this.textSpan);
+  const _CodeInfo(this.packagePath, this.code);
 }

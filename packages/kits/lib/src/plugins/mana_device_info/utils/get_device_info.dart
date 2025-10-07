@@ -58,7 +58,6 @@ Map<String, dynamic> _readAndroidBuildData(AndroidDeviceInfo build) {
     'freeDiskSize': build.freeDiskSize,
     'totalDiskSize': build.totalDiskSize,
     'systemFeatures': build.systemFeatures,
-    'serialNumber': build.serialNumber,
     'isLowRamDevice': build.isLowRamDevice,
     'physicalRamSize': build.physicalRamSize,
     'availableRamSize': build.availableRamSize,

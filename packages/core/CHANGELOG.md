@@ -1,3 +1,7 @@
+# 1.3.0
+
+- chore: update dependencies
+
 # 1.2.0
 
 - chore: restrict the development environment
