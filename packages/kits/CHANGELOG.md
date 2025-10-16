@@ -1,3 +1,7 @@
+# 1.3.1
+
+- feat: add loadAllPlugins function and update version
+
 # 1.3.0
 
 - feat: implement custom syntax highlighting and refactor the code to display components
