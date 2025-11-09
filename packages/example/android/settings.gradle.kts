@@ -10,14 +10,28 @@ pluginManagement {
     includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
 
     repositories {
-        // ===== 国内镜像 =====
-        maven("https://maven.aliyun.com/repository/google")
-        maven("https://maven.aliyun.com/repository/central")
-        maven("https://mirrors.tuna.tsinghua.edu.cn/flutter/download.flutter.io")
-        // 兜底
+        maven { url=uri ("https://www.jitpack.io")}
+        maven { url=uri ("https://maven.aliyun.com/repository/releases")}
+        maven { url=uri ("https://maven.aliyun.com/repository/google")}
+        maven { url=uri ("https://maven.aliyun.com/repository/central")}
+        maven { url=uri ("https://maven.aliyun.com/repository/gradle-plugin")}
+        maven { url=uri ("https://maven.aliyun.com/repository/public")}
         google()
         mavenCentral()
         gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        maven { url=uri ("https://www.jitpack.io")}
+        maven { url=uri ("https://maven.aliyun.com/repository/releases")}
+        maven { url=uri ("https://maven.aliyun.com/repository/google")}
+        maven { url=uri ("https://maven.aliyun.com/repository/central")}
+        maven { url=uri ("https://maven.aliyun.com/repository/gradle-plugin")}
+        maven { url=uri ("https://maven.aliyun.com/repository/public")}
+        google()
+        mavenCentral()
     }
 }
 
