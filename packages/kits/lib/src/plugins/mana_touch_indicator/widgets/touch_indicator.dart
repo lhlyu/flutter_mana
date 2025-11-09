@@ -11,9 +11,6 @@ class TouchIndicator extends StatelessWidget with I18nMixin {
 
   @override
   Widget build(BuildContext context) {
-    return ManaFloatingWindow(
-      name: name,
-      barrier: TouchIndicatorBarrier(),
-    );
+    return ManaFloatingWindow(name: name, barrier: TouchIndicatorBarrier());
   }
 }

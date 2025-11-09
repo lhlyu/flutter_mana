@@ -47,10 +47,7 @@ class _ColorSuckerBarrierState extends State<ColorSuckerBarrier> {
   Offset _getDefaultCenterPosition() {
     final Size screenSize = MediaQuery.sizeOf(context);
     return widget.initialPosition ??
-        Offset(
-          screenSize.width / 2,
-          screenSize.height / 2,
-        );
+        Offset(screenSize.width / 2, screenSize.height / 2);
   }
 
   Future<void> _initializeColorSucker() async {
@@ -95,19 +92,22 @@ class _ColorSuckerBarrierState extends State<ColorSuckerBarrier> {
       onPanEnd: (details) => _onUpdate(details.globalPosition, true),
       child: Stack(
         children: [
-          Positioned.fill(
-              child: Container(
-            color: Colors.transparent,
-          )),
+          Positioned.fill(child: Container(color: Colors.transparent)),
           Positioned(
             left: dragPosition.dx - widget.magnifierRadius,
             top: dragPosition.dy - widget.magnifierRadius,
             child: RawMagnifier(
-              size: Size(widget.magnifierRadius * 2, widget.magnifierRadius * 2),
+              size: Size(
+                widget.magnifierRadius * 2,
+                widget.magnifierRadius * 2,
+              ),
               magnificationScale: widget.magnification,
               decoration: MagnifierDecoration(
                 shape: CircleBorder(
-                  side: BorderSide(color: widget.borderColor, width: widget.borderWidth),
+                  side: BorderSide(
+                    color: widget.borderColor,
+                    width: widget.borderWidth,
+                  ),
                 ),
               ),
               focalPointOffset: Offset.zero,

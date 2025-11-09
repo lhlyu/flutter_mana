@@ -4,9 +4,7 @@ import 'package:flutter_mana/flutter_mana.dart';
 import '../core/mana_i18n_mixin.dart';
 
 class ManaSettingPanel extends StatelessWidget with ManaI18n {
-  const ManaSettingPanel({
-    super.key,
-  });
+  const ManaSettingPanel({super.key});
 
   @override
   Widget build(BuildContext context) {

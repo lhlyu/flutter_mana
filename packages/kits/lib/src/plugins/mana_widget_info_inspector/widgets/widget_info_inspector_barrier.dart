@@ -6,7 +6,11 @@ class WidgetInfoInspectorBarrier extends StatelessWidget {
 
   final GestureTapDownCallback? onTapDown;
 
-  const WidgetInfoInspectorBarrier({super.key, required this.selection, this.onTapDown});
+  const WidgetInfoInspectorBarrier({
+    super.key,
+    required this.selection,
+    this.onTapDown,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,15 +20,14 @@ class WidgetInfoInspectorBarrier extends StatelessWidget {
       onTapDown: onTapDown,
       behavior: HitTestBehavior.opaque,
       child: IgnorePointer(
-        child: SizedBox(
-          width: double.infinity,
-          height: double.infinity,
-        ),
+        child: SizedBox(width: double.infinity, height: double.infinity),
       ),
     );
     children.add(gesture);
 
-    children.add(RepaintBoundary(child: InspectorOverlay(selection: selection)));
+    children.add(
+      RepaintBoundary(child: InspectorOverlay(selection: selection)),
+    );
 
     return Stack(textDirection: TextDirection.ltr, children: children);
   }

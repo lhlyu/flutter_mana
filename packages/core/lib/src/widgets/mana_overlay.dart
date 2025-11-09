@@ -46,26 +46,35 @@ class _ManaOverlayState extends State<ManaOverlay> {
         return Stack(
           alignment: Alignment.center,
           children: [
-            ValueListenableBuilder(
-              valueListenable: manaState.activePluginName,
-              builder: (context, value, _) {
-                final currentActivatedPluginWidget =
-                    ManaPluginManager.instance.pluginsMap[manaState.activePluginName.value]?.buildWidget(context);
+            // 当前激活的插件
+            AnimatedBuilder(
+              animation: Listenable.merge([manaState.activePluginName, manaState.activePluginPanelVisible]),
+              builder: (context, _) {
+                if (!manaState.activePluginPanelVisible.value) {
+                  return nilPosition;
+                }
+
+                final currentActivatedPluginWidget = ManaPluginManager
+                    .instance
+                    .pluginsMap[manaState.activePluginName.value]
+                    ?.buildWidget(context);
                 return currentActivatedPluginWidget ?? nilPosition;
               },
             ),
+            // 插件面板
             ValueListenableBuilder(
               valueListenable: manaState.pluginManagementPanelVisible,
               builder: (context, value, _) {
                 return value
                     ? ManaFloatingWindow(
-                        name: ManaPluginManager.name,
-                        content: ManaPanel(),
-                        setting: ManaSettingPanel(),
-                      )
+                      name: ManaPluginManager.name,
+                      content: ManaPanel(),
+                      setting: ManaSettingPanel(),
+                    )
                     : nilPosition;
               },
             ),
+            // 浮动按钮
             ValueListenableBuilder(
               valueListenable: manaState.floatingButtonVisible,
               builder: (context, value, _) {
@@ -80,9 +89,6 @@ class _ManaOverlayState extends State<ManaOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    return ManaScope(
-      state: _manaState,
-      child: _buildStack(),
-    );
+    return ManaScope(state: _manaState, child: _buildStack());
   }
 }

@@ -6,7 +6,8 @@ import 'widgets/shared_preferences_viewer.dart';
 
 class ManaSharedPreferencesViewer extends ManaPluggable {
   @override
-  Widget? buildWidget(BuildContext? context) => SharedPreferencesViewer(name: name);
+  Widget? buildWidget(BuildContext? context) =>
+      SharedPreferencesViewer(name: name);
 
   @override
   String getLocalizedDisplayName(Locale locale) {

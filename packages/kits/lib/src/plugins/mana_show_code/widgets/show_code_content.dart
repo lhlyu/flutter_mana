@@ -51,7 +51,8 @@ class _ShowCodeContentState extends State<ShowCodeContent> {
     return FutureBuilder(
       future: _future,
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+        if (!snapshot.hasData)
+          return const Center(child: CircularProgressIndicator());
 
         final packagePath = snapshot.data!.packagePath;
         final code = snapshot.data!.code;
@@ -67,7 +68,11 @@ class _ShowCodeContentState extends State<ShowCodeContent> {
                 padding: const EdgeInsets.all(16),
                 child: SelectableText(
                   packagePath,
-                  style: TextStyle(fontSize: _fontSize, color: Colors.blueAccent, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: _fontSize,
+                    color: Colors.blueAccent,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               Divider(height: 1, color: _dividerColor),
@@ -75,7 +80,10 @@ class _ShowCodeContentState extends State<ShowCodeContent> {
               Expanded(
                 child: SizedBox(
                   width: double.infinity,
-                  child: CodeWidget(code: code, style: HighlighterStyle.fromColors(HighlighterStyle.gitHub)),
+                  child: CodeWidget(
+                    code: code,
+                    style: HighlighterStyle.fromColors(HighlighterStyle.gitHub),
+                  ),
                 ),
               ),
             ],

@@ -22,22 +22,102 @@ class ScreenInfoContent extends StatelessWidget {
           border: _tableBorder,
           columnWidths: const {0: IntrinsicColumnWidth(), 1: FlexColumnWidth()},
           children: [
-            TableRow(children: [_Cell('size.width', bold: true), _Cell('${mediaQuery.size.width}')]),
-            TableRow(children: [_Cell('size.height', bold: true), _Cell('${mediaQuery.size.height}')]),
-            TableRow(children: [_Cell('devicePixelRatio', bold: true), _Cell('${mediaQuery.devicePixelRatio}')]),
-            TableRow(children: [_Cell('orientation', bold: true), _Cell('${mediaQuery.orientation}')]),
-            TableRow(children: [_Cell('padding.top', bold: true), _Cell('${mediaQuery.padding.top}')]),
-            TableRow(children: [_Cell('padding.bottom', bold: true), _Cell('${mediaQuery.padding.bottom}')]),
-            TableRow(children: [_Cell('padding.bottom', bold: true), _Cell('${mediaQuery.padding.left}')]),
-            TableRow(children: [_Cell('padding.right', bold: true), _Cell('${mediaQuery.padding.right}')]),
-            TableRow(children: [_Cell('viewPadding.top', bold: true), _Cell('${mediaQuery.viewPadding.top}')]),
-            TableRow(children: [_Cell('viewPadding.bottom', bold: true), _Cell('${mediaQuery.viewPadding.bottom}')]),
-            TableRow(children: [_Cell('viewPadding.left', bold: true), _Cell('${mediaQuery.viewPadding.left}')]),
-            TableRow(children: [_Cell('viewPadding.right', bold: true), _Cell('${mediaQuery.viewPadding.right}')]),
-            TableRow(children: [_Cell('viewInsets.top', bold: true), _Cell('${mediaQuery.viewInsets.top}')]),
-            TableRow(children: [_Cell('viewInsets.bottom', bold: true), _Cell('${mediaQuery.viewInsets.bottom}')]),
-            TableRow(children: [_Cell('viewInsets.left', bold: true), _Cell('${mediaQuery.viewInsets.left}')]),
-            TableRow(children: [_Cell('viewInsets.right', bold: true), _Cell('${mediaQuery.viewInsets.right}')]),
+            TableRow(
+              children: [
+                _Cell('size.width', bold: true),
+                _Cell('${mediaQuery.size.width}'),
+              ],
+            ),
+            TableRow(
+              children: [
+                _Cell('size.height', bold: true),
+                _Cell('${mediaQuery.size.height}'),
+              ],
+            ),
+            TableRow(
+              children: [
+                _Cell('devicePixelRatio', bold: true),
+                _Cell('${mediaQuery.devicePixelRatio}'),
+              ],
+            ),
+            TableRow(
+              children: [
+                _Cell('orientation', bold: true),
+                _Cell('${mediaQuery.orientation}'),
+              ],
+            ),
+            TableRow(
+              children: [
+                _Cell('padding.top', bold: true),
+                _Cell('${mediaQuery.padding.top}'),
+              ],
+            ),
+            TableRow(
+              children: [
+                _Cell('padding.bottom', bold: true),
+                _Cell('${mediaQuery.padding.bottom}'),
+              ],
+            ),
+            TableRow(
+              children: [
+                _Cell('padding.bottom', bold: true),
+                _Cell('${mediaQuery.padding.left}'),
+              ],
+            ),
+            TableRow(
+              children: [
+                _Cell('padding.right', bold: true),
+                _Cell('${mediaQuery.padding.right}'),
+              ],
+            ),
+            TableRow(
+              children: [
+                _Cell('viewPadding.top', bold: true),
+                _Cell('${mediaQuery.viewPadding.top}'),
+              ],
+            ),
+            TableRow(
+              children: [
+                _Cell('viewPadding.bottom', bold: true),
+                _Cell('${mediaQuery.viewPadding.bottom}'),
+              ],
+            ),
+            TableRow(
+              children: [
+                _Cell('viewPadding.left', bold: true),
+                _Cell('${mediaQuery.viewPadding.left}'),
+              ],
+            ),
+            TableRow(
+              children: [
+                _Cell('viewPadding.right', bold: true),
+                _Cell('${mediaQuery.viewPadding.right}'),
+              ],
+            ),
+            TableRow(
+              children: [
+                _Cell('viewInsets.top', bold: true),
+                _Cell('${mediaQuery.viewInsets.top}'),
+              ],
+            ),
+            TableRow(
+              children: [
+                _Cell('viewInsets.bottom', bold: true),
+                _Cell('${mediaQuery.viewInsets.bottom}'),
+              ],
+            ),
+            TableRow(
+              children: [
+                _Cell('viewInsets.left', bold: true),
+                _Cell('${mediaQuery.viewInsets.left}'),
+              ],
+            ),
+            TableRow(
+              children: [
+                _Cell('viewInsets.right', bold: true),
+                _Cell('${mediaQuery.viewInsets.right}'),
+              ],
+            ),
           ],
         ),
       ),
@@ -55,6 +135,9 @@ class _Cell extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.all(8),
-    child: Text(text, style: TextStyle(fontWeight: bold ? FontWeight.bold : FontWeight.normal)),
+    child: Text(
+      text,
+      style: TextStyle(fontWeight: bold ? FontWeight.bold : FontWeight.normal),
+    ),
   );
 }

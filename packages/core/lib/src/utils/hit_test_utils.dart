@@ -20,7 +20,8 @@ class HitTestUtils {
     /// Get the root [RenderObject] from the `manaRootKey`'s current context.
     ///
     /// 从 `manaRootKey` 的当前上下文获取根 [RenderObject]。
-    final RenderObject? rootRenderObject = manaRootKey.currentContext?.findRenderObject();
+    final RenderObject? rootRenderObject =
+        manaRootKey.currentContext?.findRenderObject();
 
     /// If the root render object is a [RenderBox], perform a box hit test.
     ///

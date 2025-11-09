@@ -18,7 +18,8 @@ class ColorSuckerContent extends StatefulWidget {
   State<ColorSuckerContent> createState() => _ColorSuckerContentState();
 }
 
-class _ColorSuckerContentState extends State<ColorSuckerContent> with I18nMixin {
+class _ColorSuckerContentState extends State<ColorSuckerContent>
+    with I18nMixin {
   late Color _color;
 
   @override
@@ -60,9 +61,15 @@ class _ColorSuckerContentState extends State<ColorSuckerContent> with I18nMixin 
         children: [
           Row(
             children: [
-              Text(t('color_sucker.magnification'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+              Text(
+                t('color_sucker.magnification'),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
               const Spacer(),
-              Text('${_zoomLevel.toInt()}x', style: const TextStyle(fontSize: 12, color: Colors.black54)),
+              Text(
+                '${_zoomLevel.toInt()}x',
+                style: const TextStyle(fontSize: 12, color: Colors.black54),
+              ),
             ],
           ),
           Slider(
@@ -74,7 +81,9 @@ class _ColorSuckerContentState extends State<ColorSuckerContent> with I18nMixin 
             label: '${_zoomLevel.toInt()}x',
             onChanged: (value) {
               // 吸附到最近的预设值（可选）
-              _zoomLevel = _zoomOptions.reduce((a, b) => (value - a).abs() < (value - b).abs() ? a : b);
+              _zoomLevel = _zoomOptions.reduce(
+                (a, b) => (value - a).abs() < (value - b).abs() ? a : b,
+              );
               widget.onMagnificationChanged?.call(_zoomLevel);
               setState(() {});
             },
@@ -99,14 +108,17 @@ class _ColorSuckerContentState extends State<ColorSuckerContent> with I18nMixin 
               Expanded(
                 child: Text(
                   colorHex,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               CheckIconButton(
                 initialIcon: KitIcons.copy,
                 changedIcon: KitIcons.copy_success,
                 onPressed: _copyToClipboard,
-              )
+              ),
             ],
           ),
         ],

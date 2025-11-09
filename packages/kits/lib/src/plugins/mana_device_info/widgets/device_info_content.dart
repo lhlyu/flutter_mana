@@ -33,16 +33,17 @@ class DeviceInfoContent extends StatelessWidget {
                 0: IntrinsicColumnWidth(),
                 1: FlexColumnWidth(),
               },
-              children: data.entries
-                  .map(
-                    (e) => TableRow(
-                      children: [
-                        _Cell(e.key, bold: true),
-                        _Cell('${e.value}'),
-                      ],
-                    ),
-                  )
-                  .toList(),
+              children:
+                  data.entries
+                      .map(
+                        (e) => TableRow(
+                          children: [
+                            _Cell(e.key, bold: true),
+                            _Cell('${e.value}'),
+                          ],
+                        ),
+                      )
+                      .toList(),
             ),
           ),
         );
@@ -63,7 +64,9 @@ class _Cell extends StatelessWidget {
       padding: const EdgeInsets.all(8),
       child: Text(
         text,
-        style: TextStyle(fontWeight: bold ? FontWeight.bold : FontWeight.normal),
+        style: TextStyle(
+          fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+        ),
       ),
     );
   }

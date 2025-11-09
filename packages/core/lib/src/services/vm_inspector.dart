@@ -63,7 +63,9 @@ class VmInspector {
     if (_service != null) {
       try {
         await _service!.dispose();
-      } catch (e) {}
+      } catch (e) {
+        rethrow;
+      }
       _service = null;
     }
   }
@@ -77,7 +79,9 @@ class VmInspector {
   /// 获取当前协程的内存使用情况。
   Future<vm.MemoryUsage> getMemoryUsage() async {
     vm.VmService virtualMachine = await getVMService();
-    return virtualMachine.getMemoryUsage(isolateId); // 使用非空断言，因为 isolateId 已在构造函数中初始化
+    return virtualMachine.getMemoryUsage(
+      isolateId,
+    ); // 使用非空断言，因为 isolateId 已在构造函数中初始化
   }
 
   /// 获取当前协程中所有已加载类的列表。
@@ -137,24 +141,40 @@ class VmInspector {
   /// [count]：如果对象是列表或字符串，表示获取的元素或字符数量。
   Future<vm.Obj> getObject(String objectId, {int? offset, int? count}) async {
     vm.VmService virtualMachine = await getVMService();
-    return virtualMachine.getObject(isolateId, objectId, offset: offset, count: count);
+    return virtualMachine.getObject(
+      isolateId,
+      objectId,
+      offset: offset,
+      count: count,
+    );
   }
 
   /// 获取指向指定对象的入站引用。
   /// [objectId]：对象的 ID。
   /// [limit]：返回入站引用的最大数量，默认为 100。
-  Future<vm.InboundReferences> getInboundReferences(String objectId, {int limit = 100}) async {
+  Future<vm.InboundReferences> getInboundReferences(
+    String objectId, {
+    int limit = 100,
+  }) async {
     vm.VmService virtualMachine = await getVMService();
     return virtualMachine.getInboundReferences(isolateId, objectId, limit);
   }
 
   /// 获取所有类的堆统计信息，只返回当前字节数或实例数大于 0 的类。
   /// 可以通过可选参数 [minBytes] 和 [minInstances] 来调整过滤条件。
-  Future<List<vm.ClassHeapStats>> getClassHeapStats({int minBytes = 0, int minInstances = 0}) async {
+  Future<List<vm.ClassHeapStats>> getClassHeapStats({
+    int minBytes = 0,
+    int minInstances = 0,
+  }) async {
     vm.AllocationProfile profile = await getAllocationProfile(); // 获取最新的分配概要
-    List<vm.ClassHeapStats> list = profile.members!
-        .where((element) => element.bytesCurrent! > minBytes || element.instancesCurrent! > minInstances)
-        .toList();
+    List<vm.ClassHeapStats> list =
+        profile.members!
+            .where(
+              (element) =>
+                  element.bytesCurrent! > minBytes ||
+                  element.instancesCurrent! > minInstances,
+            )
+            .toList();
     return list;
   }
 

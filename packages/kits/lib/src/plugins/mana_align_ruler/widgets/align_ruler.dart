@@ -56,17 +56,17 @@ class _AlignRulerState extends State<AlignRuler> {
   void _toolBarPanUpdate(DragUpdateDetails dragDetails) {
     setState(() {
       _toolBarY = dragDetails.globalPosition.dy - 40;
-      _toolBarY = _toolBarY.clamp(0.0, _windowSize.height - AlignRulerContent.estimatedToolbarHeight - 16);
+      _toolBarY = _toolBarY.clamp(
+        0.0,
+        _windowSize.height - AlignRulerContent.estimatedToolbarHeight - 16,
+      );
     });
   }
 
   Size _getTextSize(TextStyle style) {
     final textPainter = TextPainter(
       textDirection: TextDirection.ltr,
-      text: TextSpan(
-        text: '9999.9',
-        style: style,
-      ),
+      text: TextSpan(text: '9999.9', style: style),
     );
     textPainter.layout();
     return Size(textPainter.width, textPainter.height);

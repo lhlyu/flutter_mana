@@ -9,13 +9,19 @@ class WidgetInfoInspectorContent extends StatefulWidget {
 
   final ValueChanged<bool>? onChanged;
 
-  const WidgetInfoInspectorContent({super.key, required this.selection, this.onChanged});
+  const WidgetInfoInspectorContent({
+    super.key,
+    required this.selection,
+    this.onChanged,
+  });
 
   @override
-  State<WidgetInfoInspectorContent> createState() => _WidgetInfoInspectorContentState();
+  State<WidgetInfoInspectorContent> createState() =>
+      _WidgetInfoInspectorContentState();
 }
 
-class _WidgetInfoInspectorContentState extends State<WidgetInfoInspectorContent> with I18nMixin {
+class _WidgetInfoInspectorContentState extends State<WidgetInfoInspectorContent>
+    with I18nMixin {
   bool _debugPaintSizeEnabled = false;
 
   void _onChange(bool value) {
@@ -34,11 +40,7 @@ class _WidgetInfoInspectorContentState extends State<WidgetInfoInspectorContent>
           Row(
             spacing: 8,
             children: [
-              Switch(
-                value: _debugPaintSizeEnabled,
-                onChanged: _onChange,
-                activeColor: Colors.red,
-              ),
+              Switch(value: _debugPaintSizeEnabled, onChanged: _onChange),
               Text(
                 t('widget_info_inspector.tip'),
                 style: const TextStyle(
@@ -46,29 +48,34 @@ class _WidgetInfoInspectorContentState extends State<WidgetInfoInspectorContent>
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
                 ),
-              )
+              ),
             ],
           ),
           Row(
             children: [
               IconButton(
-                onPressed: widget.selection.currentElement == null
-                    ? null
-                    : () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (ctx) {
-                              return InfoPage(elements: widget.selection.currentElement!.debugGetDiagnosticChain());
-                            },
-                          ),
-                        );
-                      },
+                onPressed:
+                    widget.selection.currentElement == null
+                        ? null
+                        : () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (ctx) {
+                                return InfoPage(
+                                  elements:
+                                      widget.selection.currentElement!
+                                          .debugGetDiagnosticChain(),
+                                );
+                              },
+                            ),
+                          );
+                        },
                 constraints: const BoxConstraints(),
                 style: IconButton.styleFrom(
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 icon: Icon(KitIcons.eye),
-              )
+              ),
             ],
           ),
         ],

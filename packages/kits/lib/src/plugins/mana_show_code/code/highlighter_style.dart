@@ -90,8 +90,14 @@ class HighlighterStyle {
   factory HighlighterStyle.fromColors(List<int> colors) => HighlighterStyle(
     baseStyle: TextStyle(color: Color(colors[0])),
     numberStyle: TextStyle(color: Color(colors[1])),
-    commentStyle: TextStyle(color: Color(colors[2]), fontStyle: FontStyle.italic),
-    keywordStyle: TextStyle(fontWeight: FontWeight.bold, color: Color(colors[3])),
+    commentStyle: TextStyle(
+      color: Color(colors[2]),
+      fontStyle: FontStyle.italic,
+    ),
+    keywordStyle: TextStyle(
+      fontWeight: FontWeight.bold,
+      color: Color(colors[3]),
+    ),
     stringStyle: TextStyle(color: Color(colors[4])),
     punctuationStyle: TextStyle(color: Color(colors[5])),
     classStyle: TextStyle(color: Color(colors[6])),

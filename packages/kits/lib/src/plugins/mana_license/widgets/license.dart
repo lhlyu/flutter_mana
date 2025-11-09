@@ -33,11 +33,7 @@ class _LicenseState extends State<License> {
           return Theme(
             data: Theme.of(context).copyWith(
               scaffoldBackgroundColor: Colors.white,
-              appBarTheme: AppBarTheme(
-                elevation: 0,
-                scrolledUnderElevation: 0,
-                backgroundColor: Colors.white,
-              ),
+              appBarTheme: AppBarTheme(elevation: 0, scrolledUnderElevation: 0, backgroundColor: Colors.white),
               cardColor: Colors.white,
             ),
             child: LicensePage(

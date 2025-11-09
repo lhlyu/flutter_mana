@@ -49,9 +49,10 @@ class FloatingButtonController extends ChangeNotifier {
     final maxX = _windowSize.width - _buttonSize;
     final maxY = _windowSize.height - _buttonSize;
 
-    offset.value = (x > 0 && y > 0 && x < _windowSize.width && y < _windowSize.height)
-        ? Offset(x, y)
-        : Offset(maxX - _minMarginH, maxY - _bottomSafe);
+    offset.value =
+        (x > 0 && y > 0 && x < _windowSize.width && y < _windowSize.height)
+            ? Offset(x, y)
+            : Offset(maxX - _minMarginH, maxY - _bottomSafe);
     _clampAndUpdate();
   }
 
@@ -69,10 +70,7 @@ class FloatingButtonController extends ChangeNotifier {
 
   // 拖拽
   void handleDragUpdate(DragUpdateDetails d) {
-    offset.value = Offset(
-      d.globalPosition.dx - _buttonSize / 2,
-      d.globalPosition.dy - _buttonSize / 2,
-    );
+    offset.value = Offset(d.globalPosition.dx - _buttonSize / 2, d.globalPosition.dy - _buttonSize / 2);
   }
 
   void handleDragEnd(DragEndDetails _) {
@@ -86,8 +84,12 @@ class FloatingButtonController extends ChangeNotifier {
     if (manaRootKey.currentContext != null) {
       FocusScope.of(manaRootKey.currentContext!).unfocus();
     }
+
+    // 如果插件激活 且 浮动窗口主体不可见
     if (_state.activePluginName.value.isNotEmpty && !_state.floatWindowMainVisible.value) {
       _state.floatWindowMainVisible.value = true;
+      _state.activePluginPanelVisible.value = true;
+      // 如果处于全屏状态，则隐藏浮动按钮
       if (_state.floatWindowMainFullscreen.value) {
         _state.floatingButtonVisible.value = false;
       }

@@ -40,13 +40,15 @@ class _GridPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final gridPaint = Paint()
-      ..color = color
-      ..strokeWidth = strokeWidth;
+    final gridPaint =
+        Paint()
+          ..color = color
+          ..strokeWidth = strokeWidth;
 
-    final centerPaint = Paint()
-      ..color = centerColor
-      ..strokeWidth = strokeWidth * 2;
+    final centerPaint =
+        Paint()
+          ..color = centerColor
+          ..strokeWidth = strokeWidth * 2;
 
     final textPainter = TextPainter(
       textDirection: TextDirection.ltr,
@@ -84,7 +86,11 @@ class _GridPainter extends CustomPainter {
     final centerY = size.height / 2;
 
     // 垂直中心线
-    canvas.drawLine(Offset(centerX, 0), Offset(centerX, size.height), centerPaint);
+    canvas.drawLine(
+      Offset(centerX, 0),
+      Offset(centerX, size.height),
+      centerPaint,
+    );
     if (showNumbers) {
       textPainter.text = TextSpan(
         text: centerX.toInt().toString(),
@@ -95,7 +101,11 @@ class _GridPainter extends CustomPainter {
     }
 
     // 水平中心线
-    canvas.drawLine(Offset(0, centerY), Offset(size.width, centerY), centerPaint);
+    canvas.drawLine(
+      Offset(0, centerY),
+      Offset(size.width, centerY),
+      centerPaint,
+    );
     if (showNumbers) {
       textPainter.text = TextSpan(
         text: centerY.toInt().toString(),

@@ -1,3 +1,8 @@
+# 1.4.0
+
+- style: dart format
+- chore: update dependencies
+
 # 1.3.1
 
 - feat: add loadAllPlugins function and update version

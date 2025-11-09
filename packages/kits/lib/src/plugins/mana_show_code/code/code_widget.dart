@@ -5,7 +5,13 @@ import 'highlighter_style.dart';
 import 'language/dart_languge.dart';
 
 class CodeWidget extends StatelessWidget {
-  const CodeWidget({super.key, required this.code, required this.style, this.fontSize = 13, this.fontFamily});
+  const CodeWidget({
+    super.key,
+    required this.code,
+    required this.style,
+    this.fontSize = 13,
+    this.fontFamily,
+  });
 
   final String code;
   final HighlighterStyle style;
@@ -21,7 +27,12 @@ class CodeWidget extends StatelessWidget {
         selectionControls: MaterialTextSelectionControls(),
         TextSpan(
           style: TextStyle(fontSize: fontSize, fontFamily: fontFamily),
-          children: <TextSpan>[CodeHighlighter(style: style, language: const DartLanguage()).format(code)],
+          children: <TextSpan>[
+            CodeHighlighter(
+              style: style,
+              language: const DartLanguage(),
+            ).format(code),
+          ],
         ),
       );
     } catch (err) {

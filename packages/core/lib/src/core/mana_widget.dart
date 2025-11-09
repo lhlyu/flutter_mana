@@ -65,10 +65,7 @@ class ManaWidget extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('en', 'US'),
-        Locale('zh', 'CN'),
-      ],
+      supportedLocales: const [Locale('en', 'US'), Locale('zh', 'CN')],
       home: Stack(
         children: [
           /// Wraps the child widget with RepaintBoundary and assigns `manaRootKey` to it.

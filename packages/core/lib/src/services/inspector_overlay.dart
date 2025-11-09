@@ -94,14 +94,18 @@ class InspectorOverlay extends LeafRenderObjectWidget {
   final bool needDescription;
 
   @override
-  RenderInspectorOverlay createRenderObject(BuildContext context) => RenderInspectorOverlay(
+  RenderInspectorOverlay createRenderObject(BuildContext context) =>
+      RenderInspectorOverlay(
         selection: selection,
         needEdges: needEdges,
         needDescription: needDescription,
       );
 
   @override
-  void updateRenderObject(BuildContext context, RenderInspectorOverlay renderObject) {
+  void updateRenderObject(
+    BuildContext context,
+    RenderInspectorOverlay renderObject,
+  ) {
     renderObject
       ..selection = selection
       ..needEdges = needEdges
@@ -124,9 +128,9 @@ class RenderInspectorOverlay extends RenderBox {
     required InspectorSelection selection,
     required bool needEdges,
     required bool needDescription,
-  })  : _selection = selection,
-        _needEdges = needEdges,
-        _needDescription = needDescription;
+  }) : _selection = selection,
+       _needEdges = needEdges,
+       _needDescription = needDescription;
 
   bool _needEdges;
 
@@ -183,12 +187,14 @@ class RenderInspectorOverlay extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    context.addLayer(_InspectorOverlayLayer(
-      selection: selection,
-      needEdges: needEdges,
-      needDescription: needDescription,
-      overlayRect: offset & size,
-    ));
+    context.addLayer(
+      _InspectorOverlayLayer(
+        selection: selection,
+        needEdges: needEdges,
+        needDescription: needDescription,
+        overlayRect: offset & size,
+      ),
+    );
   }
 }
 
@@ -265,7 +271,10 @@ class _InspectorOverlayLayer extends Layer {
     final info = _SelectionInfo(selection);
     final selected = _TransformedRect(selection.current!);
     final candidates =
-        selection.candidates.where((c) => c != selection.current && c.attached).map(_TransformedRect.new).toList();
+        selection.candidates
+            .where((c) => c != selection.current && c.attached)
+            .map(_TransformedRect.new)
+            .toList();
 
     final state = _InspectorOverlayRenderState(
       overlayRect: overlayRect,
@@ -305,10 +314,11 @@ class _InspectorOverlayLayer extends Layer {
     // Draw the selection box.
     // 绘制选中框。
     final fillPaint = Paint()..color = _InspectorConstants.selectionFill;
-    final borderPaint = Paint()
-      ..color = _InspectorConstants.selectionBorder
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = _InspectorConstants.strokeWidth;
+    final borderPaint =
+        Paint()
+          ..color = _InspectorConstants.selectionBorder
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = _InspectorConstants.strokeWidth;
 
     final selectedRect = state.selected.rect.deflate(0.5);
     canvas
@@ -333,9 +343,13 @@ class _InspectorOverlayLayer extends Layer {
     // Draw the text description tooltip if `needDescription` is true.
     // 如果 `needDescription` 为 true，则绘制文本描述工具提示。
     if (needDescription) {
-      final globalRect = MatrixUtils.transformRect(state.selected.transform, state.selected.rect);
+      final globalRect = MatrixUtils.transformRect(
+        state.selected.transform,
+        state.selected.rect,
+      );
       final target = Offset(globalRect.left, globalRect.center.dy);
-      final verticalOffset = globalRect.height / 2 + _InspectorConstants.offsetFromWidget;
+      final verticalOffset =
+          globalRect.height / 2 + _InspectorConstants.offsetFromWidget;
       _paintDescription(
         canvas,
         state.selectionInfo.message,
@@ -373,16 +387,25 @@ class _InspectorOverlayLayer extends Layer {
     }
 
     final view = viewList.first;
-    final safeArea = EdgeInsets.fromViewPadding(view.padding, view.devicePixelRatio);
+    final safeArea = EdgeInsets.fromViewPadding(
+      view.padding,
+      view.devicePixelRatio,
+    );
 
     // Calculate the maximum width for the tooltip text to fit within screen margins.
     // 计算工具提示文本的最大宽度，以适应屏幕边距。
-    final maxWidth = size.width - 2 * (_InspectorConstants.screenMargin + _InspectorConstants.tooltipPadding);
+    final maxWidth =
+        size.width -
+        2 *
+            (_InspectorConstants.screenMargin +
+                _InspectorConstants.tooltipPadding);
 
     /// If the text content or max width has changed, re-layout the text painter.
     ///
     /// 如果文本内容或最大宽度已更改，则重新布局文本 painter。
-    if (_textPainter == null || _textPainter!.text?.toPlainText() != message || _lastMaxWidth != maxWidth) {
+    if (_textPainter == null ||
+        _textPainter!.text?.toPlainText() != message ||
+        _lastMaxWidth != maxWidth) {
       _lastMaxWidth = maxWidth;
       _textPainter = TextPainter(
         maxLines: _InspectorConstants.maxTooltipLines,
@@ -402,7 +425,8 @@ class _InspectorOverlayLayer extends Layer {
     /// Calculate the total size of the tooltip including padding.
     ///
     /// 计算包含填充在内的工具提示的总大小。
-    final tooltipSize = _textPainter!.size +
+    final tooltipSize =
+        _textPainter!.size +
         Offset(
           _InspectorConstants.tooltipPadding * 2,
           _InspectorConstants.tooltipPadding * 2,
@@ -425,7 +449,8 @@ class _InspectorOverlayLayer extends Layer {
     /// Check if the tooltip fits above the target, considering safe areas and screen margins.
     ///
     /// 检查工具提示是否适合目标上方，同时考虑安全区域和屏幕边距。
-    final aboveFits = (tipOffset.dy - safeArea.top) >= _InspectorConstants.screenMargin;
+    final aboveFits =
+        (tipOffset.dy - safeArea.top) >= _InspectorConstants.screenMargin;
 
     // If it doesn't fit above, try placing it below.
     // 如果上方空间不足，改为下方。
@@ -449,11 +474,17 @@ class _InspectorOverlayLayer extends Layer {
     tipOffset = Offset(
       tipOffset.dx.clamp(
         safeArea.left + _InspectorConstants.screenMargin,
-        size.width - safeArea.right - _InspectorConstants.screenMargin - tooltipSize.width,
+        size.width -
+            safeArea.right -
+            _InspectorConstants.screenMargin -
+            tooltipSize.width,
       ),
       tipOffset.dy.clamp(
         safeArea.top + _InspectorConstants.screenMargin,
-        size.height - safeArea.bottom - _InspectorConstants.screenMargin - tooltipSize.height,
+        size.height -
+            safeArea.bottom -
+            _InspectorConstants.screenMargin -
+            tooltipSize.height,
       ),
     );
 
@@ -473,7 +504,11 @@ class _InspectorOverlayLayer extends Layer {
     /// 绘制工具提示的文本内容。
     _textPainter!.paint(
       canvas,
-      tipOffset + Offset(_InspectorConstants.tooltipPadding, _InspectorConstants.tooltipPadding),
+      tipOffset +
+          Offset(
+            _InspectorConstants.tooltipPadding,
+            _InspectorConstants.tooltipPadding,
+          ),
     );
     canvas.restore();
   }
@@ -502,14 +537,20 @@ class _InspectorOverlayLayer extends Layer {
     final wedge = [
       Offset(x - size, y),
       Offset(x + size, y),
-      Offset(x, y + (isBelow ? -size : size)), // Adjust vertical position based on `isBelow`.
+      Offset(
+        x,
+        y + (isBelow ? -size : size),
+      ), // Adjust vertical position based on `isBelow`.
     ];
     canvas.drawPath(Path()..addPolygon(wedge, true), paint);
   }
 
   @override
-  bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, {required bool onlyFirst}) =>
-      false;
+  bool findAnnotations<S extends Object>(
+    AnnotationResult<S> result,
+    Offset localPosition, {
+    required bool onlyFirst,
+  }) => false;
 }
 
 // === 辅助结构 ===
@@ -523,8 +564,10 @@ class _TransformedRect {
   ///
   /// 从 [RenderObject] 创建一个 [_TransformedRect]。
   _TransformedRect(RenderObject object)
-      : rect = object.semanticBounds,
-        transform = object.getTransformTo(null); // Get the transform to the root coordinate system.
+    : rect = object.semanticBounds,
+      transform = object.getTransformTo(
+        null,
+      ); // Get the transform to the root coordinate system.
 
   /// The local bounds of the [RenderObject].
   ///
@@ -537,7 +580,10 @@ class _TransformedRect {
   final Matrix4 transform;
 
   @override
-  bool operator ==(Object other) => other is _TransformedRect && rect == other.rect && transform == other.transform;
+  bool operator ==(Object other) =>
+      other is _TransformedRect &&
+      rect == other.rect &&
+      transform == other.transform;
 
   @override
   int get hashCode => Object.hash(rect, transform);
@@ -576,7 +622,10 @@ class _SelectionInfo {
   /// 如果解码过程中发生错误，则返回 `null`。
   Map<String, dynamic>? get jsonInfo {
     try {
-      final jsonStr = WidgetInspectorService.instance.getSelectedSummaryWidget(null, '');
+      final jsonStr = WidgetInspectorService.instance.getSelectedSummaryWidget(
+        null,
+        '',
+      );
       return json.decode(jsonStr) as Map<String, dynamic>?;
     } catch (_) {
       return null;
@@ -674,13 +723,23 @@ class _InspectorOverlayRenderState {
     return other is _InspectorOverlayRenderState &&
         overlayRect == other.overlayRect &&
         selected == other.selected &&
-        listEquals(candidates, other.candidates) && // Deep comparison for the list of candidates.
+        listEquals(
+          candidates,
+          other.candidates,
+        ) && // Deep comparison for the list of candidates.
         textDirection == other.textDirection &&
         selectionInfo.message ==
-            other.selectionInfo.message; // Compare by message as _SelectionInfo itself can be complex.
+            other
+                .selectionInfo
+                .message; // Compare by message as _SelectionInfo itself can be complex.
   }
 
   @override
-  int get hashCode =>
-      Object.hash(overlayRect, selected, Object.hashAll(candidates), textDirection, selectionInfo.message);
+  int get hashCode => Object.hash(
+    overlayRect,
+    selected,
+    Object.hashAll(candidates),
+    textDirection,
+    selectionInfo.message,
+  );
 }

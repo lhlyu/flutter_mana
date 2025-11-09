@@ -14,8 +14,10 @@ class WidgetInfoInspector extends StatefulWidget {
   State<WidgetInfoInspector> createState() => _WidgetInfoInspectorState();
 }
 
-class _WidgetInfoInspectorState extends State<WidgetInfoInspector> with WidgetsBindingObserver {
-  _WidgetInfoInspectorState() : selection = WidgetInspectorService.instance.selection;
+class _WidgetInfoInspectorState extends State<WidgetInfoInspector>
+    with WidgetsBindingObserver {
+  _WidgetInfoInspectorState()
+    : selection = WidgetInspectorService.instance.selection;
 
   final InspectorSelection selection;
 

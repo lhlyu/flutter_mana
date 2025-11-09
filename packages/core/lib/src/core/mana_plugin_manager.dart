@@ -28,7 +28,8 @@ class ManaPluginManager {
   /// The internal map storing registered plugins.
   ///
   /// 存储已注册插件的内部映射。
-  final LinkedHashMap<String, ManaPluggable> _pluginsMap = LinkedHashMap<String, ManaPluggable>();
+  final LinkedHashMap<String, ManaPluggable> _pluginsMap =
+      LinkedHashMap<String, ManaPluggable>();
 
   /// Provides the singleton instance of [ManaPluginManager].
   /// If the instance does not exist, it will be created.

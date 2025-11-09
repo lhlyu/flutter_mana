@@ -5,7 +5,11 @@ class LogViewerSetting extends StatelessWidget with I18nMixin {
   final bool verboseLogs;
   final ValueChanged<bool?>? onChanged;
 
-  const LogViewerSetting({super.key, required this.verboseLogs, this.onChanged});
+  const LogViewerSetting({
+    super.key,
+    required this.verboseLogs,
+    this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {

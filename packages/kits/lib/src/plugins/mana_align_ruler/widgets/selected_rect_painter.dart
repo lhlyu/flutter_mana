@@ -19,18 +19,21 @@ class SelectedRectPainter extends CustomPainter {
 
     final Matrix4 transform = selectedObject!.getTransformTo(null);
 
-    final Rect globalRect =
-        selectedObject!.paintBounds.shift(Offset(transform.getTranslation().x, transform.getTranslation().y));
+    final Rect globalRect = selectedObject!.paintBounds.shift(
+      Offset(transform.getTranslation().x, transform.getTranslation().y),
+    );
 
-    final Paint fillPaint = Paint()
-      ..color = fillColor.withAlpha(50)
-      ..style = PaintingStyle.fill;
+    final Paint fillPaint =
+        Paint()
+          ..color = fillColor.withAlpha(50)
+          ..style = PaintingStyle.fill;
     canvas.drawRect(globalRect, fillPaint);
 
-    final Paint borderPaint = Paint()
-      ..color = borderColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = borderWidth;
+    final Paint borderPaint =
+        Paint()
+          ..color = borderColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = borderWidth;
     canvas.drawRect(globalRect, borderPaint);
   }
 

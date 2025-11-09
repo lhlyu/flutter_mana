@@ -10,6 +10,7 @@ abstract final class _Icons {
   static const close = Icons.close;
 }
 
+@immutable
 class WindowControls extends StatefulWidget {
   /// 是否启用拖动把手
   final bool drag;
@@ -55,19 +56,13 @@ class _WindowControlsState extends State<WindowControls> {
   bool _isHandlePressed = false;
 
   /// 统一 IconButton 构造
-  Widget _buildIconButton({
-    required IconData icon,
-    required VoidCallback? onPressed,
-    String? tooltip,
-  }) {
+  Widget _buildIconButton({required IconData icon, required VoidCallback? onPressed, String? tooltip}) {
     return IconButton(
       icon: Icon(icon, size: 16),
       color: Colors.black54,
       tooltip: tooltip,
       constraints: const BoxConstraints(),
-      style: IconButton.styleFrom(
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      ),
+      style: IconButton.styleFrom(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
       onPressed: onPressed,
     );
   }
@@ -89,11 +84,7 @@ class _WindowControlsState extends State<WindowControls> {
                   tooltip: widget.isFullscreen ? '退出全屏' : '全屏',
                   onPressed: widget.onFullscreen,
                 ),
-                _buildIconButton(
-                  icon: _Icons.minimize,
-                  tooltip: '最小化',
-                  onPressed: widget.onMinimize,
-                ),
+                _buildIconButton(icon: _Icons.minimize, tooltip: '最小化', onPressed: widget.onMinimize),
               ],
             ),
           ),
@@ -132,17 +123,9 @@ class _WindowControlsState extends State<WindowControls> {
                   maintainSize: true,
                   maintainAnimation: true,
                   maintainState: true,
-                  child: _buildIconButton(
-                    icon: _Icons.settings,
-                    tooltip: '设置',
-                    onPressed: widget.onToggleSetting,
-                  ),
+                  child: _buildIconButton(icon: _Icons.settings, tooltip: '设置', onPressed: widget.onToggleSetting),
                 ),
-                _buildIconButton(
-                  icon: _Icons.close,
-                  tooltip: '关闭',
-                  onPressed: widget.onClose,
-                ),
+                _buildIconButton(icon: _Icons.close, tooltip: '关闭', onPressed: widget.onClose),
               ],
             ),
           ),

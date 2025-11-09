@@ -85,7 +85,8 @@ class _LogViewerContentState extends State<LogViewerContent>
   void _updateFilteredData(Iterable<OutputEvent> data) {
     final filtered = data.where((d) {
       final matchLevel = _currentTab == 'All' || d.level.name.toLowerCase() == _currentTab.toLowerCase();
-      final matchKeyword = !_filter ||
+      final matchKeyword =
+          !_filter ||
           _filterKeywords.isEmpty ||
           (_filter && _filterKeywords.isNotEmpty && d.origin.message.toString().contains(_filterKeywords));
       return matchLevel && matchKeyword;
@@ -103,11 +104,7 @@ class _LogViewerContentState extends State<LogViewerContent>
       final offset = _scrollController.position.maxScrollExtent;
 
       if (animate) {
-        _scrollController.animateTo(
-          offset,
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeOut,
-        );
+        _scrollController.animateTo(offset, duration: const Duration(milliseconds: 500), curve: Curves.easeOut);
       } else {
         _scrollController.jumpTo(offset);
       }
@@ -115,11 +112,7 @@ class _LogViewerContentState extends State<LogViewerContent>
   }
 
   void _scrollToTop() {
-    _scrollController.animateTo(
-      0,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeOut,
-    );
+    _scrollController.animateTo(0, duration: const Duration(milliseconds: 500), curve: Curves.easeOut);
   }
 
   // 允许/锁住滚动
@@ -165,11 +158,7 @@ class _LogViewerContentState extends State<LogViewerContent>
         cacheExtent: 1000,
         itemBuilder: (context, index) {
           final d = _filteredData[index];
-          return LogItemWidget(
-            key: ValueKey(d.origin.time),
-            verboseLogs: widget.verboseLogs,
-            log: d,
-          );
+          return LogItemWidget(key: ValueKey(d.origin.time), verboseLogs: widget.verboseLogs, log: d);
         },
         separatorBuilder: (_, __) => _divider,
       ),
@@ -226,28 +215,14 @@ class _LogViewerContentState extends State<LogViewerContent>
                       break;
                   }
                 },
-                children: [
-                  Icon(
-                    KitIcons.clear,
-                    size: 16,
-                  ),
-                  Icon(
-                    KitIcons.top,
-                    size: 16,
-                  ),
-                  Icon(
-                    KitIcons.down,
-                    size: 16,
-                  ),
-                  Icon(
-                    _lock ? KitIcons.lock : KitIcons.lock_open,
-                    size: 16,
-                  ),
-                  Icon(
-                    _filter ? KitIcons.filter_off : KitIcons.filter_on,
-                    size: 16,
-                  ),
-                ].map((e) => Center(child: e)).toList(),
+                children:
+                    [
+                      Icon(KitIcons.clear, size: 16),
+                      Icon(KitIcons.top, size: 16),
+                      Icon(KitIcons.down, size: 16),
+                      Icon(_lock ? KitIcons.lock : KitIcons.lock_open, size: 16),
+                      Icon(_filter ? KitIcons.filter_off : KitIcons.filter_on, size: 16),
+                    ].map((e) => Center(child: e)).toList(),
               );
             },
           ),
@@ -259,15 +234,6 @@ class _LogViewerContentState extends State<LogViewerContent>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Column(
-      children: [
-        _divider,
-        _buildHeader(),
-        _divider,
-        _buildCenter(),
-        _divider,
-        _buildBottom(),
-      ],
-    );
+    return Column(children: [_divider, _buildHeader(), _divider, _buildCenter(), _divider, _buildBottom()]);
   }
 }

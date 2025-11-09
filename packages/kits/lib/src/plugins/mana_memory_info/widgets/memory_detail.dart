@@ -13,16 +13,15 @@ class MemoryDetail extends StatelessWidget with I18nMixin {
   final MemoryService service;
 
   /// 构造函数。
-  const MemoryDetail({
-    super.key,
-    required this.detail,
-    required this.service,
-  });
+  const MemoryDetail({super.key, required this.detail, required this.service});
 
   /// 从 MemoryService 获取类的详细信息。
   Future<ClsModel?> _fetchClassDetails() async {
     final completer = Completer<ClsModel?>();
-    service.getClassDetailInfo(detail.classRef?.id ?? '', (info) => completer.complete(info));
+    service.getClassDetailInfo(
+      detail.classRef?.id ?? '',
+      (info) => completer.complete(info),
+    );
     return completer.future;
   }
 
@@ -47,11 +46,18 @@ class MemoryDetail extends StatelessWidget with I18nMixin {
           future: _fetchClassDetails(),
           builder: (context, snapshot) {
             if (!snapshot.hasData || snapshot.data == null) {
-              return Center(child: Text(t('memory_info.class_no_detail'), style: TextStyle(fontSize: 20)));
+              return Center(
+                child: Text(
+                  t('memory_info.class_no_detail'),
+                  style: TextStyle(fontSize: 20),
+                ),
+              );
             }
 
             final info = snapshot.data!;
-            final propertiesText = info.properties.map((e) => e.propertyStr).join('\n');
+            final propertiesText = info.properties
+                .map((e) => e.propertyStr)
+                .join('\n');
             final functionsText = info.functions.join('\n');
 
             return SingleChildScrollView(
@@ -65,7 +71,10 @@ class MemoryDetail extends StatelessWidget with I18nMixin {
                       padding: EdgeInsets.only(bottom: 10),
                       child: Text(
                         t('memory_info.class_name'),
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     Text(
@@ -78,7 +87,10 @@ class MemoryDetail extends StatelessWidget with I18nMixin {
                       padding: EdgeInsets.only(bottom: 10),
                       child: Text(
                         t('memory_info.location'),
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     Text(
@@ -91,7 +103,10 @@ class MemoryDetail extends StatelessWidget with I18nMixin {
                       padding: EdgeInsets.only(bottom: 10),
                       child: Text(
                         t('memory_info.property'),
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     Text(
@@ -104,7 +119,10 @@ class MemoryDetail extends StatelessWidget with I18nMixin {
                       padding: EdgeInsets.only(bottom: 10),
                       child: Text(
                         t('memory_info.function'),
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     Text(

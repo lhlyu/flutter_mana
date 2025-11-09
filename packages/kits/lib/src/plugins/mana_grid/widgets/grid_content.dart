@@ -55,13 +55,15 @@ class _GridContentState extends State<GridContent> with I18nMixin {
             children: [
               Row(
                 children: [
-                  Text(t('grid.gap'),
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      )),
+                  Text(
+                    t('grid.gap'),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
                   const Spacer(),
-                  Text('${_gap.toInt()}px', style: const TextStyle(fontSize: 12, color: Colors.black54)),
+                  Text(
+                    '${_gap.toInt()}px',
+                    style: const TextStyle(fontSize: 12, color: Colors.black54),
+                  ),
                 ],
               ),
               Slider(
@@ -73,7 +75,9 @@ class _GridContentState extends State<GridContent> with I18nMixin {
                 label: '${_gap.toInt()}px',
                 onChanged: (value) {
                   // 吸附到最近的预设值（可选）
-                  _gap = _gapOptions.reduce((a, b) => (value - a).abs() < (value - b).abs() ? a : b);
+                  _gap = _gapOptions.reduce(
+                    (a, b) => (value - a).abs() < (value - b).abs() ? a : b,
+                  );
                   widget.onGapChanged?.call(_gap);
                   setState(() {});
                 },

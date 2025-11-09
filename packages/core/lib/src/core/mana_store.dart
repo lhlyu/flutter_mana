@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter_mana/src/core/mana_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'mana_state.dart';
 
 class ManaStore {
   static ManaStore? _instance;

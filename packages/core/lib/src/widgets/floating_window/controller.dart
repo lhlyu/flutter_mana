@@ -131,12 +131,15 @@ class FloatingWindowController extends ChangeNotifier {
     _manaState.floatWindowMainFullscreen.value = fullscreen.value;
   }
 
-  void onMinimize(VoidCallback? callback) {
+  void onMinimize(bool showBarrier, VoidCallback? callback) {
     callback?.call();
     if (_name == ManaPluginManager.name) {
       _manaState.pluginManagementPanelVisible.value = false;
     } else {
       _manaState.floatWindowMainVisible.value = false;
+      if (!showBarrier) {
+        _manaState.activePluginPanelVisible.value = false;
+      }
     }
     _manaState.floatingButtonVisible.value = true;
   }
@@ -151,6 +154,7 @@ class FloatingWindowController extends ChangeNotifier {
       _manaState.pluginManagementPanelVisible.value = false;
     }
     _manaState.activePluginName.value = '';
+    _manaState.activePluginPanelVisible.value = false;
     _manaState.floatingButtonVisible.value = true;
   }
 }

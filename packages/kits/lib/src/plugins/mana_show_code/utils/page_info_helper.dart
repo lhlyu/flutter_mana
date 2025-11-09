@@ -14,7 +14,8 @@ class PageInfoHelper {
   final CodeDisplayService _codeDisplayService = CodeDisplayService();
 
   // Widget Inspector 的选中服务实例，用于获取当前选中的 Widget 信息。
-  final InspectorSelection selection = WidgetInspectorService.instance.selection;
+  final InspectorSelection selection =
+      WidgetInspectorService.instance.selection;
 
   // 构造函数，在创建实例时初始化选择器。
   PageInfoHelper() {
@@ -92,15 +93,18 @@ class PageInfoHelper {
       // 获取 Widget 的诊断节点 ID。
       // 这可能会在 Flutter 更新时导致兼容性问题，应寻找官方支持的替代方案。
       final widgetId = WidgetInspectorService.instance
-          // ignore: invalid_use_of_protected_member
-          .toId(renderObject!.toDiagnosticsNode(), ''); // renderObject 已在前面进行了空检查
+      // ignore: invalid_use_of_protected_member
+      .toId(renderObject!.toDiagnosticsNode(), ''); // renderObject 已在前面进行了空检查
 
       if (widgetId == null) {
         return null;
       }
 
       // 获取选中 Widget 的摘要信息字符串，通常是 JSON 格式。
-      String infoStr = WidgetInspectorService.instance.getSelectedSummaryWidget(widgetId, '');
+      String infoStr = WidgetInspectorService.instance.getSelectedSummaryWidget(
+        widgetId,
+        '',
+      );
 
       // 尝试解码 JSON 字符串。
       return json.decode(infoStr) as Map?; // 明确转换类型
@@ -125,9 +129,12 @@ class PageInfoHelper {
   /// 然后将其设置为 Inspector Selection 的候选列表。
   void _selectionInit() {
     // 确保 `manaRootKey.currentContext` 和其 `findRenderObject()` 非空。
-    final RenderObject? rootRenderObject = manaRootKey.currentContext?.findRenderObject();
+    final RenderObject? rootRenderObject =
+        manaRootKey.currentContext?.findRenderObject();
     if (rootRenderObject == null) {
-      debugPrint('Warning: Root render object not found for selection initialization.');
+      debugPrint(
+        'Warning: Root render object not found for selection initialization.',
+      );
       return;
     }
 
@@ -135,10 +142,13 @@ class PageInfoHelper {
     // 其 `child` 属性才是用户界面的根 `RenderObject`。
     // 最好明确类型或通过更安全的 API 获取子渲染对象。
     // 现在 _ignorePointer 是 RenderObject 类型
-    final RenderObject? userRender = (rootRenderObject as dynamic).child as RenderObject?;
+    final RenderObject? userRender =
+        (rootRenderObject as dynamic).child as RenderObject?;
 
     if (userRender == null) {
-      debugPrint('Warning: User render object not found. Cannot initialize selection.');
+      debugPrint(
+        'Warning: User render object not found. Cannot initialize selection.',
+      );
       return;
     }
 
@@ -150,7 +160,8 @@ class PageInfoHelper {
         final List<DiagnosticsNode> children = object.debugDescribeChildren();
         for (final c in children) {
           // 仅处理可见的 RenderBox 类型子节点
-          if (c.style == DiagnosticsTreeStyle.offstage || c.value is! RenderBox) {
+          if (c.style == DiagnosticsTreeStyle.offstage ||
+              c.value is! RenderBox) {
             continue;
           }
           final RenderObject child = c.value as RenderObject;
@@ -166,7 +177,9 @@ class PageInfoHelper {
     findAllRenderObject(userRender);
 
     // 按照面积大小进行排序 (从小到大)
-    objectList.sort((RenderObject a, RenderObject b) => _area(a).compareTo(_area(b)));
+    objectList.sort(
+      (RenderObject a, RenderObject b) => _area(a).compareTo(_area(b)),
+    );
 
     // 使用 Set 去重并保持顺序
     Set<RenderObject> objectSet = <RenderObject>{};
@@ -187,13 +200,17 @@ class PageInfoHelper {
     }
 
     try {
-      String? scriptId = await _codeDisplayService.getScriptIdByPackagePath(packagePath);
+      String? scriptId = await _codeDisplayService.getScriptIdByPackagePath(
+        packagePath,
+      );
 
       if (scriptId == null) {
         debugPrint('Script ID not found for file: $packagePath');
         return null;
       }
-      String? sourceCode = await _codeDisplayService.getSourceCodeByScriptId(scriptId);
+      String? sourceCode = await _codeDisplayService.getSourceCodeByScriptId(
+        scriptId,
+      );
       if (sourceCode == null) {
         debugPrint('Source code is null for script ID: $scriptId');
       }
@@ -210,12 +227,16 @@ class PageInfoHelper {
   /// 返回：源代码字符串，如果获取失败则为 `null`。
   Future<String?> getCodeByFileName(String fileName) async {
     try {
-      String? scriptId = await _codeDisplayService.getScriptIdByPackagePath(fileName);
+      String? scriptId = await _codeDisplayService.getScriptIdByPackagePath(
+        fileName,
+      );
       if (scriptId == null) {
         debugPrint('Script ID not found for file name substring: $fileName');
         return null;
       }
-      String? sourceCode = await _codeDisplayService.getSourceCodeByScriptId(scriptId);
+      String? sourceCode = await _codeDisplayService.getSourceCodeByScriptId(
+        scriptId,
+      );
       if (sourceCode == null) {
         debugPrint('Source code is null for script ID: $scriptId');
       }
@@ -235,7 +256,9 @@ class PageInfoHelper {
     final Map<String?, String> result = <String?, String>{};
     try {
       // 获取所有匹配关键词的脚本 ID 和 URI
-      final scriptUris = await _codeDisplayService.findScriptUrisByKeyword(keyword);
+      final scriptUris = await _codeDisplayService.findScriptUrisByKeyword(
+        keyword,
+      );
 
       if (scriptUris.isEmpty) {
         debugPrint('No scripts found with keyword: $keyword');
@@ -249,12 +272,16 @@ class PageInfoHelper {
 
         // 确保 scriptId 非空
         if (scriptId != null) {
-          final code = await _codeDisplayService.getSourceCodeByScriptId(scriptId);
+          final code = await _codeDisplayService.getSourceCodeByScriptId(
+            scriptId,
+          );
           // 仅当源代码非空且非空字符串时才添加到结果中
           if (code != null && code.isNotEmpty) {
             result[scriptUri] = code;
           } else {
-            debugPrint('Warning: Could not retrieve source code for script ID: $scriptId (URI: $scriptUri)');
+            debugPrint(
+              'Warning: Could not retrieve source code for script ID: $scriptId (URI: $scriptUri)',
+            );
           }
         } else {
           debugPrint('Warning: Null script ID found for URI: $scriptUri');

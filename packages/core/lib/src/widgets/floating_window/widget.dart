@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mana/flutter_mana.dart';
-import 'package:flutter_mana/src/widgets/floating_window/window_controls.dart';
 
 import '../nil.dart';
 import 'controller.dart';
+import 'window_controls.dart';
 
+@immutable
 class FloatingWindow extends StatefulWidget {
   /// 名称
   final String name;
@@ -103,13 +104,9 @@ class _FloatingWindowState extends State<FloatingWindow> {
   Widget _buildBarrier() {
     return widget.barrier ??
         GestureDetector(
-          onTap: () => _controller.onMinimize(widget.onMinimize),
+          onTap: () => _controller.onMinimize(widget.showBarrier, widget.onMinimize),
           behavior: HitTestBehavior.opaque,
-          child: Container(
-            color: Colors.transparent,
-            width: double.infinity,
-            height: double.infinity,
-          ),
+          child: Container(color: Colors.transparent, width: double.infinity, height: double.infinity),
         );
   }
 
@@ -123,12 +120,7 @@ class _FloatingWindowState extends State<FloatingWindow> {
         color: Colors.white,
         borderRadius: radius,
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(50),
-            blurRadius: 16,
-            spreadRadius: 0,
-            offset: const Offset(0, 0),
-          ),
+          BoxShadow(color: Colors.black.withAlpha(50), blurRadius: 16, spreadRadius: 0, offset: const Offset(0, 0)),
         ],
       ),
       child: SafeArea(
@@ -141,14 +133,15 @@ class _FloatingWindowState extends State<FloatingWindow> {
           children: [
             if (widget.showControls)
               WindowControls(
-                  drag: widget.drag,
-                  isFullscreen: fullscreen,
-                  showSettingButton: widget.setting != null,
-                  onPanUpdate: _controller.onPanUpdate,
-                  onToggleSetting: _controller.onToggleSetting,
-                  onFullscreen: _controller.onFullscreen,
-                  onMinimize: () => _controller.onMinimize(widget.onMinimize),
-                  onClose: () => _controller.onClose(widget.onClose)),
+                drag: widget.drag,
+                isFullscreen: fullscreen,
+                showSettingButton: widget.setting != null,
+                onPanUpdate: _controller.onPanUpdate,
+                onToggleSetting: _controller.onToggleSetting,
+                onFullscreen: _controller.onFullscreen,
+                onMinimize: () => _controller.onMinimize(widget.showBarrier, widget.onMinimize),
+                onClose: () => _controller.onClose(widget.onClose),
+              ),
             Expanded(
               child: Stack(
                 children: [
@@ -158,10 +151,7 @@ class _FloatingWindowState extends State<FloatingWindow> {
                       valueListenable: _controller.showSetting,
                       builder: (context, showSetting, _) {
                         if (showSetting && widget.setting != null) {
-                          return ColoredBox(
-                            color: Colors.white,
-                            child: widget.setting ?? SizedBox.shrink(),
-                          );
+                          return ColoredBox(color: Colors.white, child: widget.setting ?? SizedBox.shrink());
                         }
                         return SizedBox.shrink();
                       },
@@ -182,9 +172,28 @@ class _FloatingWindowState extends State<FloatingWindow> {
       canPop: false, // 拦截返回
       onPopInvokedWithResult: (bool didPop, void result) {
         if (!didPop) {
-          if (_controller.manaState.activePluginName.value.isEmpty) {
+          if (_controller.manaState.activePluginName.value == widget.name &&
+              _controller.manaState.pluginManagementPanelVisible.value) {
+            return;
+          }
+
+          if (_controller.manaState.pluginManagementPanelVisible.value) {
             _controller.manaState.pluginManagementPanelVisible.value = false;
             return;
+          }
+
+          if (widget.content == null) {
+            _controller.manaState.activePluginName.value = '';
+            _controller.manaState.activePluginPanelVisible.value = false;
+            _controller.manaState.floatingButtonVisible.value = true;
+            return;
+          }
+
+          if (!_controller.manaState.floatWindowMainVisible.value || !widget.showBarrier) {
+            _controller.manaState.activePluginPanelVisible.value = false;
+            if (widget.showBarrier) {
+              return;
+            }
           }
           _controller.manaState.floatWindowMainVisible.value = false;
           _controller.manaState.floatingButtonVisible.value = true;

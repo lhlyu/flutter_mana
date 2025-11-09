@@ -11,6 +11,6 @@ class ScreenInfo extends StatelessWidget with I18nMixin {
 
   @override
   Widget build(BuildContext context) {
-    return ManaFloatingWindow(name: name, content: ScreenInfoContent());
+    return ManaFloatingWindow(name: name, showBarrier: false, content: ScreenInfoContent());
   }
 }

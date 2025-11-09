@@ -10,7 +10,12 @@ class ModelDetail extends StatefulWidget {
   final VoidCallback? onClose;
   final void Function(Model model)? onSave;
 
-  const ModelDetail({super.key, required this.model, this.onClose, this.onSave});
+  const ModelDetail({
+    super.key,
+    required this.model,
+    this.onClose,
+    this.onSave,
+  });
 
   @override
   State<ModelDetail> createState() => _ModelDetailState();
@@ -22,7 +27,13 @@ class _ModelDetailState extends State<ModelDetail> with I18nMixin {
   late final TextEditingController _valueController;
   late String _selectedKind;
 
-  final List<String> _kindOptions = ['string', 'int', 'double', 'bool', 'List<String>'];
+  final List<String> _kindOptions = [
+    'string',
+    'int',
+    'double',
+    'bool',
+    'List<String>',
+  ];
 
   @override
   void initState() {
@@ -31,7 +42,10 @@ class _ModelDetailState extends State<ModelDetail> with I18nMixin {
     _keyController = TextEditingController(text: widget.model.key);
     _valueController = TextEditingController(text: widget.model.value);
 
-    _selectedKind = _kindOptions.contains(widget.model.kind) ? widget.model.kind : _kindOptions.first;
+    _selectedKind =
+        _kindOptions.contains(widget.model.kind)
+            ? widget.model.kind
+            : _kindOptions.first;
   }
 
   @override
@@ -85,24 +99,28 @@ class _ModelDetailState extends State<ModelDetail> with I18nMixin {
                 fillColor: Colors.white,
                 filled: true,
                 isDense: true,
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
               ),
               style: const TextStyle(fontSize: 14, color: Colors.black),
-              items: _kindOptions.map((String kind) {
-                var style = const TextStyle(fontSize: 14);
+              items:
+                  _kindOptions.map((String kind) {
+                    var style = const TextStyle(fontSize: 14);
 
-                if (kind == widget.model.kind) {
-                  style = const TextStyle(fontSize: 14, fontWeight: FontWeight.bold);
-                }
+                    if (kind == widget.model.kind) {
+                      style = const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      );
+                    }
 
-                return DropdownMenuItem<String>(
-                  value: kind,
-                  child: Text(
-                    kind,
-                    style: style,
-                  ),
-                );
-              }).toList(),
+                    return DropdownMenuItem<String>(
+                      value: kind,
+                      child: Text(kind, style: style),
+                    );
+                  }).toList(),
               onChanged: (String? newValue) {
                 setState(() {
                   _selectedKind = newValue!;
@@ -117,7 +135,10 @@ class _ModelDetailState extends State<ModelDetail> with I18nMixin {
                 fillColor: Colors.white,
                 filled: true,
                 isDense: true,
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
               ),
               style: const TextStyle(fontSize: 14),
               validator: (value) {
@@ -135,7 +156,10 @@ class _ModelDetailState extends State<ModelDetail> with I18nMixin {
                 fillColor: Colors.white,
                 filled: true,
                 isDense: true,
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
               ),
               style: const TextStyle(fontSize: 14),
               maxLines: 3,
@@ -164,7 +188,9 @@ class _ModelDetailState extends State<ModelDetail> with I18nMixin {
                     if (isListOfString(value)) {
                       return null;
                     }
-                    return t('shared_preferences_viewer.value_must_list_of_string');
+                    return t(
+                      'shared_preferences_viewer.value_must_list_of_string',
+                    );
                   default:
                     return null;
                 }
@@ -182,7 +208,10 @@ class _ModelDetailState extends State<ModelDetail> with I18nMixin {
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 8),
                     ),
-                    child: Text(t('shared_preferences_viewer.save'), style: TextStyle(fontSize: 14)),
+                    child: Text(
+                      t('shared_preferences_viewer.save'),
+                      style: TextStyle(fontSize: 14),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -195,7 +224,10 @@ class _ModelDetailState extends State<ModelDetail> with I18nMixin {
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 8),
                     ),
-                    child: Text(t('shared_preferences_viewer.cancel'), style: TextStyle(fontSize: 14)),
+                    child: Text(
+                      t('shared_preferences_viewer.cancel'),
+                      style: TextStyle(fontSize: 14),
+                    ),
                   ),
                 ),
               ],

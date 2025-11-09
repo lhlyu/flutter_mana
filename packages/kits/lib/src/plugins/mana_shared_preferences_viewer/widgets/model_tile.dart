@@ -18,7 +18,13 @@ class ModelTile extends StatelessWidget {
   final VoidCallback? onCopy;
   final VoidCallback? onDelete;
 
-  const ModelTile({super.key, required this.model, this.onTap, this.onCopy, this.onDelete});
+  const ModelTile({
+    super.key,
+    required this.model,
+    this.onTap,
+    this.onCopy,
+    this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -39,14 +45,22 @@ class ModelTile extends StatelessWidget {
       title: Text(
         model.key,
         maxLines: 1,
-        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, overflow: TextOverflow.ellipsis),
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
       subtitle: Padding(
         padding: const EdgeInsets.only(top: 4),
         child: Text(
           model.value,
           maxLines: 1,
-          style: TextStyle(color: Colors.black87, fontSize: 12, overflow: TextOverflow.ellipsis),
+          style: TextStyle(
+            color: Colors.black87,
+            fontSize: 12,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
       ),
       trailing: Row(

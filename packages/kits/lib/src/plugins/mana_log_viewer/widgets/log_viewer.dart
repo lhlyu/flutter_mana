@@ -38,10 +38,7 @@ class _LogViewerState extends State<LogViewer> {
       position: PositionType.bottom,
       drag: false,
       content: LogViewerContent(verboseLogs: _verboseLogs),
-      setting: LogViewerSetting(
-        verboseLogs: _verboseLogs,
-        onChanged: _onChange,
-      ),
+      setting: LogViewerSetting(verboseLogs: _verboseLogs, onChanged: _onChange),
     );
   }
 }

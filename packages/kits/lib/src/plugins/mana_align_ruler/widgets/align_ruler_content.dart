@@ -37,18 +37,12 @@ class AlignRulerContent extends StatelessWidget with I18nMixin {
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Left: $left'),
-            Text('Top: $top'),
-          ],
+          children: [Text('Left: $left'), Text('Top: $top')],
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Right: $right'),
-            Text('Bottom: $bottom'),
-          ],
-        )
+          children: [Text('Right: $right'), Text('Bottom: $bottom')],
+        ),
       ],
     );
   }
@@ -91,7 +85,7 @@ class AlignRulerContent extends StatelessWidget with I18nMixin {
                   onChanged: onSnapToWidgetChanged,
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),

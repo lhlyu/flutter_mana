@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 class TouchIndicatorBarrier extends StatefulWidget {
   final bool enabled;
 
-  const TouchIndicatorBarrier({
-    super.key,
-    this.enabled = true,
-  });
+  const TouchIndicatorBarrier({super.key, this.enabled = true});
 
   @override
   State<TouchIndicatorBarrier> createState() => _TouchIndicatorBarrierState();

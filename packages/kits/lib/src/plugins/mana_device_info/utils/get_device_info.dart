@@ -12,12 +12,24 @@ Future<Map<String, dynamic>> getDeviceInfo() async {
       deviceData = _readWebBrowserInfo(await deviceInfoPlugin.webBrowserInfo);
     } else {
       deviceData = switch (defaultTargetPlatform) {
-        TargetPlatform.android => _readAndroidBuildData(await deviceInfoPlugin.androidInfo),
-        TargetPlatform.iOS => _readIosDeviceInfo(await deviceInfoPlugin.iosInfo),
-        TargetPlatform.linux => _readLinuxDeviceInfo(await deviceInfoPlugin.linuxInfo),
-        TargetPlatform.windows => _readWindowsDeviceInfo(await deviceInfoPlugin.windowsInfo),
-        TargetPlatform.macOS => _readMacOsDeviceInfo(await deviceInfoPlugin.macOsInfo),
-        TargetPlatform.fuchsia => <String, dynamic>{'Error:': 'Fuchsia platform isn\'t supported'},
+        TargetPlatform.android => _readAndroidBuildData(
+          await deviceInfoPlugin.androidInfo,
+        ),
+        TargetPlatform.iOS => _readIosDeviceInfo(
+          await deviceInfoPlugin.iosInfo,
+        ),
+        TargetPlatform.linux => _readLinuxDeviceInfo(
+          await deviceInfoPlugin.linuxInfo,
+        ),
+        TargetPlatform.windows => _readWindowsDeviceInfo(
+          await deviceInfoPlugin.windowsInfo,
+        ),
+        TargetPlatform.macOS => _readMacOsDeviceInfo(
+          await deviceInfoPlugin.macOsInfo,
+        ),
+        TargetPlatform.fuchsia => <String, dynamic>{
+          'Error:': 'Fuchsia platform isn\'t supported',
+        },
       };
     }
   } on PlatformException {

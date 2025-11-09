@@ -21,7 +21,8 @@ class _GridState extends State<Grid> {
   void initState() {
     super.initState();
     _gap = ManaStore.instance.prefs.getDouble('mana_grid_gap') ?? 50;
-    _showNumbers = ManaStore.instance.prefs.getBool('mana_grid_show_numbers') ?? true;
+    _showNumbers =
+        ManaStore.instance.prefs.getBool('mana_grid_show_numbers') ?? true;
   }
 
   void _onGapChanged(double value) async {
@@ -47,10 +48,7 @@ class _GridState extends State<Grid> {
         onGapChanged: _onGapChanged,
         onShowNumbersChanged: _onShowNumbersChanged,
       ),
-      barrier: GridBarrier(
-        gap: _gap,
-        showNumbers: _showNumbers,
-      ),
+      barrier: GridBarrier(gap: _gap, showNumbers: _showNumbers),
     );
   }
 }

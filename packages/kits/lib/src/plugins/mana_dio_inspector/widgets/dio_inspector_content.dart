@@ -16,7 +16,8 @@ class DioInspectorContent extends StatefulWidget {
   State<DioInspectorContent> createState() => _DioInspectorContentState();
 }
 
-class _DioInspectorContentState extends State<DioInspectorContent> with SingleTickerProviderStateMixin, I18nMixin {
+class _DioInspectorContentState extends State<DioInspectorContent>
+    with SingleTickerProviderStateMixin, I18nMixin {
   late TabController _tabController;
 
   late final TextEditingController _filterController;
@@ -49,7 +50,8 @@ class _DioInspectorContentState extends State<DioInspectorContent> with SingleTi
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _tabs.length, vsync: this)..addListener(_handleTabSelection);
+    _tabController = TabController(length: _tabs.length, vsync: this)
+      ..addListener(_handleTabSelection);
     _filterController = TextEditingController()..addListener(_onTextChanged);
     ManaDioCollector().addListener(_onDataChanged);
     _onDataChanged();
@@ -89,10 +91,15 @@ class _DioInspectorContentState extends State<DioInspectorContent> with SingleTi
 
   void _updateFilteredData(Iterable<Response> data) {
     final filtered = data.where((d) {
-      final matchLevel = _currentTab == 'All' || d.requestOptions.method.toLowerCase() == _currentTab.toLowerCase();
-      final matchKeyword = !_filter ||
+      final matchLevel =
+          _currentTab == 'All' ||
+          d.requestOptions.method.toLowerCase() == _currentTab.toLowerCase();
+      final matchKeyword =
+          !_filter ||
           _filterKeywords.isEmpty ||
-          (_filter && _filterKeywords.isNotEmpty && d.requestOptions.uri.toString().contains(_filterKeywords));
+          (_filter &&
+              _filterKeywords.isNotEmpty &&
+              d.requestOptions.uri.toString().contains(_filterKeywords));
       return matchLevel && matchKeyword;
     });
 
@@ -154,7 +161,10 @@ class _DioInspectorContentState extends State<DioInspectorContent> with SingleTi
         indicatorColor: Colors.transparent,
         dividerHeight: 0,
         isScrollable: false,
-        labelStyle: const TextStyle(fontSize: _fontSize, fontWeight: FontWeight.bold),
+        labelStyle: const TextStyle(
+          fontSize: _fontSize,
+          fontWeight: FontWeight.bold,
+        ),
         tabs: _tabs.map((tab) => Tab(text: tab, height: 36)).toList(),
       ),
     );
@@ -200,12 +210,16 @@ class _DioInspectorContentState extends State<DioInspectorContent> with SingleTi
               style: const TextStyle(fontSize: _fontSize),
               decoration: InputDecoration(
                 hintText: t('dio_inspector.filter_keywords'),
-                hintStyle: TextStyle(fontSize: _fontSize, color: Colors.black54),
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide.none,
+                hintStyle: TextStyle(
+                  fontSize: _fontSize,
+                  color: Colors.black54,
                 ),
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12.0,
+                  vertical: 12.0,
+                ),
+                border: OutlineInputBorder(borderSide: BorderSide.none),
                 filled: true,
                 fillColor: Colors.grey.shade200,
               ),
@@ -221,7 +235,10 @@ class _DioInspectorContentState extends State<DioInspectorContent> with SingleTi
               return ToggleButtons(
                 isSelected: selects,
                 renderBorder: false,
-                constraints: BoxConstraints(minHeight: 36.0, minWidth: buttonWidth),
+                constraints: BoxConstraints(
+                  minHeight: 36.0,
+                  minWidth: buttonWidth,
+                ),
                 textStyle: const TextStyle(fontSize: _fontSize),
                 onPressed: (int index) {
                   switch (index) {
@@ -243,22 +260,10 @@ class _DioInspectorContentState extends State<DioInspectorContent> with SingleTi
                   }
                 },
                 children: [
-                  Icon(
-                    KitIcons.clear,
-                    size: 16,
-                  ),
-                  Icon(
-                    KitIcons.top,
-                    size: 16,
-                  ),
-                  Icon(
-                    KitIcons.down,
-                    size: 16,
-                  ),
-                  Icon(
-                    _lock ? KitIcons.lock : KitIcons.lock_open,
-                    size: 16,
-                  ),
+                  Icon(KitIcons.clear, size: 16),
+                  Icon(KitIcons.top, size: 16),
+                  Icon(KitIcons.down, size: 16),
+                  Icon(_lock ? KitIcons.lock : KitIcons.lock_open, size: 16),
                   Icon(
                     _filter ? KitIcons.filter_off : KitIcons.filter_on,
                     size: 16,
@@ -304,7 +309,7 @@ class _DioInspectorContentState extends State<DioInspectorContent> with SingleTi
                 },
               ),
             ),
-          )
+          ),
       ],
     );
   }

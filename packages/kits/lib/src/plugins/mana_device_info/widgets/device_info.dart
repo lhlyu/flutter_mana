@@ -10,10 +10,6 @@ class DeviceInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ManaFloatingWindow(
-      name: name,
-      showBarrier: false,
-      content: DeviceInfoContent(),
-    );
+    return ManaFloatingWindow(name: name, showBarrier: false, content: DeviceInfoContent());
   }
 }

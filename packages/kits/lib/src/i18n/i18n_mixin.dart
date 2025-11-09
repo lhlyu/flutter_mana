@@ -3,7 +3,10 @@ import 'package:flutter_mana/flutter_mana.dart';
 mixin I18nMixin {
   static const _strings = {
     // Align Ruler
-    'align_ruler.tip': ['Snap to nearest widget edge on release', '开启后松手将会自动吸附至最近部件边缘'],
+    'align_ruler.tip': [
+      'Snap to nearest widget edge on release',
+      '开启后松手将会自动吸附至最近部件边缘',
+    ],
 
     // Color Sucker
     'color_sucker.magnification': ['Magnification', '放大率'],
@@ -38,23 +41,35 @@ mixin I18nMixin {
     'memory_info.class_name': ['Class', '类名'],
     'memory_info.class_no_detail': [
       'The object is a Sentinel or lacks detailed information',
-      '该对象是一个 Sentinel 或没有详细信息'
+      '该对象是一个 Sentinel 或没有详细信息',
     ],
     'memory_info.location': ['Location:', '位置:'],
     'memory_info.property': ['Property:', '属性:'],
     'memory_info.function': ['Function:', '方法:'],
 
     // Shared Preferences Viewer
-    'shared_preferences_viewer.filter_keywords': ['filter keywords...', '筛选字词...'],
+    'shared_preferences_viewer.filter_keywords': [
+      'filter keywords...',
+      '筛选字词...',
+    ],
     'shared_preferences_viewer.type': ['Type', '类型'],
     'shared_preferences_viewer.key': ['Key', '键'],
     'shared_preferences_viewer.key_required': ['Key Required', '键必填'],
     'shared_preferences_viewer.value': ['Value', '值'],
     'shared_preferences_viewer.value_required': ['Value Required', '值必填'],
-    'shared_preferences_viewer.value_must_double': ['Value Must Double', '值必须是Double类型'],
-    'shared_preferences_viewer.value_must_bool': ['Value Must Bool', '值必须是Bool类型'],
+    'shared_preferences_viewer.value_must_double': [
+      'Value Must Double',
+      '值必须是Double类型',
+    ],
+    'shared_preferences_viewer.value_must_bool': [
+      'Value Must Bool',
+      '值必须是Bool类型',
+    ],
     'shared_preferences_viewer.value_must_int': ['Value Must Int', '值必须是Int类型'],
-    'shared_preferences_viewer.value_must_list_of_string': ['Value Must List<String>', '值必须是List<String>类型'],
+    'shared_preferences_viewer.value_must_list_of_string': [
+      'Value Must List<String>',
+      '值必须是List<String>类型',
+    ],
     'shared_preferences_viewer.save': ['Save', '保存'],
     'shared_preferences_viewer.cancel': ['Cancel', '取消'],
 
@@ -70,9 +85,18 @@ mixin I18nMixin {
     'visual_helper.layout_bounds': ['Layout Bounds', '布局边界'],
     'visual_helper.show_widget_borders': ['show widget borders', '显示每个组件边框'],
     'visual_helper.repaint_highlight': ['Repaint highlight', '重绘高亮'],
-    'visual_helper.frame_repaint_highlight': ['frame repaint highlight', '高亮每帧重绘区域'],
-    'visual_helper.invert_oversized_images': ['Invert Oversized Images', '大图反色'],
-    'visual_helper.invert_oversized_images_label': ['invert oversized images', '超大图片反色提示'],
+    'visual_helper.frame_repaint_highlight': [
+      'frame repaint highlight',
+      '高亮每帧重绘区域',
+    ],
+    'visual_helper.invert_oversized_images': [
+      'Invert Oversized Images',
+      '大图反色',
+    ],
+    'visual_helper.invert_oversized_images_label': [
+      'invert oversized images',
+      '超大图片反色提示',
+    ],
   };
 
   static final _language = manaLocale.languageCode;

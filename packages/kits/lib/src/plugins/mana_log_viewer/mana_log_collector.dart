@@ -22,12 +22,9 @@ class ManaLogCollector extends ChangeNotifier implements LogOutput {
     if (_originalDebugPrint != null) return;
     _originalDebugPrint = debugPrint;
     debugPrint = (String? message, {int? wrapWidth}) {
-      ManaLogCollector._instance.output(OutputEvent(
-          LogEvent(
-            Level.debug,
-            message,
-          ),
-          []));
+      ManaLogCollector._instance.output(
+        OutputEvent(LogEvent(Level.debug, message), []),
+      );
 
       if (_originalDebugPrint != null) {
         _originalDebugPrint!(message, wrapWidth: wrapWidth);

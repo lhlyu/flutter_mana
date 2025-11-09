@@ -57,7 +57,9 @@ class _FloatingButtonState extends State<FloatingButton> {
                         height: size,
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular((size / 7).truncateToDouble()),
+                          borderRadius: BorderRadius.circular(
+                            (size / 7).truncateToDouble(),
+                          ),
                           boxShadow: const [
                             BoxShadow(
                               color: Colors.black12,
@@ -69,11 +71,18 @@ class _FloatingButtonState extends State<FloatingButton> {
                         ),
                         child: Center(
                           child: Padding(
-                            padding: EdgeInsets.all((size / 6).truncateToDouble()),
+                            padding: EdgeInsets.all(
+                              (size / 6).truncateToDouble(),
+                            ),
                             child: ValueListenableBuilder<String>(
-                              valueListenable: _controller.state.activePluginName,
+                              valueListenable:
+                                  _controller.state.activePluginName,
                               builder: (context, name, _) {
-                                final icon = ManaPluginManager.instance.pluginsMap[name]?.iconImageProvider;
+                                final icon =
+                                    ManaPluginManager
+                                        .instance
+                                        .pluginsMap[name]
+                                        ?.iconImageProvider;
                                 return Image(image: icon ?? iconImage);
                               },
                             ),

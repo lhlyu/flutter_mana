@@ -5,11 +5,7 @@ import 'mana_state.dart';
 class ManaScope extends InheritedWidget {
   final ManaState state;
 
-  const ManaScope({
-    super.key,
-    required this.state,
-    required super.child,
-  });
+  const ManaScope({super.key, required this.state, required super.child});
 
   static ManaState of(BuildContext context) {
     final result = context.dependOnInheritedWidgetOfExactType<ManaScope>();

@@ -1,5 +1,1 @@
-enum PositionType {
-  normal,
-  top,
-  bottom,
-}
+enum PositionType { normal, top, bottom }

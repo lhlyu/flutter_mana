@@ -10,7 +10,8 @@ class VisualHelperContent extends StatefulWidget {
   State<VisualHelperContent> createState() => _VisualHelperContentState();
 }
 
-class _VisualHelperContentState extends State<VisualHelperContent> with I18nMixin {
+class _VisualHelperContentState extends State<VisualHelperContent>
+    with I18nMixin {
   double _raw = 1;
 
   double get _speed => 1 / _raw;
@@ -48,9 +49,15 @@ class _VisualHelperContentState extends State<VisualHelperContent> with I18nMixi
           // 动画减速（标题 + 文案 + Slider）
           Row(
             children: [
-              Text(t('visual_helper.animate_speed'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+              Text(
+                t('visual_helper.animate_speed'),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
               const Spacer(),
-              Text('×${_raw.toStringAsFixed(2)}', style: const TextStyle(fontSize: 14, color: Colors.black54)),
+              Text(
+                '×${_raw.toStringAsFixed(2)}',
+                style: const TextStyle(fontSize: 14, color: Colors.black54),
+              ),
             ],
           ),
           Slider(
@@ -105,7 +112,12 @@ class _VisualHelperContentState extends State<VisualHelperContent> with I18nMixi
     );
   }
 
-  Widget _compactRow(String title, String desc, bool value, ValueChanged<bool> onChanged) {
+  Widget _compactRow(
+    String title,
+    String desc,
+    bool value,
+    ValueChanged<bool> onChanged,
+  ) {
     return SizedBox(
       height: 48,
       child: Row(
@@ -115,8 +127,17 @@ class _VisualHelperContentState extends State<VisualHelperContent> with I18nMixi
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                Text(desc, style: const TextStyle(fontSize: 11, color: Colors.black54)),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  desc,
+                  style: const TextStyle(fontSize: 11, color: Colors.black54),
+                ),
               ],
             ),
           ),
