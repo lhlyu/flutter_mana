@@ -1,211 +1,207 @@
+import 'dart:convert';
 import 'dart:io';
 
-const dir = 'packages/kits/lib/src/plugins/';
+const _usage =
+    '用法: dart run scripts/plugin.dart <plugin_name> [中文名称]\n'
+    '示例: dart run scripts/plugin.dart http_inspector 网络检查器';
 
-const files = {
-  'mana_{{SNAKE_CASE}}/icon.dart': _iconContent,
-  'mana_{{SNAKE_CASE}}/index.dart': _indexContent,
-  'mana_{{SNAKE_CASE}}/README.md': _readmeContent,
-  'mana_{{SNAKE_CASE}}/widgets/{{SNAKE_CASE}}.dart': _widgetContent,
-};
-
-/// 快速创建一个插件目录
-/// dart run scripts/plugin.dart <plugin_name> [plugin_chinese_name]
+/// Creates a Widgets-only kit and exports it without changing loadAllPlugins.
 void main(List<String> args) {
-  if (args.isEmpty) {
-    stderr.writeln('使用: dart run scripts/plugin.dart <plugin_name> [plugin_chinese_name]');
-    exit(64);
+  if (args.length == 1 && ['--help', '-h'].contains(args.single)) {
+    stdout.writeln(_usage);
+    return;
+  }
+  if (args.isEmpty || args.length > 2) {
+    stderr.writeln(_usage);
+    exitCode = 64;
+    return;
   }
 
-  final pluginName = args.first.trim();
-  if (pluginName.isEmpty) {
-    stderr.writeln('插件不能为空！');
-    exit(64);
-  }
-
-  // 创建根目录
-  final rootDir = Directory(dir);
-  if (!rootDir.existsSync()) {
-    rootDir.createSync(recursive: true);
-  }
-
-  final pluginChineseName = args.length >= 2 ? args[1] : '无名';
-
-  final snake = toSnakeCase(pluginName);
-  final pascal = toPascalCase(pluginName);
-  final spacePascal = toSpacePascalCase(pluginName);
-
-  final replacements = {
-    'SNAKE_CASE': snake,
-    'PASCAL_CASE': pascal,
-    'SPACE_PASCAL_CASE': spacePascal,
-    'ZH_NAME': pluginChineseName,
-  };
-
-  files.forEach((templatePath, content) {
-    final targetPath = renderTemplate(templatePath, replacements);
-    final file = File('${rootDir.path}$targetPath');
-
-    if (file.existsSync()) {
+  try {
+    // Resolve from the script, not the caller's working directory.
+    final root = File.fromUri(Platform.script).parent.parent;
+    final target = createPlugin(
+      root,
+      args.first,
+      chineseName: args.length == 2 ? args[1] : null,
+    );
+    final result = Process.runSync(Platform.resolvedExecutable, [
+      'format',
+      target.path,
+      '${target.parent.path}/plugins.dart',
+    ]);
+    if (result.exitCode != 0) {
+      stderr.write(result.stderr);
+      exitCode = result.exitCode;
       return;
     }
-
-    // 确保父目录存在
-    file.parent.createSync(recursive: true);
-
-    // 写入文件
-    file.writeAsStringSync(renderTemplate(content, replacements));
-    print('文件创建成功: ${file.path}');
-  });
-
-  print('\n**********************************************************************\n');
-  print(
-      '[$pluginChineseName - $pascal](https://github.com/lhlyu/flutter_mana/tree/master/packages/kits/lib/src/plugins/mana_$snake)');
-  print('\n**********************************************************************');
+    stdout.writeln('已创建: ${target.path}');
+    stdout.writeln('已更新 plugins.dart 导出；按需手动加入 loadAllPlugins()。');
+    stdout.writeln('图标暂用 PluginIcon.demo，请在 plugin_icons.dart 中添加专属 SVG。');
+  } on ArgumentError catch (error) {
+    stderr.writeln(error.message);
+    stderr.writeln(_usage);
+    exitCode = 64;
+  } on StateError catch (error) {
+    stderr.writeln(error.message);
+    exitCode = 73;
+  } on FileSystemException catch (error) {
+    stderr.writeln(error);
+    exitCode = 74;
+  }
 }
 
-const _iconContent = '''import 'dart:convert';
-
-import 'package:flutter/cupertino.dart';
-
-/// png to base64
-const _iconData = r'';
-
-final _iconBytes = base64Decode(_iconData);
-
-final iconImage = MemoryImage(_iconBytes);''';
-
-const _indexContent = '''import 'package:flutter/material.dart';
-import 'package:flutter_mana/flutter_mana.dart';
-
-import 'icon.dart';
-import 'widgets/{{SNAKE_CASE}}.dart';
-
-class Mana{{PASCAL_CASE}} extends ManaPluggable {
-  @override
-  Widget? buildWidget(BuildContext? context) => {{PASCAL_CASE}}(name: name);
-
-  @override
-  ImageProvider<Object> get iconImageProvider => iconImage;
-
-  @override
-  String get name => 'mana_{{SNAKE_CASE}}';
-
-  @override
-  String getLocalizedDisplayName(Locale locale) {
-    if (locale.languageCode == 'zh') {
-      return '{{ZH_NAME}}';
-    }
-    return '{{SPACE_PASCAL_CASE}}';
+/// Refuses existing paths and validates all inputs before writing any files.
+Directory createPlugin(Directory root, String name, {String? chineseName}) {
+  if (!RegExp(r'^[a-zA-Z][a-zA-Z0-9 _-]*$').hasMatch(name.trim())) {
+    throw ArgumentError('插件名须以英文字母开头，仅支持字母、数字、空格、下划线或连字符。');
   }
+  var snake = toSnakeCase(name);
+  if (snake.startsWith('mana_')) snake = snake.substring(5);
+  if (snake == 'mana' || !RegExp(r'^[a-z][a-z0-9_]*$').hasMatch(snake)) {
+    throw ArgumentError('请提供不含 mana 前缀的有效插件名。');
+  }
+  if (chineseName != null && chineseName.trim().isEmpty) {
+    throw ArgumentError('中文名称不能为空。');
+  }
+  final words = snake.split('_');
+  final title = words.map(_capitalize).join(' ');
+  final pascal = words.map(_capitalize).join();
+  final id = 'mana_$snake';
+  final className = 'Mana$pascal';
+  final plugins = Directory('${root.path}/packages/kits/lib/src/plugins');
+  final barrel = File('${plugins.path}/plugins.dart');
+  final original = barrel.readAsStringSync();
+  final target = Directory('${plugins.path}/$id');
+  if (FileSystemEntity.typeSync(target.path, followLinks: false) !=
+      FileSystemEntityType.notFound) {
+    throw StateError('目标路径已存在，不会覆盖: ${target.path}');
+  }
+
+  final exportPath = '$id/index.dart';
+  final exports = RegExp(
+    r"^export '([^']+)'.*?;",
+    multiLine: true,
+    dotAll: true,
+  ).allMatches(original).toList();
+  if (exports.isEmpty) throw StateError('plugins.dart 中未找到导出，请检查工作区。');
+  if (exports.any((entry) => entry.group(1) == exportPath)) {
+    throw StateError('plugins.dart 已包含 $exportPath，请先检查已有插件。');
+  }
+  if (exports.any((entry) => RegExp('\\b$className\\b').hasMatch(entry[0]!))) {
+    throw StateError('plugins.dart 已导出 $className，请使用其他插件名。');
+  }
+  final insertion = exports
+      .where((entry) => entry.group(1)!.compareTo(exportPath) > 0)
+      .firstOrNull;
+  final line = "export '$exportPath' show $className;\n";
+  final updated = insertion == null
+      ? '${original.trimRight()}\n$line'
+      : original.replaceRange(insertion.start, insertion.start, line);
+  final replacements = {
+    'SNAKE': snake,
+    'PASCAL': pascal,
+    'ID': id,
+    'CLASS': className,
+    'TITLE': title,
+    'TITLE_LITERAL': _dartString(title),
+    'CHINESE_LITERAL': _dartString(chineseName?.trim() ?? title),
+  };
+  final files = {
+    'index.dart': _indexContent,
+    'widgets/${snake}_content.dart': _widgetContent,
+    'README.md': _readmeContent,
+  };
+  for (final entry in files.entries) {
+    final file = File('${target.path}/${entry.key}');
+    file.parent.createSync(recursive: true);
+    file.writeAsStringSync(renderTemplate(entry.value, replacements));
+  }
+  barrel.writeAsStringSync(updated);
+  return target;
+}
+
+String toSnakeCase(String value) => value
+    .trim()
+    .replaceAllMapped(
+      RegExp(r'([A-Z]+)([A-Z][a-z])'),
+      (match) => '${match[1]}_${match[2]}',
+    )
+    .replaceAllMapped(
+      RegExp(r'([a-z0-9])([A-Z])'),
+      (match) => '${match[1]}_${match[2]}',
+    )
+    .replaceAll(RegExp(r'[\s_-]+'), '_')
+    .replaceAll(RegExp(r'_+$'), '')
+    .toLowerCase();
+
+String _capitalize(String word) => word[0].toUpperCase() + word.substring(1);
+
+String _dartString(String value) => jsonEncode(value).replaceAll(r'$', r'\$');
+
+// One pass keeps placeholder-like user text from being substituted again.
+String renderTemplate(String content, Map<String, String> replacements) =>
+    content.replaceAllMapped(
+      RegExp(r'\{\{(\w+)\}\}'),
+      (match) => replacements[match[1]] ?? match[0]!,
+    );
+
+const _indexContent = '''import 'package:flutter/widgets.dart';
+
+import '../../ui/kit_ui.dart';
+import '../builtin_kit.dart';
+import 'widgets/{{SNAKE}}_content.dart';
+
+class {{CLASS}} extends BuiltinKit {
+  {{CLASS}}()
+    : super(
+        name: '{{ID}}',
+        title: {{TITLE_LITERAL}},
+        chineseTitle: {{CHINESE_LITERAL}},
+        icon: .demo,
+      );
+
+  @override
+  Widget buildWidget(BuildContext context) => KitWindow(
+    name: name,
+    content: const {{PASCAL}}Content(),
+  );
 }
 ''';
 
-const _readmeContent = '''# {{ZH_NAME}} - {{PASCAL_CASE}}
+const _widgetContent = '''import 'package:flutter/widgets.dart';
 
-## 使用 - Use
+import '../../../ui/kit_ui.dart';
+
+class {{PASCAL}}Content extends StatelessWidget {
+  const {{PASCAL}}Content({super.key});
+
+  @override
+  Widget build(BuildContext context) => KitScaffold(
+    body: KitMessage(kitText(context, 'common.empty')),
+  );
+}
+''';
+
+const _readmeContent = '''# {{TITLE}}
 
 ```dart
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_mana/flutter_mana.dart';
 import 'package:flutter_mana_kits/flutter_mana_kits.dart';
 
-void main() {
-  /// add plugin
-  ManaPluginManager.instance.register(Mana{{PASCAL_CASE}}());
-
-  runApp(ManaWidget(child: App()));
-}
-
-class App extends StatelessWidget {
-  const App({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: '{{PASCAL_CASE}}',
-      home: Text('{{SPACE_PASCAL_CASE}}'),
-    );
-  }
-}
+void main() => runApp(
+  ManaWidget(
+    plugins: [{{CLASS}}()],
+    child: const Center(child: Text('Host')),
+  ),
+);
 ```
+
+`ManaWidget` 管理内部 Controller 的生命周期。已有应用可在 builder 中使用
+`ManaWidget.builder`，并由宿主释放传入的 Controller。
+
+内容使用 `KitScaffold` 和 `kitText`；新增文案放在 `src/i18n/kit_localizations.dart`。
+图标暂用 `PluginIcon.demo`；请在 `src/icons/plugin_icons.dart` 添加专属 SVG。
+插件已导出，但不会自动加入 `loadAllPlugins()`。
 ''';
-
-const _widgetContent = '''import 'package:flutter/material.dart';
-import 'package:flutter_mana/flutter_mana.dart';
-import 'package:flutter_mana_kits/src/i18n/i18n_mixin.dart';
-
-class {{PASCAL_CASE}} extends StatelessWidget with I18nMixin {
-  final String name;
-
-  const {{PASCAL_CASE}}({super.key, required this.name});
-
-  @override
-  Widget build(BuildContext context) {
-    return ManaFloatingWindow(
-      name: name,
-      content: Text('{{PASCAL_CASE}}'),
-    );
-  }
-}
-''';
-
-// --------------------------- 工具函数 -----------------------
-/// 统一转成大驼峰（PascalCase）
-/// 支持：snake_case、camelCase、PascalCase 以及带空格/连字符/下划线的任意组合
-String toPascalCase(String src) {
-  // 1. 按所有非字母数字字符（包括空格）拆分
-  final words = src
-      .split(RegExp(r'[^a-zA-Z0-9]+'))
-      .expand((w) => w.split(RegExp(r'(?=[A-Z])'))) // 处理驼峰里的隐性分隔
-      .where((w) => w.isNotEmpty)
-      .toList();
-
-  // 2. 首字母大写，其余小写
-  return words.map((w) => w[0].toUpperCase() + w.substring(1).toLowerCase()).join();
-}
-
-String toSpacePascalCase(String src) {
-  // 1. 按所有非字母数字字符（包括空格）拆分
-  final words = src
-      .split(RegExp(r'[^a-zA-Z0-9]+'))
-      .expand((w) => w.split(RegExp(r'(?=[A-Z])'))) // 处理驼峰里的隐性分隔
-      .where((w) => w.isNotEmpty)
-      .toList();
-
-  // 2. 首字母大写，其余小写
-  return words.map((w) => w[0].toUpperCase() + w.substring(1).toLowerCase()).join(' ');
-}
-
-/// 统一转成蛇形（snake_case）
-/// 支持：snake_case、camelCase、PascalCase 以及带空格/连字符/任意分隔符的混合写法
-String toSnakeCase(String src) {
-  // 1. 先把所有非字母数字字符（含空格、连字符等）统一换成下划线
-  var s = src.replaceAll(RegExp(r'[^a-zA-Z0-9]+'), '_');
-
-  // 2. 处理大小写驼峰：在字母由小写→大写 或 数字→字母 之前插入下划线
-  s = s.replaceAllMapped(
-    RegExp(r'([a-z])([A-Z])|([0-9])([a-zA-Z])|([a-zA-Z])([0-9])'),
-    (m) => '${m[1] ?? m[3] ?? m[5]}_${m[2] ?? m[4] ?? m[6]}',
-  );
-
-  // 3. 去掉首尾多余下划线并合并连续下划线，再整体转小写
-  return s.replaceAll(RegExp(r'_+'), '_').replaceAll(RegExp(r'^_+|_+\$'), '').toLowerCase();
-}
-
-/// 批量替换 content 中的占位符
-/// [content] 原始模板字符串
-/// [replacements] Map<占位符, 替换值>
-/// 占位符统一写成 `{{key}}` 的形式
-String renderTemplate(String content, Map<String, String> replacements) {
-  // 先按 key 长度倒序，避免短 key 影响长 key 的前缀
-  final sortedKeys = replacements.keys.toList()..sort((a, b) => b.length.compareTo(a.length));
-
-  var result = content;
-  for (final key in sortedKeys) {
-    final placeholder = '{{$key}}';
-    result = result.replaceAll(placeholder, replacements[key] ?? placeholder);
-  }
-  return result;
-}
