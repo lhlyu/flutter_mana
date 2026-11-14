@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 
 import '../builtin_kit.dart';
 
-import 'icon.dart';
 import 'mana_log_collector.dart';
 import 'widgets/log_viewer.dart';
 
@@ -14,7 +13,7 @@ class ManaLogViewer extends BuiltinKit {
         name: 'mana_log_viewer',
         title: 'Log Viewer',
         chineseTitle: '日志查看器',
-        iconImageProvider: iconImage,
+        icon: .logs,
       );
   final ManaLogCollector collector;
   final bool _ownsCollector;

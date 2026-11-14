@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 
 import '../builtin_kit.dart';
-import 'icon.dart';
 import '../../ui/kit_ui.dart';
 import 'utils/get_device_info.dart';
 
@@ -11,7 +10,7 @@ class ManaDeviceInfo extends BuiltinKit {
         name: 'mana_device_info',
         title: 'Device Info',
         chineseTitle: '设备信息',
-        iconImageProvider: iconImage,
+        icon: .device,
       );
   @override
   Widget buildWidget(BuildContext context) => KitWindow(

@@ -32,7 +32,7 @@ void main() => runApp(ManaWidget(
 
 ## 功能
 
-- 自定义插件、插件管理与生命周期管理。
+- 自定义插件、插件管理与生命周期管理。图标支持 `iconImageProvider`，或覆盖 `buildIcon(context, size: ...)` 返回 SVG／自绘 Widget。
 - 浮窗拖动、最小化、全屏及自定义覆盖层。
 - 悬浮按钮设置与位置保存。
 - 本地化、RTL、键盘及无障碍支持。

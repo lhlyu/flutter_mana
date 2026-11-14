@@ -17,8 +17,8 @@ an in-app debug kits platform for Flutter.
 **不考虑兼容低版本**
 
 ```yaml
-dart: ">=3.7.0 <4.0.0"
-flutter: ">=3.29.0"
+dart: ">=3.14.0 <4.0.0"
+flutter: ">=3.50.0"
 ```
 
 ## 使用
@@ -122,84 +122,46 @@ class _AppState extends State<App> {
 flutter pub add flutter_mana
 ```
 
-- 实现接口
+- 实现插件
 
 ```dart
-import 'dart:convert';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_mana/flutter_mana.dart';
 
-/// png to base64
-const _iconData =
-    r'iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAMAAACahl6sAAAAn1BMVEUAAAA6PDw7PDw6PDw7PDw7PDw7PDw7PDw6Ozs7PDw7PDw7PDw7PDw7Ozs7PDw7PDw7PDw7PDw6PT07PDw6PDw7PDw7PDw7PDw7PDw7PDw7Ozs6Ojo7PDw7PDw7PDw7Ozs7PDw7PDw8PDw8PT08PT07PDw7PDw7Ozs7PDw7PDw6Ozs6PDw7PDw7PDw7PDw6PDw7Ozs6PDw6PDw7PDw7PDzNdURdAAAANHRSTlMAfss3eELSnjKLXOS/hPK6I/pXKBzYxLWacUoG7LGsYFKREw4L3Kc8GOiWTi2jbEbfZGj2fVPqbgAAB25JREFUeNrt3eeSokAQAOAmIybMCrpm15y23//ZroqGXUBcdRWcpu77d1X34+ac6emeBPx3i61trLNaHncXnepgty5IvVPdUabAh7utSwu9hsmK1fVea4Lo7PPHHO9QkQuaC4JajsYtfECt01NAOIdyCf/gaJxsEIdS1q93omJLbuvHfu3qD/NhiREB7F4J42qtznjvKI3mFL7NlrapDcsLuY9xq64DbzYZDjBKH59uBaWpOVIHFYxoFRR4H7u8ijVitIR7mb1YYzp1eA9zXAkP265lw4NcTapiSHsI2fs0MOTDcuFvzEigkPczyJTzgT9ktQHP2Oy+8NtcXUJmGjv81u8e4GnNXjvUSc+QkV4/hf8/Z4HfBgpkQKuGe3Q6o64muZCySQEDpSG82PYnDsobSJWlo68zghTY5T761k1IzXSNvtYQUtIw0DcfQUo0GX2FCaRn00ZfGVLRqwVB5RPSpfaD/ruFl2su0u1Vyf1rNYQX27SQdCeQhVERyXgGryShrwcZaVSRtE14nW4QSBzIzhhJ8QCvMgjGng1Z2vvR5asOL+HKQdCFjB10JEN4gaU/7GonyFwzqBb28LRGEAgdeAfjVUHmE4luwnsEQ16CpzSRlOBtyq/oXZOgJIc3GiLZwJ+5/jhX4a0UJBr8lT+5HuDNZkg+n5vPR/B2UyTKM/HiBAKw/TnAhMeVhRgfsXHS2sKjLL9yBkE4froHD2pQwBqAMPwoXP5TwisvQRzqX2KPRPnzJ4iEoujchvttgkxNKBP50TSjSQX6DgRzeDSQLijUibetrz6WauyDJE08VGjJM7iHvfLjnIDs4wPFieHPPEKq0+b99v6/aoKYxvfGoZksUop1adm6c1os+6WtsCwa73cuNmggrsVdXabjL8UJrNH3dpMb8JsTrf2IcVznmh5tC8BvaLOoDmKjtQTzZug1QHA0kLs3myrgAb3EOdu8UU4uQHi3fpIP4UNv4OPXn0QTrUy/zvn1J9mJsh73ZOAyRU9OLuNr95csywIe2l6O3oQELUrGmKAc5AyXNmKn73FTr46tXptkag3gontluC/7b9+aeszmysrCmUW6GDb3EvXkQmQu7J2Oq9W7A1Gm+AVVnJY4lUhM8t4w3asUpxBRZTSrB8oJ66eTmoCr77coCauOdYY9y49bncsIUARmut4ggTCZ2WxIrIt+1BRxg+reozK9i6ZtgZtSvCMZLIcIgBT/dx+ZrJ4kF7V2rK8NgZ9idJXhk+kQ8ZeFpFjZOAN+CrR9FfnjChjyqig5Wou0gSEvlf+CwJzFGvz1A2lNIK6fRXJUC2fyW3blemwxrsc6hw8N73WkzJ0AR2OqbEPRtwYsqRR/I/UJS3vvQFZ4B34OLFnh/HdAS3YsjbzdBSAlthN7sEoHRBb4fNZ9S0JT8LSYllU/N6eWoeqkCyzRskkDPBV269c/puHtHsY5o/+P1/Lyiyh5GSMm/6i1pcHOfx6hBSCb/8zuUK3LP9eyqJYKnQo6AkvncIqyZlyP0EUMl3+FSC8ARVol3rWXuxd/55FTHWJdDLuXHD4j1GC7qwCwitz6FPcGzy1udBexJeQdt3vY0dtgA7ZTu0apFv/9kaE/jfiGbHesaFs3B3uIdKgpB7u6X1Sls9+yMuNT+Zpp/rv3skQ3fvSUz5nfwC5+iHkiznsbDzleHB4vsRwk28uLOxLLQXLy9hRmEKKx3A9dXC7/uCuGR+ialYS13g+G537PSd1oz7BvdZJu7jS/2K1km8m7CAt2txXU5FTXYncgpZ18J2xWZHaG2bl2J2zN7I6VZnzROnzcgdetN++1+VIJEuis7iGSDf+boYT/XV2Sg9vThP99dpKDFwYI/zcfSA5e4SD830UhOXiphvB/O4jwf82J5OB9LcL/xTPC/w06H/9XAR9+86kK7NmrvESuPealxFrQk+Acd0ejmq28DJMN5mWYSLkZJvRKee3tX1d9VvBufJ9/kWWhZ87xhMpF9sj4PHBsVZvtOa6oD8xLCV9Cvqcdo3TBvt3xdysBvpr0GjX0lHjerQ4r+lGYfypcRc/q7R+BetXX1mpn4E5FsmafruyRtHneaAgZIqmw716jY166V6MTdC8NsmBBagroK0whbeYgzQTP6iPR65CqmZRylW2W0GfYkJ46paotSI+7Rl/xDCk5DNA3hhTV5XS/mP+5QF+tsIQ0uVIFfaUhvJhiYKDkQNq2OwzI+xm8jmZg4EtyIQOjNgbm6hJew+rgt4ECGVGLGOgbIxeetezp+K06guwspSJ+O44P8IyN0cdv7TpkKWhKQC8rf41ThTn+kIeQuaApAb17suEx01FBxpCqBW8QNCXamPoE7qRIpRqG7Q7wPpPhAGN0Q3Vs+I2rnNbtCkasCm9f3bB7JbxQkQ3VURrNKYRMG9pQWg9aGNffWWIsNyllHa+pFFtyW9aPqwp1JHFbQQ5StYKPm3frIrWCuNqDjWlLAu+HmT2j3ceb9IXqMKj+l9p5XD0mjphW1Shb3A7sTJsNRdtYZ1VS9ydr5Gg2gx/hv//y6h/lgDgf4wyYKAAAAABJRU5ErkJggg==';
-
-final _iconBytes = base64Decode(_iconData);
-
-final iconImage = MemoryImage(_iconBytes);
-
-/// 自定义接口
-class Demo extends ManaPluggable {
+class MyPlugin extends ManaPluggable {
+  @override
+  String get name => 'my_tool';
 
   @override
-  Widget? buildWidget(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      width: double.infinity,
-      height: double.infinity,
-      child: Center(child: Text('当前的插件是: demo')),
-    );
-  }
+  String getLocalizedDisplayName(Locale locale) =>
+      locale.languageCode == 'zh' ? '自定义工具' : 'My Tool';
 
   @override
-  String getLocalizedDisplayName(Locale locale) {
-    switch (locale.languageCode) {
-      case 'zh':
-        return '例子';
-      default:
-        return 'Demo';
-    }
-  }
+  ImageProvider get iconImageProvider =>
+      const AssetImage('assets/my_plugin.png');
 
   @override
-  ImageProvider<Object> get iconImageProvider => iconImage;
-
-  @override
-  String get name => 'demo';
-
-  @override
-  void onTrigger() {}
-
-  @override
-  Future<void> initialize() async {}
-
-  bool get isSupported => true;
+  Widget buildWidget(BuildContext context) => ManaFloatingWindow(
+    name: name,
+    content: const Center(child: Text('My Tool')),
+  );
 }
+
+void main() => runApp(ManaWidget(
+  plugins: [MyPlugin()],
+  child: const Center(child: Text('Example')),
+));
 ```
 
-- 注册接口使用
+图片可使用 `AssetImage`、`NetworkImage` 或 `MemoryImage`，不需要转换 base64。SVG、自绘或其他 Widget 图标覆盖 `buildIcon`。例如添加插件自己的 `flutter_svg` 依赖、引入 `package:flutter_svg/flutter_svg.dart` 后：
 
 ```dart
-void main() {
-  runApp(ManaWidget(plugins: [Demo()], child: App()));
-}
-
-class App extends StatelessWidget {
-  const App({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Example',
-      home: Text('Example'),
-    );
-  }
-}
+@override
+Widget buildIcon(BuildContext context, {double size = 40}) =>
+    SvgPicture.asset('assets/my_plugin.svg', width: size, height: size);
 ```
 
-## 工具
-
-- [PNG图片转Base64](https://base64.guru/converter/encode/image/png)
+图标会同时用于插件面板和悬浮入口，`size` 由宿主传入。不设置图标时使用 Mana 默认图标；内置 kits 的 SVG 样式不限制第三方插件。
 
 ## 参考
 

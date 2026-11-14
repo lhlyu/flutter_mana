@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import '../builtin_kit.dart';
-import 'icon.dart';
 import '../../ui/kit_ui.dart';
 
 class ManaFpsMonitor extends BuiltinKit {
@@ -11,7 +10,7 @@ class ManaFpsMonitor extends BuiltinKit {
         name: 'mana_fps_monitor',
         title: 'Frame Timing',
         chineseTitle: '帧率监控',
-        iconImageProvider: iconImage,
+        icon: .performance,
       );
   @override
   Widget buildWidget(BuildContext context) => KitWindow(

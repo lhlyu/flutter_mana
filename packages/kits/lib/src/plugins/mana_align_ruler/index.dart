@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 
 import '../builtin_kit.dart';
-import 'icon.dart';
 import 'widgets/align_ruler.dart';
 
 class ManaAlignRuler extends BuiltinKit {
@@ -10,7 +9,7 @@ class ManaAlignRuler extends BuiltinKit {
         name: 'mana_align_ruler',
         title: 'Align Ruler',
         chineseTitle: '对齐标尺',
-        iconImageProvider: iconImage,
+        icon: .ruler,
       );
   @override
   Widget buildWidget(BuildContext context) => AlignRuler(name: name);

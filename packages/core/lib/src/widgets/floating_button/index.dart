@@ -36,10 +36,10 @@ class _FloatingButtonState extends State<FloatingButton> {
     final runtime = ManaScope.of(context);
     final settings = runtime.state.settings;
     final id = runtime.state.activePluginId;
-    final icon = id == null
-        ? iconImage
-        : runtime.plugins[id]?.plugin.iconImageProvider ?? iconImage;
+    final plugin = id == null ? null : runtime.plugins[id]?.plugin;
     final controller = _controller!;
+    final padding = (settings.buttonSize / 6).truncateToDouble();
+    final iconSize = settings.buttonSize - padding * 2;
     return ValueListenableBuilder(
       valueListenable: controller.offset,
       builder: (context, position, _) => Positioned(
@@ -57,7 +57,7 @@ class _FloatingButtonState extends State<FloatingButton> {
               child: Container(
                 width: settings.buttonSize,
                 height: settings.buttonSize,
-                padding: .all((settings.buttonSize / 6).truncateToDouble()),
+                padding: .all(padding),
                 decoration: BoxDecoration(
                   color: ManaStyle.surface,
                   borderRadius: .circular(
@@ -71,7 +71,9 @@ class _FloatingButtonState extends State<FloatingButton> {
                     ),
                   ],
                 ),
-                child: Image(image: icon),
+                child:
+                    plugin?.buildIcon(context, size: iconSize) ??
+                    Image(image: iconImage, width: iconSize, height: iconSize),
               ),
             ),
           ),

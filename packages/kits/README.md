@@ -1,6 +1,8 @@
 # Flutter Mana Kits
 
-16 个基于 Flutter Widgets 的调试插件。最低版本：Flutter 3.50.0 / Dart 3.14.0。
+16 个基于 Flutter Widgets 的调试插件，采用统一的彩色 SVG 图标。最低版本：Flutter 3.50.0 / Dart 3.14.0。
+
+[图标预览](../../screenshots/kits_icons.svg)
 
 ## 接入
 

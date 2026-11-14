@@ -47,7 +47,7 @@ class ManaPanel extends StatelessWidget {
                   child: SizedBox.square(
                     dimension: iconSize,
                     child: ready
-                        ? Image(image: plugin.iconImageProvider, fit: .cover)
+                        ? plugin.buildIcon(context, size: iconSize)
                         : const ManaIcon(
                             .blocked,
                             color: ManaStyle.muted,

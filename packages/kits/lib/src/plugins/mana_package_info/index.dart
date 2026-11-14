@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../builtin_kit.dart';
-import 'icon.dart';
 import '../../ui/kit_ui.dart';
 
 class ManaPackageInfo extends BuiltinKit {
@@ -11,7 +10,7 @@ class ManaPackageInfo extends BuiltinKit {
         name: 'mana_package_info',
         title: 'Package Info',
         chineseTitle: '包信息',
-        iconImageProvider: iconImage,
+        icon: .package,
       );
   @override
   Widget buildWidget(BuildContext context) => KitWindow(

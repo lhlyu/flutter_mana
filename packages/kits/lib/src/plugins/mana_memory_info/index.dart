@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import '../builtin_kit.dart';
-import 'icon.dart';
 import '../../ui/kit_ui.dart';
 import 'widgets/memory_info_content.dart';
 
@@ -12,7 +11,7 @@ class ManaMemoryInfo extends BuiltinKit {
         name: 'mana_memory_info',
         title: 'Memory Info',
         chineseTitle: '内存信息',
-        iconImageProvider: iconImage,
+        icon: .memory,
       );
   @override
   Widget buildWidget(BuildContext context) => KitWindow(

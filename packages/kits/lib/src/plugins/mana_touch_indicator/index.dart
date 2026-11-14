@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_mana/flutter_mana.dart';
 
 import '../builtin_kit.dart';
-import 'icon.dart';
 import '../../ui/kit_ui.dart';
 import 'widgets/touch_indicator_barrier.dart';
 
@@ -12,7 +11,7 @@ class ManaTouchIndicator extends BuiltinKit {
         name: 'mana_touch_indicator',
         title: 'Touch Indicator',
         chineseTitle: '触摸指示器',
-        iconImageProvider: iconImage,
+        icon: .touch,
       );
   @override
   Widget buildWidget(BuildContext context) =>

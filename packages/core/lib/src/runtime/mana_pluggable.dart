@@ -2,13 +2,19 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
+import '../widgets/floating_button/icon.dart' as mana;
+
 /// Presentation intent, independent of any design system.
 enum ManaPresentation { window, overlay, action }
 
 abstract class ManaPluggable {
   String get name;
   String getLocalizedDisplayName(Locale locale);
-  ImageProvider get iconImageProvider;
+  ImageProvider get iconImageProvider => mana.iconImage;
+
+  /// Override for SVG or custom widgets; existing image providers still work.
+  Widget buildIcon(BuildContext context, {double size = 40}) =>
+      Image(image: iconImageProvider, width: size, height: size, fit: .contain);
   bool get isSupported => true;
   ManaPresentation get presentation => .window;
 

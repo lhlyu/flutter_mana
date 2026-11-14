@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 
 import '../builtin_kit.dart';
-import 'icon.dart';
 import 'widgets/license.dart';
 
 class ManaLicense extends BuiltinKit {
@@ -10,7 +9,7 @@ class ManaLicense extends BuiltinKit {
         name: 'mana_license',
         title: 'Licenses',
         chineseTitle: '开源许可',
-        iconImageProvider: iconImage,
+        icon: .license,
       );
   @override
   Widget buildWidget(BuildContext context) => License(name: name);
