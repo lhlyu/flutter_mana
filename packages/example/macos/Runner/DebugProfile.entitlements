@@ -8,7 +8,8 @@
 	<true/>
 	<key>com.apple.security.network.server</key>
 	<true/>
+	<!-- The memory and source kits connect to the local Dart VM Service. -->
 	<key>com.apple.security.network.client</key>
-    <true/>
+	<true/>
 </dict>
 </plist>

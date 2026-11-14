@@ -1,12 +1,12 @@
 {
-    "name": "example",
-    "short_name": "example",
+    "name": "Mana Example",
+    "short_name": "Mana",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#F7F8FA",
+    "theme_color": "#7560CF",
+    "description": "Explore all 16 Flutter Mana debugging kits.",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {

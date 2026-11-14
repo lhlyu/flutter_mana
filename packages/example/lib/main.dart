@@ -1,163 +1,294 @@
-import 'dart:async';
-
-import 'package:example/detail.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_mana/flutter_mana.dart';
-import 'package:flutter_mana_kits/flutter_mana_kits.dart';
+import 'package:material_ui/material_ui.dart';
 
-import 'utils/dio_client.dart';
-import 'utils/log_generator.dart';
-import 'utils/sp_client.dart';
-import 'widgets/animated_ball.dart';
-import 'widgets/custom_button.dart';
+import 'demo_session.dart';
 
-void main() async {
-  final controller = ManaController(
-    plugins: loadAllPlugins(
-      dioCollector: DioClient.collector,
-      logCollector: LogGenerator.collector,
-      captureDebugPrint: true,
-    ),
-  );
-
-  runApp(MyApp(controller: controller));
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const ExampleApp());
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key, required this.controller});
-  final ManaController controller;
+class ExampleApp extends StatefulWidget {
+  const ExampleApp({super.key, this.session});
+  final DemoSession? session;
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<ExampleApp> createState() => _ExampleAppState();
 }
 
-class _MyAppState extends State<MyApp> {
-  late final _observer = ManaNavigatorObserver(widget.controller);
+class _ExampleAppState extends State<ExampleApp> {
+  late final session = widget.session ?? DemoSession();
+  late final observer = ManaNavigatorObserver(session.controller);
+  Locale locale = const Locale('en');
+  bool dark = false;
 
   @override
   void dispose() {
-    _observer.dispose();
-    widget.controller.dispose();
+    observer.dispose();
+    if (widget.session == null) session.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      navigatorObservers: [_observer],
-      builder: (context, child) => ManaWidget.builder(
-        controller: widget.controller,
-        child: child ?? const SizedBox.shrink(),
-      ),
-      title: 'Example',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
-      ),
-      home: HomePage(),
-    );
-  }
+  Widget build(BuildContext context) => MaterialApp(
+    title: 'Flutter Mana Example',
+    debugShowCheckedModeBanner: false,
+    theme: _theme(Brightness.light),
+    darkTheme: _theme(Brightness.dark),
+    themeMode: dark ? ThemeMode.dark : ThemeMode.light,
+    locale: locale,
+    supportedLocales: const [Locale('en'), Locale('zh')],
+    localizationsDelegates: GlobalMaterialLocalizations.delegates,
+    navigatorObservers: [observer],
+    builder: (context, child) => ManaWidget.builder(
+      controller: session.controller,
+      child: child ?? const SizedBox.shrink(),
+    ),
+    home: _ExamplePage(
+      session: session,
+      locale: locale,
+      onLocaleChanged: (value) => setState(() => locale = value),
+      onThemeChanged: () => setState(() => dark = !dark),
+    ),
+  );
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key, this.title = 'Mana Example'});
+ThemeData _theme(Brightness brightness) {
+  final dark = brightness == Brightness.dark;
+  final foreground = dark ? const Color(0xFFFAFAFA) : const Color(0xFF18181B);
+  final background = dark ? const Color(0xFF09090B) : Colors.white;
+  final border = dark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7);
+  final scheme =
+      ColorScheme.fromSeed(
+        seedColor: Colors.grey,
+        brightness: brightness,
+        dynamicSchemeVariant: DynamicSchemeVariant.monochrome,
+      ).copyWith(
+        primary: foreground,
+        onPrimary: background,
+        surface: background,
+        onSurface: foreground,
+        outline: border,
+        secondaryContainer: border,
+        onSecondaryContainer: foreground,
+      );
+  return ThemeData(
+    colorScheme: scheme,
+    scaffoldBackgroundColor: background,
+    dividerColor: border,
+    appBarTheme: AppBarTheme(
+      backgroundColor: background,
+      surfaceTintColor: Colors.transparent,
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: foreground,
+        side: BorderSide(color: border),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+      ),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      isDense: true,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+      enabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: border),
+        borderRadius: BorderRadius.circular(6),
+      ),
+    ),
+  );
+}
 
-  final String title;
+class _ExamplePage extends StatefulWidget {
+  const _ExamplePage({
+    required this.session,
+    required this.locale,
+    required this.onLocaleChanged,
+    required this.onThemeChanged,
+  });
+  final DemoSession session;
+  final Locale locale;
+  final ValueChanged<Locale> onLocaleChanged;
+  final VoidCallback onThemeChanged;
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<_ExamplePage> createState() => _ExamplePageState();
 }
 
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  bool isLandscape = false;
+class _ExamplePageState extends State<_ExamplePage>
+    with SingleTickerProviderStateMixin {
+  late final animation = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 3),
+  );
+  bool animate = false;
+  double radius = 8;
 
-  void toggleOrientation() {
-    if (isLandscape) {
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-        DeviceOrientation.portraitDown,
-      ]);
-    } else {
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
-      ]);
+  String t(String en, String zh) =>
+      Localizations.localeOf(context).languageCode == 'zh' ? zh : en;
+
+  @override
+  void dispose() {
+    animation.dispose();
+    super.dispose();
+  }
+
+  Future<void> seedPreferences() async {
+    try {
+      await widget.session.seedPreferences();
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(t('Saved.', '已写入。'))));
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${t('Storage error', '存储失败')}: $error')),
+        );
+      }
     }
-    setState(() {
-      isLandscape = !isLandscape;
-    });
-  }
-
-  Future<void> sendRequest() async {
-    await DioClient().randomRequest();
-  }
-
-  void addLog() {
-    LogGenerator.generateRandomLog();
-  }
-
-  Future<void> addSharedPreferences() async {
-    await SpClient.insertRandom();
   }
 
   @override
   Widget build(BuildContext context) {
+    final session = widget.session;
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Wrap(
-            spacing: 16,
-            runSpacing: 16,
-            children: [
-              CustomButton(
-                text: 'Detail Page',
-                backgroundColor: Colors.orange,
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const DetailPage()),
-                  );
-                },
-              ),
-              CustomButton(
-                text: 'Toggle Orientation',
-                backgroundColor: Colors.blue,
-                onPressed: toggleOrientation,
-              ),
-              CustomButton(
-                text: 'Send Request',
-                backgroundColor: Colors.red,
-                onPressed: sendRequest,
-              ),
-              CustomButton(
-                text: 'Add Log',
-                backgroundColor: Colors.cyan,
-                onPressed: addLog,
-              ),
-              CustomButton(
-                text: 'Add SharedPreferences',
-                backgroundColor: Colors.deepPurple,
-                onPressed: addSharedPreferences,
-              ),
-              Container(
-                width: double.infinity,
-                color: Colors.grey.shade200,
-                padding: EdgeInsets.all(16),
-                child: SelectableText('Test Animation'),
-              ),
-              AnimatedBall(),
-              SizedBox(
-                width: 300,
-                child: Image.asset('assets/test.jpeg', fit: BoxFit.cover),
-              ),
+        title: const Text(
+          'mana / example',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+        actions: [
+          SegmentedButton<Locale>(
+            segments: const [
+              ButtonSegment(value: Locale('en'), label: Text('EN')),
+              ButtonSegment(value: Locale('zh'), label: Text('中文')),
             ],
+            selected: {widget.locale},
+            showSelectedIcon: false,
+            onSelectionChanged: (value) => widget.onLocaleChanged(value.single),
+            style: const ButtonStyle(visualDensity: VisualDensity.compact),
+          ),
+          IconButton(
+            onPressed: widget.onThemeChanged,
+            tooltip: t('Toggle theme', '切换主题'),
+            icon: const Icon(Icons.contrast_rounded, size: 20),
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: ListenableBuilder(
+        listenable: session,
+        builder: (context, _) => SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 96),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 880),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final scenario in ['GET', 'POST', '404', 'Timeout'])
+                        OutlinedButton(
+                          key: Key('request-$scenario'),
+                          onPressed: session.busy
+                              ? null
+                              : () => session.send(scenario),
+                          child: Text(scenario),
+                        ),
+                      OutlinedButton(
+                        onPressed: session.writeLogs,
+                        child: Text(t('Generate logs', '生成日志')),
+                      ),
+                      OutlinedButton(
+                        onPressed: seedPreferences,
+                        child: Text(t('Seed preferences', '写入存储')),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  if (session.busy) const LinearProgressIndicator(minHeight: 2),
+                  Row(
+                    children: [
+                      for (final color in [
+                        0xFF18181B,
+                        0xFF52525B,
+                        0xFFA1A1AA,
+                        0xFFE4E4E7,
+                      ])
+                        Expanded(
+                          child: Container(height: 32, color: Color(color)),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    key: const Key('sample-input'),
+                    decoration: InputDecoration(
+                      labelText: t('Sample input', '输入示例'),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Center(
+                    child: RotationTransition(
+                      turns: animation,
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary,
+                          borderRadius: BorderRadius.circular(radius),
+                        ),
+                        child: Icon(
+                          Icons.add,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Text(
+                        t('Radius', '圆角'),
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      Expanded(
+                        child: Slider(
+                          value: radius,
+                          min: 0,
+                          max: 24,
+                          onChanged: (value) => setState(() => radius = value),
+                        ),
+                      ),
+                      Text(
+                        '${radius.round()} px',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
+                  SwitchListTile.adaptive(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      t('Animation', '动画'),
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                    value: animate,
+                    onChanged: (value) => setState(() {
+                      animate = value;
+                      if (value) {
+                        animation.repeat();
+                      } else {
+                        animation.stop();
+                      }
+                    }),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
