@@ -33,25 +33,22 @@ class _GridState extends State<Grid> {
     name: widget.name,
     initialHeight: 210,
     barrier: GridBarrier(gap: _gap, showNumbers: _numbers),
-    content: Column(
-      children: [
-        Expanded(
-          child: GridContent(
-            gap: _gap,
-            showNumbers: _numbers,
-            onGapChanged: (value) {
-              setState(() => _gap = value);
-              _save('mana_grid_gap', value);
-            },
-            onShowNumbersChanged: (value) {
-              setState(() => _numbers = value);
-              _save('mana_grid_show_numbers', value);
-            },
-          ),
-        ),
-        if (_error case final error?)
-          Text('$error', style: const TextStyle(color: KitStyle.danger)),
-      ],
+    content: KitScaffold(
+      body: GridContent(
+        gap: _gap,
+        showNumbers: _numbers,
+        onGapChanged: (value) {
+          setState(() => _gap = value);
+          _save('mana_grid_gap', value);
+        },
+        onShowNumbersChanged: (value) {
+          setState(() => _numbers = value);
+          _save('mana_grid_show_numbers', value);
+        },
+      ),
+      footer: _error == null
+          ? null
+          : Text('$_error', style: const TextStyle(color: KitStyle.danger)),
     ),
   );
 }

@@ -45,31 +45,27 @@ class _InfoPageState extends State<InfoPage> {
     return KitDetail(
       title: '${kitText(context, 'common.details')} (${_entries.length})',
       onClose: widget.onClose,
-      child: Column(
-        children: [
-          KitField(
-            controller: _search,
-            label: kitText(context, 'common.search'),
-            onChanged: (_) => setState(() {}),
-          ),
-          Expanded(
-            child: entries.isEmpty
-                ? KitMessage(kitText(context, 'common.empty'))
-                : ListView.builder(
-                    itemCount: entries.length,
-                    itemBuilder: (context, i) => ManaButton(
-                      onPressed: () => setState(() => _selected = entries[i]),
-                      child: Align(
-                        alignment: .centerLeft,
-                        child: Text(
-                          entries[i].name,
-                          style: const TextStyle(fontSize: 13),
-                        ),
-                      ),
+      child: KitScaffold(
+        header: KitField(
+          controller: _search,
+          label: kitText(context, 'common.search'),
+          onChanged: (_) => setState(() {}),
+        ),
+        body: entries.isEmpty
+            ? KitMessage(kitText(context, 'common.empty'))
+            : ListView.builder(
+                itemCount: entries.length,
+                itemBuilder: (context, i) => ManaButton(
+                  onPressed: () => setState(() => _selected = entries[i]),
+                  child: Align(
+                    alignment: .centerLeft,
+                    child: Text(
+                      entries[i].name,
+                      style: const TextStyle(fontSize: 13),
                     ),
                   ),
-          ),
-        ],
+                ),
+              ),
       ),
     );
   }

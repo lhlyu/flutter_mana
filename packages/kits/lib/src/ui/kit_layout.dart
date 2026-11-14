@@ -7,6 +7,33 @@ import 'kit_style.dart';
 import 'kit_button.dart';
 import 'kit_selection.dart';
 
+/// Bounded list/detail layout. Normal chrome keeps its natural height; in a
+/// short window it scrolls independently instead of taking space from the body.
+class KitScaffold extends StatelessWidget {
+  const KitScaffold({super.key, this.header, required this.body, this.footer});
+  final Widget? header;
+  final Widget body;
+  final Widget? footer;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      Widget chrome(Widget child) => ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: constraints.maxHeight * .4),
+        child: SingleChildScrollView(child: child),
+      );
+      return Column(
+        crossAxisAlignment: .stretch,
+        children: [
+          if (header case final header?) chrome(header),
+          Expanded(child: body),
+          if (footer case final footer?) chrome(footer),
+        ],
+      );
+    },
+  );
+}
+
 class KitDivider extends StatelessWidget {
   const KitDivider({super.key});
   @override
@@ -67,7 +94,11 @@ class KitDataTable extends StatelessWidget {
                 );
                 return Padding(
                   padding: const .all(10),
-                  child: constraints.maxWidth < 300
+                  child:
+                      constraints.maxWidth <
+                          300 *
+                              (MediaQuery.textScalerOf(context).scale(12) / 12)
+                                  .clamp(1, 2)
                       ? Column(
                           crossAxisAlignment: .start,
                           spacing: 4,
@@ -150,33 +181,39 @@ class KitDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ColoredBox(
     color: KitStyle.surface,
-    child: Column(
-      children: [
-        Padding(
-          padding: const .symmetric(horizontal: 4),
-          child: Row(
-            children: [
-              KitButton(
-                label: kitText(context, 'common.back'),
-                icon: .back,
-                iconOnly: true,
-                onPressed: onClose,
-              ),
-              Expanded(
-                child: Text(
-                  title,
-                  maxLines: 1,
-                  overflow: .ellipsis,
-                  style: const TextStyle(fontWeight: .bold),
+    child: KitScaffold(
+      header: Column(
+        mainAxisSize: .min,
+        children: [
+          Padding(
+            padding: const .symmetric(horizontal: 4),
+            child: Row(
+              children: [
+                KitButton(
+                  label: kitText(context, 'common.back'),
+                  icon: .back,
+                  iconOnly: true,
+                  onPressed: onClose,
                 ),
-              ),
-              ...actions,
-            ],
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: .ellipsis,
+                    style: const TextStyle(fontWeight: .bold),
+                  ),
+                ),
+                if (actions.isNotEmpty)
+                  Flexible(
+                    child: Wrap(alignment: .end, children: actions),
+                  ),
+              ],
+            ),
           ),
-        ),
-        const KitDivider(),
-        Expanded(child: child),
-      ],
+          const KitDivider(),
+        ],
+      ),
+      body: child,
     ),
   );
 }

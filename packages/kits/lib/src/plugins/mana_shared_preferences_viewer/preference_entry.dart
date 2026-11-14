@@ -49,11 +49,9 @@ class PreferenceEntry {
         final int value => PreferenceEntry(key, '$value', .integer),
         final double value => PreferenceEntry(key, '$value', .decimal),
         final String value => PreferenceEntry(key, value, .string),
-        final List<String> value => PreferenceEntry(
-          key,
-          jsonEncode(value),
-          .stringList,
-        ),
+        // Platform codecs may return List<Object?> even for string lists.
+        final List value when value.every((item) => item is String) =>
+          PreferenceEntry(key, jsonEncode(value), .stringList),
         _ => throw ArgumentError.value(value),
       };
   Object get parsedValue => kind.parse(value);

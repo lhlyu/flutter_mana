@@ -145,25 +145,30 @@ class _MemoryInfoContentState extends State<MemoryInfoContent> {
                 return ManaButton(
                   onPressed: () => setState(() => _selected = item),
                   padding: const .all(10),
-                  child: Row(
-                    spacing: 8,
+                  child: Column(
+                    crossAxisAlignment: .stretch,
+                    spacing: 4,
                     children: [
-                      Expanded(
-                        child: Text(
-                          item.classRef?.name ?? '—',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ),
                       Text(
-                        '${item.instancesCurrent ?? 0}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: KitStyle.muted,
-                        ),
+                        item.classRef?.name ?? '—',
+                        style: const TextStyle(fontSize: 13, fontWeight: .w600),
                       ),
-                      Text(
-                        MemoryService.formatBytes(item.bytesCurrent ?? 0),
-                        style: const TextStyle(fontSize: 12),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 4,
+                        children: [
+                          Text(
+                            '${kitText(context, 'memory_info.number')}: ${item.instancesCurrent ?? 0}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: KitStyle.muted,
+                            ),
+                          ),
+                          Text(
+                            MemoryService.formatBytes(item.bytesCurrent ?? 0),
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ],
                       ),
                     ],
                   ),

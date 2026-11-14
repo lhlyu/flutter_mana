@@ -77,28 +77,21 @@ class _LicenseState extends State<License> {
                 )
                 .toList()
               ..sort();
-        return Column(
-          children: [
-            KitField(
-              controller: _query,
-              label: kitText(context, 'common.search'),
-              onChanged: (_) => setState(() {}),
-            ),
-            Expanded(
-              child: keys.isEmpty
-                  ? KitMessage(kitText(context, 'common.empty'))
-                  : ListView.builder(
-                      itemCount: keys.length,
-                      itemBuilder: (context, i) => ManaButton(
-                        onPressed: () => setState(() => _selected = keys[i]),
-                        child: Align(
-                          alignment: .centerLeft,
-                          child: Text(keys[i]),
-                        ),
-                      ),
-                    ),
-            ),
-          ],
+        return KitScaffold(
+          header: KitField(
+            controller: _query,
+            label: kitText(context, 'common.search'),
+            onChanged: (_) => setState(() {}),
+          ),
+          body: keys.isEmpty
+              ? KitMessage(kitText(context, 'common.empty'))
+              : ListView.builder(
+                  itemCount: keys.length,
+                  itemBuilder: (context, i) => ManaButton(
+                    onPressed: () => setState(() => _selected = keys[i]),
+                    child: Align(alignment: .centerLeft, child: Text(keys[i])),
+                  ),
+                ),
         );
       },
     ),

@@ -35,4 +35,26 @@ final controller = ManaController(plugins: loadAllPlugins(
 
 内存和源码仅支持非 Web 的 Debug 构建；Widget 检查仅支持 Debug，性能叠层不支持 Web。清空偏好需确认。流式或二进制请求体不支持导出 cURL。
 
+## 新增插件
+
+在仓库根目录运行：
+
+```bash
+dart run scripts/plugin.dart http_inspector 网络检查器
+```
+
+生成 Widgets-only 的 `BuiltinKit`、`KitWindow` / `KitScaffold` 内容和接入说明，自动按顺序补充 `src/plugins/plugins.dart` 导出并格式化。支持 snake_case、camelCase、PascalCase，拒绝覆盖已有目录。
+
+生成的图标暂用 `PluginIcon.demo`，请添加专属 SVG；内容文案通过 `kitText` 维护。是否加入默认的 `loadAllPlugins()` 由维护者手动确认。
+
+## 尺寸与布局
+
+- 列表和详情页使用统一的 `KitScaffold`：顶部搜索 / 筛选、中间内容、底部操作区。正常尺寸按内容自然高度布局；低高度时顶部和底部各最多占用 40%，超出部分独立滚动，避免挤掉列表。
+- `KitWindow` 不再用固定的最小内容高度兜底。内容使用真实可用高度，键盘弹出和窗口缩放时保留搜索、焦点及选中状态。
+- 宽度不足 160 logical px 时允许横向滚动，不通过缩小字体或隐藏操作来规避溢出。正常宽度按实际约束换行。
+- 数据表在窄窗或大字体下改为上下排列；偏好条目将操作按钮移到下方，内存条目将统计信息分组换行。
+- 新布局应优先使用自然高度、`Wrap`、可滚动内容和 `KitScaffold`，避免给多行文本估算固定高度，也不要在无界高度中使用 `Expanded`。
+
+尺寸回归测试见 `test/responsive_layout_test.dart`，包含窄窗、横屏低高度、大字体、中英文、RTL 和动态缩放。
+
 接入见 [example](../example/lib/main.dart)。

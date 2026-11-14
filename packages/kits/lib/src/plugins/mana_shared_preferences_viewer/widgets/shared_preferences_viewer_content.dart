@@ -41,98 +41,100 @@ class _SharedPreferencesViewerContentState
         onSave: (next) => _repository.save(_selected, next),
       );
     }
-    return Column(
-      children: [
-        Expanded(
-          child: KitAsync<List<PreferenceEntry>>(
-            key: ValueKey(_revision),
-            load: _repository.load,
-            builder: (context, entries) {
-              final query = _filter ? _query.text.toLowerCase() : '';
-              final items = entries
-                  .where((entry) => entry.key.toLowerCase().contains(query))
-                  .toList();
-              if (items.isEmpty) {
-                return KitMessage(kitText(context, 'common.empty'));
-              }
-              return ListView.separated(
-                itemCount: items.length,
-                itemBuilder: (context, i) => PreferenceTile(
-                  entry: items[i],
-                  onTap: () => setState(() {
-                    _selected = items[i];
-                    _editing = true;
-                  }),
-                  onDelete: () async {
-                    await _repository.remove(items[i].key);
-                    if (mounted) setState(() => _revision++);
+    return KitScaffold(
+      header: _filter
+          ? KitField(
+              controller: _query,
+              label: kitText(context, 'common.search'),
+              onChanged: (_) => setState(() {}),
+            )
+          : null,
+      body: KitAsync<List<PreferenceEntry>>(
+        key: ValueKey(_revision),
+        load: _repository.load,
+        builder: (context, entries) {
+          final query = _filter ? _query.text.toLowerCase() : '';
+          final items = entries
+              .where((entry) => entry.key.toLowerCase().contains(query))
+              .toList();
+          if (items.isEmpty) {
+            return KitMessage(kitText(context, 'common.empty'));
+          }
+          return ListView.separated(
+            itemCount: items.length,
+            itemBuilder: (context, i) => PreferenceTile(
+              entry: items[i],
+              onTap: () => setState(() {
+                _selected = items[i];
+                _editing = true;
+              }),
+              onDelete: () async {
+                await _repository.remove(items[i].key);
+                if (mounted) setState(() => _revision++);
+              },
+            ),
+            separatorBuilder: (_, _) => const KitDivider(),
+          );
+        },
+      ),
+      footer: Column(
+        mainAxisSize: .min,
+        children: [
+          if (_confirmClear)
+            KitToolbar(
+              children: [
+                KitButton(
+                  label: kitText(context, 'common.confirm_clear'),
+                  onPressed: () async {
+                    await _repository.clear();
+                    if (mounted) {
+                      setState(() {
+                        _confirmClear = false;
+                        _revision++;
+                      });
+                    }
                   },
                 ),
-                separatorBuilder: (_, _) => const KitDivider(),
-              );
-            },
-          ),
-        ),
-        if (_filter)
-          KitField(
-            controller: _query,
-            label: kitText(context, 'common.search'),
-            onChanged: (_) => setState(() {}),
-          ),
-        if (_confirmClear)
+                KitButton(
+                  label: kitText(context, 'common.cancel'),
+                  onPressed: () => setState(() => _confirmClear = false),
+                ),
+              ],
+            ),
           KitToolbar(
             children: [
               KitButton(
-                label: kitText(context, 'common.confirm_clear'),
-                onPressed: () async {
-                  await _repository.clear();
-                  if (mounted) {
-                    setState(() {
-                      _confirmClear = false;
-                      _revision++;
-                    });
-                  }
-                },
+                label: kitText(context, 'common.clear'),
+                icon: .clear,
+                iconOnly: true,
+                onPressed: () => setState(() => _confirmClear = true),
               ),
               KitButton(
-                label: kitText(context, 'common.cancel'),
-                onPressed: () => setState(() => _confirmClear = false),
+                label: kitText(context, 'common.add'),
+                icon: .add,
+                iconOnly: true,
+                onPressed: () => setState(() {
+                  _selected = null;
+                  _editing = true;
+                }),
+              ),
+              KitButton(
+                label: kitText(context, 'common.refresh'),
+                icon: .refresh,
+                iconOnly: true,
+                onPressed: () => setState(() => _revision++),
+              ),
+              KitButton(
+                label: kitText(context, 'common.search'),
+                icon: .filter,
+                iconOnly: true,
+                selected: _filter,
+                onPressed: () => setState(() => _filter = !_filter),
               ),
             ],
           ),
-        KitToolbar(
-          children: [
-            KitButton(
-              label: kitText(context, 'common.clear'),
-              icon: .clear,
-              iconOnly: true,
-              onPressed: () => setState(() => _confirmClear = true),
-            ),
-            KitButton(
-              label: kitText(context, 'common.add'),
-              icon: .add,
-              iconOnly: true,
-              onPressed: () => setState(() {
-                _selected = null;
-                _editing = true;
-              }),
-            ),
-            KitButton(
-              label: kitText(context, 'common.refresh'),
-              icon: .refresh,
-              iconOnly: true,
-              onPressed: () => setState(() => _revision++),
-            ),
-            KitButton(
-              label: kitText(context, 'common.search'),
-              icon: .filter,
-              iconOnly: true,
-              selected: _filter,
-              onPressed: () => setState(() => _filter = !_filter),
-            ),
-          ],
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

@@ -35,6 +35,45 @@ void main() {
       );
     },
   );
+  test('platform-decoded string lists load and can be edited', () async {
+    // StandardMessageCodec returns List<Object?>, not necessarily List<String>.
+    SharedPreferences.setMockInitialValues({
+      'languages': <Object?>['English', '中文'],
+      'empty': <dynamic>[],
+      'name': 'Mana',
+    });
+    final repository = PreferencesRepository();
+    final entries = await repository.load();
+    expect(entries.map((entry) => entry.key), ['empty', 'languages', 'name']);
+    expect(entries.first.kind, PreferenceKind.stringList);
+    expect(entries.first.parsedValue, isEmpty);
+    final languages = entries[1];
+    expect(languages.kind, PreferenceKind.stringList);
+    expect(languages.parsedValue, ['English', '中文']);
+    expect(languages.parsedValue, isA<List<String>>());
+    await repository.save(
+      languages,
+      const PreferenceEntry('languages', '["中文", "English"]', .stringList),
+    );
+    final reloaded = (await repository.load()).firstWhere(
+      (entry) => entry.key == 'languages',
+    );
+    expect(reloaded.parsedValue, ['中文', 'English']);
+  });
+
+  test('non-string platform lists are not silently accepted', () {
+    for (final value in [
+      <Object?>['English', 1],
+      <Object?>['中文', null],
+      <Object?>[true],
+    ]) {
+      expect(
+        () => PreferenceEntry.fromValue('invalid', value),
+        throwsArgumentError,
+      );
+    }
+  });
+
   test('invalid rename input never removes the existing preference', () async {
     SharedPreferences.setMockInitialValues({'original': 42});
     final repository = PreferencesRepository();

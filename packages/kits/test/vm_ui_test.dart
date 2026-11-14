@@ -96,6 +96,71 @@ Finder button(String label) => find.byWidgetPredicate(
 void main() {
   for (final memory in [true, false]) {
     testWidgets(
+      '${memory ? 'memory' : 'source'} success UI adapts to narrow short viewports',
+      (tester) async {
+        final inspector = _Vm();
+        final service = MemoryService(inspector: inspector);
+        final code = CodeDisplayService(inspector: inspector);
+        try {
+          for (final size in [
+            const Size(180, 100),
+            const Size(320, 140),
+            const Size(640, 480),
+          ]) {
+            await tester.pumpWidget(
+              testHost(
+                Center(
+                  child: SizedBox(
+                    width: size.width,
+                    height: size.height,
+                    child: memory
+                        ? MemoryInfoContent(service: service)
+                        : ShowCodeContent(service: code),
+                  ),
+                ),
+                scale: 3,
+                direction: .rtl,
+              ),
+            );
+            await tester.pumpAndSettle();
+            expect(tester.takeException(), isNull, reason: '$size');
+            final item = memory
+                ? find.text('Example')
+                : find.text('package:app/main.dart');
+            final list = memory
+                ? find.byType(CustomScrollView)
+                : find.byType(ListView);
+            await tester.scrollUntilVisible(
+              item,
+              200,
+              scrollable: find
+                  .descendant(of: list, matching: find.byType(Scrollable))
+                  .first,
+            );
+            await tester.pumpAndSettle();
+            // At 3x text a row can be taller than the viewport: tap its visible
+            // portion rather than its off-screen geometric center.
+            final visible = tester
+                .getRect(item)
+                .intersect(tester.getRect(list));
+            expect(visible.isEmpty, isFalse);
+            await tester.tapAt(visible.center);
+            await tester.pumpAndSettle();
+            expect(tester.takeException(), isNull, reason: '$size detail');
+            await tester.ensureVisible(button('Back'));
+            await tester.tap(button('Back'));
+            await tester.pumpAndSettle();
+          }
+        } finally {
+          await tester.pumpWidget(const SizedBox());
+          await service.close();
+        }
+      },
+    );
+  }
+
+  for (final memory in [true, false]) {
+    testWidgets(
       '${memory ? 'memory' : 'source'} changes services without closing injected resources',
       (tester) async {
         final first = _Vm();

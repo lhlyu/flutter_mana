@@ -43,11 +43,12 @@ class _ShowCodeContentState extends State<ShowCodeContent> {
         child: KitAsync<String>(
           key: ValueKey(script.id),
           load: () => _service.source(script),
-          builder: (context, source) => Column(
-            children: [
-              Align(alignment: .centerRight, child: KitCopyButton(source)),
-              Expanded(child: CodeWidget(code: source)),
-            ],
+          builder: (context, source) => KitScaffold(
+            header: Align(
+              alignment: .centerRight,
+              child: KitCopyButton(source),
+            ),
+            body: CodeWidget(code: source),
           ),
         ),
       );
@@ -60,31 +61,27 @@ class _ShowCodeContentState extends State<ShowCodeContent> {
         final items = scripts
             .where((script) => script.uri!.toLowerCase().contains(query))
             .toList();
-        return Column(
-          children: [
-            KitField(
-              controller: _query,
-              label: kitText(context, 'common.search'),
-              onChanged: (_) => setState(() {}),
-            ),
-            Expanded(
-              child: items.isEmpty
-                  ? KitMessage(kitText(context, 'common.empty'))
-                  : ListView.builder(
-                      itemCount: items.length,
-                      itemBuilder: (context, i) => ManaButton(
-                        onPressed: () => setState(() => _selected = items[i]),
-                        child: Align(
-                          alignment: .centerLeft,
-                          child: Text(
-                            items[i].uri!,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        ),
+        return KitScaffold(
+          header: KitField(
+            controller: _query,
+            label: kitText(context, 'common.search'),
+            onChanged: (_) => setState(() {}),
+          ),
+          body: items.isEmpty
+              ? KitMessage(kitText(context, 'common.empty'))
+              : ListView.builder(
+                  itemCount: items.length,
+                  itemBuilder: (context, i) => ManaButton(
+                    onPressed: () => setState(() => _selected = items[i]),
+                    child: Align(
+                      alignment: .centerLeft,
+                      child: Text(
+                        items[i].uri!,
+                        style: const TextStyle(fontSize: 12),
                       ),
                     ),
-            ),
-          ],
+                  ),
+                ),
         );
       },
     );

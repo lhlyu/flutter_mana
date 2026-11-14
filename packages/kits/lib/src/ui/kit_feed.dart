@@ -79,79 +79,77 @@ class _KitFeedState<T> extends State<KitFeed<T>> {
                   widget.searchText(item).toLowerCase().contains(query)),
         )
         .toList();
-    return Column(
-      children: [
-        KitTabs<String?>(
-          values: [null, ...widget.categories],
-          value: _category,
-          label: (value) => value ?? kitText(context, 'common.all'),
-          onChanged: (value) => setState(() => _category = value),
-        ),
-        const KitDivider(),
-        Expanded(
-          child: items.isEmpty
-              ? KitMessage(kitText(context, 'common.empty'))
-              : ListView.separated(
-                  controller: _scroll,
-                  itemCount: items.length,
-                  padding: const .only(bottom: 8),
-                  itemBuilder: (context, index) =>
-                      widget.itemBuilder(context, items[index]),
-                  separatorBuilder: (_, _) => const KitDivider(),
-                ),
-        ),
-        if (_filter)
-          KitField(
-            controller: _query,
-            label: kitText(context, 'common.search'),
-            onChanged: (_) => setState(() {}),
+    return KitScaffold(
+      header: Column(
+        mainAxisSize: .min,
+        children: [
+          KitTabs<String?>(
+            values: [null, ...widget.categories],
+            value: _category,
+            label: (value) => value ?? kitText(context, 'common.all'),
+            onChanged: (value) => setState(() => _category = value),
           ),
-        KitToolbar(
-          children: [
-            KitButton(
-              label: kitText(context, 'common.clear'),
-              icon: .clear,
-              iconOnly: true,
-              onPressed: widget.collector.clear,
-            ),
-            KitButton(
-              label: kitText(context, 'common.top'),
-              icon: .top,
-              iconOnly: true,
-              onPressed: () {
-                if (_scroll.hasClients) _scroll.jumpTo(0);
-              },
-            ),
-            KitButton(
-              label: kitText(context, 'common.bottom'),
-              icon: .bottom,
-              iconOnly: true,
-              onPressed: () {
-                if (_scroll.hasClients) {
-                  _scroll.jumpTo(_scroll.position.maxScrollExtent);
-                }
-              },
-            ),
-            KitButton(
-              label: kitText(
-                context,
-                _locked ? 'common.unlock' : 'common.lock',
-              ),
-              icon: _locked ? .lock : .unlock,
-              iconOnly: true,
-              selected: _locked,
-              onPressed: () => setState(() => _locked = !_locked),
-            ),
-            KitButton(
+          if (_filter)
+            KitField(
+              controller: _query,
               label: kitText(context, 'common.search'),
-              icon: .filter,
-              iconOnly: true,
-              selected: _filter,
-              onPressed: () => setState(() => _filter = !_filter),
+              onChanged: (_) => setState(() {}),
             ),
-          ],
-        ),
-      ],
+          const KitDivider(),
+        ],
+      ),
+      body: items.isEmpty
+          ? KitMessage(kitText(context, 'common.empty'))
+          : ListView.separated(
+              controller: _scroll,
+              itemCount: items.length,
+              padding: const .only(bottom: 8),
+              itemBuilder: (context, index) =>
+                  widget.itemBuilder(context, items[index]),
+              separatorBuilder: (_, _) => const KitDivider(),
+            ),
+      footer: KitToolbar(
+        children: [
+          KitButton(
+            label: kitText(context, 'common.clear'),
+            icon: .clear,
+            iconOnly: true,
+            onPressed: widget.collector.clear,
+          ),
+          KitButton(
+            label: kitText(context, 'common.top'),
+            icon: .top,
+            iconOnly: true,
+            onPressed: () {
+              if (_scroll.hasClients) _scroll.jumpTo(0);
+            },
+          ),
+          KitButton(
+            label: kitText(context, 'common.bottom'),
+            icon: .bottom,
+            iconOnly: true,
+            onPressed: () {
+              if (_scroll.hasClients) {
+                _scroll.jumpTo(_scroll.position.maxScrollExtent);
+              }
+            },
+          ),
+          KitButton(
+            label: kitText(context, _locked ? 'common.unlock' : 'common.lock'),
+            icon: _locked ? .lock : .unlock,
+            iconOnly: true,
+            selected: _locked,
+            onPressed: () => setState(() => _locked = !_locked),
+          ),
+          KitButton(
+            label: kitText(context, 'common.search'),
+            icon: .filter,
+            iconOnly: true,
+            selected: _filter,
+            onPressed: () => setState(() => _filter = !_filter),
+          ),
+        ],
+      ),
     );
   }
 }
