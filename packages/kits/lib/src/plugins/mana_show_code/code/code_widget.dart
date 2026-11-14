@@ -1,53 +1,32 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
-import 'high_light_code.dart';
-import 'highlighter_style.dart';
-import 'language/dart_languge.dart';
+import '../../../ui/kit_ui.dart';
+import 'code_highlighter.dart';
 
-class CodeWidget extends StatelessWidget {
-  const CodeWidget({
-    super.key,
-    required this.code,
-    required this.style,
-    this.fontSize = 13,
-    this.fontFamily,
-  });
-
+class CodeWidget extends StatefulWidget {
+  const CodeWidget({super.key, required this.code});
   final String code;
-  final HighlighterStyle style;
-  final double fontSize;
-  final String? fontFamily;
+  @override
+  State<CodeWidget> createState() => _CodeWidgetState();
+}
+
+class _CodeWidgetState extends State<CodeWidget> {
+  late TextSpan _span = highlightDart(widget.code);
+  @override
+  void didUpdateWidget(CodeWidget old) {
+    super.didUpdateWidget(old);
+    if (old.code != widget.code) _span = highlightDart(widget.code);
+  }
 
   @override
-  Widget build(BuildContext context) {
-    Widget body;
-    Widget codeWidget;
-    try {
-      codeWidget = SelectableText.rich(
-        selectionControls: MaterialTextSelectionControls(),
-        TextSpan(
-          style: TextStyle(fontSize: fontSize, fontFamily: fontFamily),
-          children: <TextSpan>[
-            CodeHighlighter(
-              style: style,
-              language: const DartLanguage(),
-            ).format(code),
-          ],
-        ),
-      );
-    } catch (err) {
-      debugPrint('$err');
-      codeWidget = SelectableText(code);
-    }
-    body = SingleChildScrollView(
-      physics: const ClampingScrollPhysics(),
-      scrollDirection: Axis.horizontal,
+  Widget build(BuildContext context) => SizedBox(
+    width: double.infinity,
+    child: SingleChildScrollView(
       child: SingleChildScrollView(
-        physics: const ClampingScrollPhysics(),
-        padding: const EdgeInsets.all(16),
-        child: codeWidget,
+        scrollDirection: .horizontal,
+        padding: const .all(12),
+        child: KitSelection(child: Text.rich(_span, softWrap: false)),
       ),
-    );
-    return body;
-  }
+    ),
+  );
 }

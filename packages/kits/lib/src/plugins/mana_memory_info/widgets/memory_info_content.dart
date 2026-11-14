@@ -1,333 +1,178 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
-import 'package:flutter_mana_kits/src/i18n/i18n_mixin.dart';
-import 'package:flutter_mana_kits/src/icons/kit_icons.dart';
-import 'package:package_info_plus/package_info_plus.dart';
+import 'package:flutter/widgets.dart';
+import 'package:vm_service/vm_service.dart';
 
+import '../../../ui/kit_ui.dart';
 import '../utils/memory_service.dart';
 import 'memory_detail.dart';
 
 class MemoryInfoContent extends StatefulWidget {
-  const MemoryInfoContent({super.key});
-
+  const MemoryInfoContent({super.key, this.service});
+  final MemoryService? service;
   @override
   State<MemoryInfoContent> createState() => _MemoryInfoContentState();
 }
 
-class _MemoryInfoContentState extends State<MemoryInfoContent> with I18nMixin {
-  final MemoryService _memoryService = MemoryService();
-
-  String _pkg = '';
-  String _currentSortField = 'accumulatedSize';
-  bool _isAscending = false;
-  bool _hidePrivateClasses = true;
-  bool _onlyCurrentPackage = false;
-  bool _dataReady = false;
-
-  List<FormattedClassHeapStats> get _filteredItems {
-    var items = _memoryService.classHeapStatsList;
-
-    if (_hidePrivateClasses) {
-      items = items
-          .where((v) => !(v.classRef?.name?.startsWith('_') ?? false))
-          .toList();
-    }
-
-    if (_onlyCurrentPackage && _pkg.isNotEmpty) {
-      items = items
-          .where(
-            (v) => (v.classRef?.location?.script?.uri?.contains(_pkg) ?? false),
-          )
-          .toList();
-    }
-
-    return items;
-  }
-
+class _MemoryInfoContentState extends State<MemoryInfoContent> {
+  late MemoryService _service = widget.service ?? MemoryService();
+  final _query = TextEditingController();
+  bool _private = false;
+  String _sort = 'Size';
+  bool _ascending = false;
+  int _revision = 0;
+  ClassHeapStats? _selected;
   @override
-  void initState() {
-    super.initState();
-    _initData();
+  void didUpdateWidget(MemoryInfoContent old) {
+    super.didUpdateWidget(old);
+    if (old.service == widget.service) return;
+    if (old.service == null) unawaited(_service.close());
+    _service = widget.service ?? MemoryService();
+    _selected = null;
+    _revision++;
   }
 
   @override
   void dispose() {
-    unawaited(_memoryService.vmInspector.disconnect());
+    _query.dispose();
+    if (widget.service == null) unawaited(_service.close());
     super.dispose();
-  }
-
-  Future<void> _initData() async {
-    await Future.wait([
-      _memoryService.getInfos(() {}),
-      PackageInfo.fromPlatform().then((info) {
-        _pkg = 'package:${info.packageName.split('.').last}/';
-      }),
-    ]);
-
-    if (!mounted) return;
-    _sortClassHeapStats(); // 初始排序
-    setState(() => _dataReady = true);
-  }
-
-  void _sortClassHeapStats() {
-    switch (_currentSortField) {
-      case 'accumulatedSize':
-        _memoryService.sortClassHeapStats(
-          (stats) => stats.accumulatedSize ?? 0,
-          !_isAscending,
-          () {},
-        );
-        break;
-      case 'instancesCurrent':
-        _memoryService.sortClassHeapStats(
-          (stats) => stats.instancesCurrent ?? 0,
-          !_isAscending,
-          () {},
-        );
-        break;
-      case 'className':
-        _memoryService.sortClassHeapStats(
-          (stats) => stats.classRef?.name ?? '',
-          _isAscending,
-          () {},
-        );
-        break;
-    }
-  }
-
-  void _onSortChanged(String field) {
-    setState(() {
-      if (_currentSortField == field) {
-        _isAscending = !_isAscending;
-      } else {
-        _currentSortField = field;
-        _isAscending = false;
-      }
-      _sortClassHeapStats();
-    });
-  }
-
-  Widget _buildTableHeaderCol({
-    int flex = 1,
-    required String field,
-    required String label,
-  }) {
-    final icon = _currentSortField == field
-        ? (_isAscending ? KitIcons.sort_asc : KitIcons.sort_desc)
-        : KitIcons.sort_auto;
-
-    return Expanded(
-      flex: flex,
-      child: InkWell(
-        onTap: () => _onSortChanged(field),
-        child: Row(
-          children: [
-            Text(
-              t(context, label),
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            Icon(icon, size: 16),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTableRow(String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: SelectableText(value, style: const TextStyle(fontSize: 14)),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCheckboxRow(bool value, String label, VoidCallback onChanged) {
-    return Row(
-      children: [
-        SizedBox(
-          height: 24,
-          width: 24,
-          child: Checkbox(
-            materialTapTargetSize: MaterialTapTargetSize.padded,
-            value: value,
-            onChanged: (_) => setState(onChanged),
-          ),
-        ),
-        const SizedBox(width: 5),
-        Text(t(context, label)),
-      ],
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_dataReady) {
-      return const Center(child: CircularProgressIndicator());
+    if (_selected case final item?) {
+      return MemoryDetail(
+        detail: item,
+        service: _service,
+        onClose: () => setState(() => _selected = null),
+      );
     }
-
-    final vmInfo = _memoryService.vmInfo;
-    final memoryInfo = _memoryService.memoryUsageInfo;
-    final items = _filteredItems;
-
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: CustomScrollView(
-        physics: const ClampingScrollPhysics(),
-        slivers: [
-          SliverAppBar(
-            toolbarHeight: 0,
-            expandedHeight: 420.0,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              titlePadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
-              background: Container(
-                color: Colors.white,
-                padding: const EdgeInsets.all(16),
-                alignment: Alignment.topLeft,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 2,
-                  children: [
-                    Text(
-                      t(context, 'memory_info.vm_info'),
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    _buildTableRow('PID:', '${vmInfo?.pid ?? 'N/A'}'),
-                    _buildTableRow('CPU:', vmInfo?.hostCPU ?? 'N/A'),
-                    _buildTableRow(
-                      t(context, 'memory_info.version'),
-                      vmInfo?.version ?? 'N/A',
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      t(context, 'memory_info.memory_info'),
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    _buildTableRow(
-                      'Heap Usage:',
-                      '${memoryInfo?.heapUsageFormatted ?? 'N/A'} / '
-                          '${memoryInfo?.heapCapacityFormatted ?? 'N/A'}',
-                    ),
-                    _buildTableRow(
-                      'External Usage:',
-                      memoryInfo?.externalUsageFormatted ?? 'N/A',
-                    ),
-                    const SizedBox(height: 16),
-                    _buildCheckboxRow(
-                      _hidePrivateClasses,
-                      'memory_info.hide_private_classes',
-                      () {
-                        _hidePrivateClasses = !_hidePrivateClasses;
-                      },
-                    ),
-                    const SizedBox(height: 4),
-                    _buildCheckboxRow(
-                      _onlyCurrentPackage,
-                      'memory_info.current_app',
-                      () {
-                        _onlyCurrentPackage = !_onlyCurrentPackage;
-                      },
-                    ),
-                    const SizedBox(height: 4),
-                    _buildTableRow(
-                      t(context, 'memory_info.total'),
-                      '${items.length}',
-                    ),
-                  ],
-                ),
-              ),
+    return KitAsync<MemorySnapshot>(
+      key: ValueKey(_revision),
+      load: _service.load,
+      builder: (context, snapshot) {
+        final query = _query.text.toLowerCase();
+        final items = snapshot.classes
+            .where(
+              (item) =>
+                  (_private ||
+                      !(item.classRef?.name?.startsWith('_') ?? false)) &&
+                  '${item.classRef?.name} ${item.classRef?.location?.script?.uri}'
+                      .toLowerCase()
+                      .contains(query),
+            )
+            .toList();
+        items.sort((a, b) {
+          final result = switch (_sort) {
+            'Size' => (a.bytesCurrent ?? 0).compareTo(b.bytesCurrent ?? 0),
+            'Count' => (a.instancesCurrent ?? 0).compareTo(
+              b.instancesCurrent ?? 0,
             ),
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(39),
-              child: Container(
-                color: Colors.grey.shade200,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                child: Row(
-                  children: [
-                    _buildTableHeaderCol(
-                      field: 'accumulatedSize',
-                      label: 'memory_info.size',
+            _ => (a.classRef?.name ?? '').compareTo(b.classRef?.name ?? ''),
+          };
+          return _ascending ? result : -result;
+        });
+        return CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  KitDataTable({
+                    'PID': snapshot.vm.pid,
+                    'CPU': snapshot.vm.hostCPU,
+                    'VM': snapshot.vm.version,
+                    'Heap': MemoryService.formatBytes(
+                      snapshot.usage.heapUsage ?? 0,
                     ),
-                    _buildTableHeaderCol(
-                      field: 'instancesCurrent',
-                      label: 'memory_info.number',
+                    'Capacity': MemoryService.formatBytes(
+                      snapshot.usage.heapCapacity ?? 0,
                     ),
-                    _buildTableHeaderCol(
-                      flex: 3,
-                      field: 'className',
-                      label: 'memory_info.class_name',
+                    'External': MemoryService.formatBytes(
+                      snapshot.usage.externalUsage ?? 0,
                     ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate((context, index) {
-              final item = items[index];
-              final isEven = index.isOdd;
-
-              return InkWell(
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        MemoryDetail(detail: item, service: _memoryService),
+                    'Classes': items.length,
+                  }),
+                  KitField(
+                    controller: _query,
+                    label: kitText(context, 'common.search'),
+                    onChanged: (_) => setState(() {}),
                   ),
-                ),
-                child: Container(
-                  color: isEven ? Colors.grey.shade100 : Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+                  KitToggle(
+                    label: kitText(context, 'memory_info.hide_private_classes'),
+                    value: !_private,
+                    onChanged: (value) => setState(() => _private = !value),
                   ),
-                  child: Row(
+                  KitToolbar(
                     children: [
-                      Expanded(
-                        flex: 1,
-                        child: Text(item.accumulatedSizeFormatted),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Text('${item.instancesCurrent ?? 'N/A'}'),
-                      ),
-                      Expanded(
-                        flex: 3,
-                        child: Text(
-                          item.classRef?.name ?? 'Unknown Class',
-                          overflow: TextOverflow.ellipsis,
+                      for (final (field, key) in [
+                        ('Size', 'memory_info.size'),
+                        ('Count', 'memory_info.number'),
+                        ('Class', 'memory_info.class_name'),
+                      ])
+                        KitButton(
+                          label: kitText(context, key),
+                          selected: _sort == field,
+                          icon: _sort != field
+                              ? .sort
+                              : _ascending
+                              ? .sortAsc
+                              : .sortDesc,
+                          onPressed: () => setState(() {
+                            if (_sort == field) {
+                              _ascending = !_ascending;
+                            } else {
+                              _sort = field;
+                              _ascending = field == 'Class';
+                            }
+                          }),
                         ),
+                      KitButton(
+                        label: kitText(context, 'common.refresh'),
+                        icon: .refresh,
+                        iconOnly: true,
+                        onPressed: () => setState(() => _revision++),
                       ),
                     ],
                   ),
-                ),
-              );
-            }, childCount: items.length),
-          ),
-        ],
-      ),
+                ],
+              ),
+            ),
+            SliverList.builder(
+              itemCount: items.length,
+              itemBuilder: (context, index) {
+                final item = items[index];
+                return ManaButton(
+                  onPressed: () => setState(() => _selected = item),
+                  padding: const .all(10),
+                  child: Row(
+                    spacing: 8,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          item.classRef?.name ?? '—',
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ),
+                      Text(
+                        '${item.instancesCurrent ?? 0}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: KitStyle.muted,
+                        ),
+                      ),
+                      Text(
+                        MemoryService.formatBytes(item.bytesCurrent ?? 0),
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

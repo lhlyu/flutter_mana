@@ -1,4 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+
+import '../../../ui/kit_ui.dart';
 
 class GridBarrier extends StatelessWidget {
   final double gap;
@@ -12,8 +14,8 @@ class GridBarrier extends StatelessWidget {
       child: CustomPaint(
         painter: _GridPainter(
           gap: gap,
-          color: Colors.grey.withAlpha(180),
-          centerColor: Colors.redAccent.withAlpha(180),
+          color: KitStyle.muted.withValues(alpha: .7),
+          centerColor: KitStyle.danger.withValues(alpha: .7),
           strokeWidth: 0.5,
           showNumbers: showNumbers,
         ),
@@ -40,15 +42,14 @@ class _GridPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final gridPaint =
-        Paint()
-          ..color = color
-          ..strokeWidth = strokeWidth;
+    if (!gap.isFinite || gap < 4 || !size.isFinite) return;
+    final gridPaint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth;
 
-    final centerPaint =
-        Paint()
-          ..color = centerColor
-          ..strokeWidth = strokeWidth * 2;
+    final centerPaint = Paint()
+      ..color = centerColor
+      ..strokeWidth = strokeWidth * 2;
 
     final textPainter = TextPainter(
       textDirection: TextDirection.ltr,
@@ -114,6 +115,7 @@ class _GridPainter extends CustomPainter {
       textPainter.layout();
       textPainter.paint(canvas, Offset(2, centerY + 2));
     }
+    textPainter.dispose();
   }
 
   @override

@@ -1,225 +1,140 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_mana/flutter_mana.dart';
 import 'package:flutter_mana/flutter_mana_diagnostics.dart';
 
-import 'selected_rect_painter.dart';
+import '../../../ui/kit_ui.dart';
 
-class AlignRulerBarrier extends StatefulWidget {
-  final Size windowSize;
-
-  final Size dotSize;
-
-  final Offset dotCenterOffset;
-
-  final TextStyle coordinateTextStyle;
-
-  final Size coordinateTextSize;
-
-  final bool snapToWidgetEnabled;
-
-  final ValueChanged<Offset>? onDotPositionChanged;
-
+class AlignRulerBarrier extends StatelessWidget {
   const AlignRulerBarrier({
     super.key,
-    required this.windowSize,
-    required this.dotSize,
-    required this.dotCenterOffset,
-    required this.coordinateTextStyle,
-    required this.coordinateTextSize,
-    required this.snapToWidgetEnabled,
-    this.onDotPositionChanged,
+    required this.position,
+    required this.snap,
+    required this.onChanged,
   });
-
-  @override
-  State<AlignRulerBarrier> createState() => _AlignRulerBarrierState();
-}
-
-class _AlignRulerBarrierState extends State<AlignRulerBarrier> {
-  late Offset _dotPosition;
-
-  final ValueNotifier<RenderObject?> _selectedRenderObjectNotifier =
-      ValueNotifier<RenderObject?>(null);
-
-  @override
-  void initState() {
-    super.initState();
-
-    _dotPosition = widget.windowSize.center(Offset.zero);
-  }
-
-  @override
-  void dispose() {
-    _selectedRenderObjectNotifier.dispose();
-    super.dispose();
-  }
-
-  void _updateDotPosition(Offset newPosition, {bool isSnapping = false}) {
-    setState(() => _dotPosition = newPosition);
-    if (!isSnapping) {
-      _selectedRenderObjectNotifier.value = null;
-    }
-    widget.onDotPositionChanged?.call(newPosition);
-  }
-
-  void _onPanUpdate(DragUpdateDetails dragDetails) {
-    _updateDotPosition(dragDetails.globalPosition);
-  }
-
-  void _onPanEnd(DragEndDetails dragDetails) {
-    if (!widget.snapToWidgetEnabled) {
-      _selectedRenderObjectNotifier.value = null;
-      return;
-    }
-
-    final List<RenderObject> objects = HitTestUtils.hitTest(
-      _dotPosition,
-      rootKey: ManaScope.read(context).rootKey,
-    );
-
-    Offset? snappedOffset;
-    RenderObject? snappedObject;
-
-    for (final RenderObject obj in objects) {
-      final Matrix4 transform = obj.getTransformTo(null);
-
-      final Rect rect = obj.paintBounds.shift(
-        Offset(transform.getTranslation().x, transform.getTranslation().y),
-      );
-
-      if (rect.contains(_dotPosition)) {
-        double dx, dy;
-        final double halfWidth = rect.width / 2;
-        final double halfHeight = rect.height / 2;
-
-        if (_dotPosition.dx <= rect.left + halfWidth) {
-          dx = rect.left;
-        } else {
-          dx = rect.right;
-        }
-
-        if (_dotPosition.dy <= rect.top + halfHeight) {
-          dy = rect.top;
-        } else {
-          dy = rect.bottom;
-        }
-        snappedOffset = Offset(dx, dy);
-        snappedObject = obj;
+  final Offset position;
+  final bool snap;
+  final ValueChanged<Offset> onChanged;
+  void _move(BuildContext context, Offset global, {bool release = false}) {
+    final box = context.findRenderObject() as RenderBox;
+    var point = box.globalToLocal(global);
+    if (release && snap) {
+      for (final object in HitTestUtils.hitTest(
+        global,
+        rootKey: ManaScope.read(context).rootKey,
+      )) {
+        if (!object.attached) continue;
+        final rect = MatrixUtils.transformRect(
+          object.getTransformTo(box),
+          object.paintBounds,
+        );
+        if (!rect.isFinite || !rect.contains(point)) continue;
+        final x = (point.dx - rect.left).abs() < (point.dx - rect.right).abs()
+            ? rect.left
+            : rect.right;
+        final y = (point.dy - rect.top).abs() < (point.dy - rect.bottom).abs()
+            ? rect.top
+            : rect.bottom;
+        point = (point.dx - x).abs() < (point.dy - y).abs()
+            ? Offset(x, point.dy)
+            : Offset(point.dx, y);
+        HapticFeedback.selectionClick();
         break;
       }
     }
-
-    if (snappedOffset != null) {
-      _updateDotPosition(snappedOffset, isSnapping: true);
-      _selectedRenderObjectNotifier.value = snappedObject;
-      HapticFeedback.mediumImpact();
-    } else {
-      _selectedRenderObjectNotifier.value = null;
-    }
+    onChanged(
+      Offset(
+        point.dx.clamp(0, box.size.width),
+        point.dy.clamp(0, box.size.height),
+      ),
+    );
   }
 
   @override
-  Widget build(BuildContext context) {
-    final double verticalLeftOffset =
-        _dotPosition.dx - widget.coordinateTextSize.width;
-    final double horizontalTopOffset =
-        _dotPosition.dy - widget.coordinateTextSize.height;
-
-    return Stack(
-      alignment: Alignment.topLeft,
-      children: [
-        Positioned.fill(
-          child: ValueListenableBuilder<RenderObject?>(
-            valueListenable: _selectedRenderObjectNotifier,
-            builder: (context, selectedObject, child) {
-              return CustomPaint(painter: SelectedRectPainter(selectedObject));
-            },
+  Widget build(BuildContext context) => Stack(
+    children: [
+      Positioned.fill(
+        child: IgnorePointer(
+          child: CustomPaint(
+            painter: _RulerPainter(position, MediaQuery.textScalerOf(context)),
           ),
         ),
-        Positioned(
-          left: 0,
-          top: _dotPosition.dy,
-          child: Container(
-            width: widget.windowSize.width,
-            height: 1,
-            color: const Color(0xffff0000),
-          ),
-        ),
-        Positioned(
-          left: _dotPosition.dx,
-          top: 0,
-          child: Container(
-            width: 1,
-            height: widget.windowSize.height,
-            color: const Color(0xffff0000),
-          ),
-        ),
-        Positioned(
-          top: horizontalTopOffset,
-          left: _dotPosition.dx / 2 - widget.coordinateTextSize.width / 2,
-          child: Text(
-            _dotPosition.dx.toStringAsFixed(1),
-            style: widget.coordinateTextStyle,
-          ),
-        ),
-        Positioned(
-          left: verticalLeftOffset,
-          top: _dotPosition.dy / 2 - widget.coordinateTextSize.height / 2,
-          child: Text(
-            _dotPosition.dy.toStringAsFixed(1),
-            style: widget.coordinateTextStyle,
-          ),
-        ),
-        Positioned(
-          left:
-              _dotPosition.dx +
-              (widget.windowSize.width - _dotPosition.dx) / 2 -
-              widget.coordinateTextSize.width / 2,
-          top: horizontalTopOffset,
-          child: Text(
-            (widget.windowSize.width - _dotPosition.dx).toStringAsFixed(1),
-            style: widget.coordinateTextStyle,
-          ),
-        ),
-        Positioned(
-          top:
-              _dotPosition.dy +
-              (widget.windowSize.height - _dotPosition.dy) / 2 -
-              widget.coordinateTextSize.height / 2,
-          left: verticalLeftOffset,
-          child: Text(
-            (widget.windowSize.height - _dotPosition.dy).toStringAsFixed(1),
-            style: widget.coordinateTextStyle,
-          ),
-        ),
-        Positioned(
-          left: _dotPosition.dx - widget.dotCenterOffset.dx,
-          top: _dotPosition.dy - widget.dotCenterOffset.dy,
+      ),
+      Positioned(
+        left: position.dx - 24,
+        top: position.dy - 24,
+        child: Semantics(
+          label: 'Ruler position',
           child: GestureDetector(
-            onPanUpdate: _onPanUpdate,
-            onPanEnd: _onPanEnd,
+            behavior: .opaque,
+            onPanUpdate: (d) => _move(context, d.globalPosition),
+            onPanEnd: (d) => _move(context, d.globalPosition, release: true),
             child: Container(
-              height: widget.dotSize.height,
-              width: widget.dotSize.width,
+              width: 48,
+              height: 48,
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.black, width: 2),
-                color: Colors.white.withAlpha(150),
+                shape: .circle,
+                color: KitStyle.surface.withValues(alpha: .7),
+                border: Border.all(color: KitStyle.danger, width: 2),
               ),
-              child: Center(
-                child: Container(
-                  height: widget.dotSize.width / 2.5,
-                  width: widget.dotSize.height / 2.5,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.red.withAlpha(130),
-                  ),
-                ),
+              child: const Center(
+                child: KitGlyph(.add, color: KitStyle.danger),
               ),
             ),
           ),
         ),
-      ],
-    );
+      ),
+    ],
+  );
+}
+
+class _RulerPainter extends CustomPainter {
+  const _RulerPainter(this.point, this.scaler);
+  final Offset point;
+  final TextScaler scaler;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = KitStyle.danger
+      ..strokeWidth = 1;
+    canvas.drawLine(Offset(0, point.dy), Offset(size.width, point.dy), paint);
+    canvas.drawLine(Offset(point.dx, 0), Offset(point.dx, size.height), paint);
+    final text = TextPainter(textDirection: .ltr, textScaler: scaler);
+    for (final (value, offset) in [
+      (point.dx, Offset(point.dx / 2, point.dy - 20)),
+      (
+        size.width - point.dx,
+        Offset((size.width + point.dx) / 2, point.dy - 20),
+      ),
+      (point.dy, Offset(point.dx + 4, point.dy / 2)),
+      (
+        size.height - point.dy,
+        Offset(point.dx + 4, (size.height + point.dy) / 2),
+      ),
+    ]) {
+      text.text = TextSpan(
+        text: value.toStringAsFixed(1),
+        style: const TextStyle(color: KitStyle.danger, fontSize: 11),
+      );
+      text.layout(maxWidth: size.width);
+      text.paint(
+        canvas,
+        Offset(
+          offset.dx.clamp(
+            0,
+            (size.width - text.width).clamp(0, double.infinity),
+          ),
+          offset.dy.clamp(
+            0,
+            (size.height - text.height).clamp(0, double.infinity),
+          ),
+        ),
+      );
+    }
+    text.dispose();
   }
+
+  @override
+  bool shouldRepaint(_RulerPainter old) =>
+      old.point != point || old.scaler != scaler;
 }

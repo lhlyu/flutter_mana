@@ -1,154 +1,66 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:flutter_mana_kits/src/i18n/i18n_mixin.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+
+import '../../../diagnostics/debug_session.dart';
+import '../../../ui/kit_ui.dart';
 
 class VisualHelperContent extends StatefulWidget {
   const VisualHelperContent({super.key});
-
   @override
   State<VisualHelperContent> createState() => _VisualHelperContentState();
 }
 
-class _VisualHelperContentState extends State<VisualHelperContent>
-    with I18nMixin {
-  double _raw = 1;
-
-  double get _speed => 1 / _raw;
-
-  void markWholeRenderTreeNeedsPaint() {
-    late RenderObjectVisitor visitor;
-
-    visitor = (RenderObject child) {
-      child.markNeedsPaint();
-      child.visitChildren(visitor);
-    };
-
-    for (final renderView in RendererBinding.instance.renderViews) {
-      renderView.visitChildren(visitor);
-    }
-  }
-
+class _VisualHelperContentState extends State<VisualHelperContent> {
+  final _session = DebugSession();
+  late double _speed = (1 / (DebugSession.read(.animation) as double)).clamp(
+    .1,
+    2,
+  );
   @override
   void dispose() {
-    timeDilation = 1;
-    debugPaintSizeEnabled = false;
-    debugRepaintRainbowEnabled = false;
-    debugInvertOversizedImages = false;
-    markWholeRenderTreeNeedsPaint();
+    _session.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 动画减速（标题 + 文案 + Slider）
-          Row(
-            children: [
-              Text(
-                t(context, 'visual_helper.animate_speed'),
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-              const Spacer(),
-              Text(
-                '×${_raw.toStringAsFixed(2)}',
-                style: const TextStyle(fontSize: 14, color: Colors.black54),
-              ),
-            ],
-          ),
-          Slider(
-            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-            value: _raw,
-            min: 0.1,
-            max: 2,
-            divisions: 19,
-            onChangeStart: (value) {
-              timeDilation = 1;
-            },
-            onChangeEnd: (value) {
-              timeDilation = _speed;
-            },
-            onChanged: (value) {
-              setState(() {
-                _raw = value;
-              });
-            },
-          ),
-
-          // 三项紧凑行
-          _compactRow(
-            t(context, 'visual_helper.layout_bounds'),
-            t(context, 'visual_helper.show_widget_borders'),
-            debugPaintSizeEnabled,
-            (v) {
-              setState(() => debugPaintSizeEnabled = v);
-              markWholeRenderTreeNeedsPaint();
-            },
-          ),
-          _compactRow(
-            t(context, 'visual_helper.repaint_highlight'),
-            t(context, 'visual_helper.frame_repaint_highlight'),
-            debugRepaintRainbowEnabled,
-            (v) {
-              setState(() => debugRepaintRainbowEnabled = v);
-              markWholeRenderTreeNeedsPaint();
-            },
-          ),
-          _compactRow(
-            t(context, 'visual_helper.invert_oversized_images'),
-            t(context, 'visual_helper.invert_oversized_images_label'),
-            debugInvertOversizedImages,
-            (v) {
-              setState(() => debugInvertOversizedImages = v);
-              markWholeRenderTreeNeedsPaint();
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _compactRow(
-    String title,
-    String desc,
-    bool value,
-    ValueChanged<bool> onChanged,
-  ) {
-    return SizedBox(
-      height: 48,
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  desc,
-                  style: const TextStyle(fontSize: 11, color: Colors.black54),
-                ),
-              ],
+  Widget build(BuildContext context) => SingleChildScrollView(
+    padding: const .all(12),
+    child: Column(
+      crossAxisAlignment: .stretch,
+      children: [
+        Text(
+          '${kitText(context, 'visual_helper.animation_speed')} ×${_speed.toStringAsFixed(1)}',
+          style: const TextStyle(fontWeight: .bold),
+        ),
+        ManaSlider(
+          value: _speed,
+          min: .1,
+          max: 2,
+          divisions: 19,
+          formatValue: (v) => '×${v.toStringAsFixed(1)}',
+          semanticLabel: kitText(context, 'visual_helper.animation_speed'),
+          onChanged: (value) {
+            setState(() => _speed = value);
+            _session.set(.animation, 1 / value);
+          },
+        ),
+        if (kDebugMode)
+          for (final (flag, key) in [
+            (DebugFlag.layout, 'visual_helper.layout_bounds'),
+            (DebugFlag.repaint, 'visual_helper.repaint_highlight'),
+            (DebugFlag.images, 'visual_helper.invert_oversized_images'),
+          ])
+            KitToggle(
+              label: kitText(context, key),
+              value: DebugSession.read(flag) as bool,
+              onChanged: (value) => setState(() => _session.set(flag, value)),
             ),
+        if (!kDebugMode)
+          Text(
+            kitText(context, 'common.unsupported'),
+            style: const TextStyle(color: KitStyle.muted),
           ),
-          Switch(
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            padding: EdgeInsets.zero,
-            value: value,
-            onChanged: onChanged,
-          ),
-        ],
-      ),
-    );
-  }
+      ],
+    ),
+  );
 }

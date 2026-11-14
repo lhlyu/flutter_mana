@@ -1,54 +1,82 @@
-import 'dart:collection';
-
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 
-class ManaLogCollector extends ChangeNotifier implements LogOutput {
-  static final ManaLogCollector _instance = ManaLogCollector._internal();
+import '../../data/bounded_collector.dart';
 
-  factory ManaLogCollector() => _instance;
+/// Attach the same instance to Logger.output and ManaLogViewer.
+class ManaLogCollector extends BoundedCollector<OutputEvent>
+    implements LogOutput {
+  ManaLogCollector({super.capacity});
+  final _captures = <VoidCallback>{};
+  @override
+  Future<void> init() async {}
+  @override
+  Future<void> destroy() async {}
+  @override
+  void output(OutputEvent event) => add(event);
 
-  ManaLogCollector._internal();
+  /// Returns an idempotent release callback. Multiple viewers may capture together.
+  VoidCallback captureDebugPrint() {
+    if (isDisposed) throw StateError('Collector is disposed.');
+    final release = _DebugPrintCapture.attach(this);
+    var active = true;
+    late final VoidCallback cancel;
+    cancel = () {
+      if (!active) return;
+      active = false;
+      _captures.remove(cancel);
+      release();
+    };
+    _captures.add(cancel);
+    return cancel;
+  }
 
-  static const int _max = 1000;
+  @override
+  void dispose() {
+    for (final release in _captures.toList()) {
+      release();
+    }
+    super.dispose();
+  }
+}
 
-  final ListQueue<OutputEvent> _data = ListQueue();
+abstract final class _DebugPrintCapture {
+  static final _targets = <Object, ManaLogCollector>{};
+  static DebugPrintCallback? _original;
+  static bool _capturing = false;
 
-  UnmodifiableListView<OutputEvent> get data => UnmodifiableListView(_data);
+  static void _print(String? message, {int? wrapWidth}) {
+    final original = _original;
+    if (_capturing) {
+      original?.call(message, wrapWidth: wrapWidth);
+      return;
+    }
+    _capturing = true;
+    try {
+      for (final collector in _targets.values.toSet()) {
+        collector.output(
+          OutputEvent(LogEvent(Level.debug, message ?? ''), [message ?? '']),
+        );
+      }
+      original?.call(message, wrapWidth: wrapWidth);
+    } finally {
+      _capturing = false;
+    }
+  }
 
-  static DebugPrintCallback? _originalDebugPrint;
-
-  static redirectDebugPrint() {
-    if (_originalDebugPrint != null) return;
-    _originalDebugPrint = debugPrint;
-    debugPrint = (String? message, {int? wrapWidth}) {
-      ManaLogCollector._instance.output(
-        OutputEvent(LogEvent(Level.debug, message), []),
-      );
-
-      if (_originalDebugPrint != null) {
-        _originalDebugPrint!(message, wrapWidth: wrapWidth);
+  static VoidCallback attach(ManaLogCollector collector) {
+    if (_targets.isEmpty) {
+      _original = debugPrint;
+      debugPrint = _print;
+    }
+    final token = Object();
+    _targets[token] = collector;
+    return () {
+      _targets.remove(token);
+      if (_targets.isEmpty) {
+        if (debugPrint == _print) debugPrint = _original!;
+        _original = null;
       }
     };
-  }
-
-  @override
-  Future<void> init() => Future.value();
-
-  @override
-  Future<void> destroy() => Future.value();
-
-  @override
-  void output(OutputEvent event) {
-    _data.add(event);
-    if (_data.length > _max) {
-      _data.removeFirst();
-    }
-    notifyListeners();
-  }
-
-  void clear() {
-    _data.clear();
-    notifyListeners();
   }
 }

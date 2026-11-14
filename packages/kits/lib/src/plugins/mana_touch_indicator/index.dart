@@ -1,26 +1,22 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_mana/flutter_mana.dart';
 
+import '../builtin_kit.dart';
 import 'icon.dart';
-import 'widgets/touch_indicator.dart';
+import '../../ui/kit_ui.dart';
+import 'widgets/touch_indicator_barrier.dart';
 
-class ManaTouchIndicator extends ManaPluggable {
+class ManaTouchIndicator extends BuiltinKit {
+  ManaTouchIndicator()
+    : super(
+        name: 'mana_touch_indicator',
+        title: 'Touch Indicator',
+        chineseTitle: '触摸指示器',
+        iconImageProvider: iconImage,
+      );
+  @override
+  Widget buildWidget(BuildContext context) =>
+      KitWindow(name: name, barrier: const TouchIndicatorBarrier());
   @override
   ManaPresentation get presentation => .overlay;
-  @override
-  Widget? buildWidget(BuildContext context) => TouchIndicator(name: name);
-
-  @override
-  ImageProvider<Object> get iconImageProvider => iconImage;
-
-  @override
-  String get name => 'mana_touch_indicator';
-
-  @override
-  String getLocalizedDisplayName(Locale locale) {
-    if (locale.languageCode == 'zh') {
-      return '触摸指示器';
-    }
-    return 'Touch Indicator';
-  }
 }

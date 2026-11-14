@@ -1,142 +1,125 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_mana/flutter_mana.dart';
 
+import '../../../ui/kit_ui.dart';
 import 'screen_pixel_grabber.dart';
 
 class ColorSuckerBarrier extends StatefulWidget {
-  final double magnifierRadius;
-
-  final Color borderColor;
-
-  final double borderWidth;
-
-  final double magnification;
-
-  final Offset? initialPosition;
-
-  final ValueChanged<Color>? onColorChanged;
-
   const ColorSuckerBarrier({
     super.key,
-    this.magnifierRadius = 50,
-    this.borderColor = Colors.grey,
-    this.borderWidth = 2,
-    this.magnification = 10.0,
-    this.initialPosition,
+    this.magnification = 10,
     this.onColorChanged,
   });
-
+  final double magnification;
+  final ValueChanged<Color>? onColorChanged;
   @override
   State<ColorSuckerBarrier> createState() => _ColorSuckerBarrierState();
 }
 
 class _ColorSuckerBarrierState extends State<ColorSuckerBarrier> {
-  Offset? _dragPosition;
-  late ScreenPixelGrabber _pixelGrabber;
-
+  late final _grabber = ScreenPixelGrabber(
+    repaintBoundaryKey: ManaScope.read(context).rootKey,
+  );
+  Offset? _position;
+  Object? _error;
+  int _generation = 0;
   @override
   void initState() {
     super.initState();
-    _pixelGrabber = ScreenPixelGrabber(
-      repaintBoundaryKey: ManaScope.read(context).rootKey,
-    );
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initializeColorSucker();
+      if (mounted) _sample();
     });
-  }
-
-  Offset _getDefaultCenterPosition() {
-    final Size screenSize = MediaQuery.sizeOf(context);
-    return widget.initialPosition ??
-        Offset(screenSize.width / 2, screenSize.height / 2);
-  }
-
-  Future<void> _initializeColorSucker() async {
-    final double devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
-    await _pixelGrabber.captureImage(pixelRatio: devicePixelRatio);
-
-    if (mounted) {
-      final defaultCenterPosition = _getDefaultCenterPosition();
-
-      setState(() {
-        _dragPosition = defaultCenterPosition;
-      });
-      _onUpdate(defaultCenterPosition, true);
-    }
-  }
-
-  Future<void> _onUpdate(Offset globalPosition, [bool end = false]) async {
-    setState(() {
-      _dragPosition = globalPosition;
-    });
-
-    if (!end) {
-      return;
-    }
-
-    final color = await _pixelGrabber.getColorAt(globalPosition);
-
-    if (color != null) {
-      widget.onColorChanged?.call(color);
-    }
   }
 
   @override
-  Widget build(BuildContext context) {
-    final defaultDragPosition = _getDefaultCenterPosition();
+  void dispose() {
+    _generation++;
+    _grabber.dispose();
+    super.dispose();
+  }
 
-    final dragPosition = _dragPosition ?? defaultDragPosition;
+  Future<void> _sample() async {
+    final generation = ++_generation;
+    final box = context.findRenderObject() as RenderBox;
+    final position = box.localToGlobal(
+      _position ?? box.size.center(Offset.zero),
+    );
+    try {
+      await _grabber.captureImage(
+        pixelRatio: MediaQuery.devicePixelRatioOf(context),
+      );
+      final color = _grabber.getColorAt(position);
+      if (!mounted || generation != _generation) return;
+      setState(() => _error = null);
+      if (color != null) widget.onColorChanged?.call(color);
+    } catch (error) {
+      if (mounted && generation == _generation) setState(() => _error = error);
+    }
+  }
 
-    return GestureDetector(
-      onPanDown: (details) => _onUpdate(details.globalPosition),
-      onPanUpdate: (details) => _onUpdate(details.globalPosition),
-      onPanEnd: (details) => _onUpdate(details.globalPosition, true),
-      child: Stack(
-        children: [
-          Positioned.fill(child: Container(color: Colors.transparent)),
-          Positioned(
-            left: dragPosition.dx - widget.magnifierRadius,
-            top: dragPosition.dy - widget.magnifierRadius,
-            child: RawMagnifier(
-              size: Size(
-                widget.magnifierRadius * 2,
-                widget.magnifierRadius * 2,
-              ),
-              magnificationScale: widget.magnification,
-              decoration: MagnifierDecoration(
-                shape: CircleBorder(
-                  side: BorderSide(
-                    color: widget.borderColor,
-                    width: widget.borderWidth,
+  void _move(Offset position) {
+    final box = context.findRenderObject() as RenderBox;
+    setState(() {
+      _generation++;
+      _position = Offset(
+        position.dx.clamp(0, box.size.width),
+        position.dy.clamp(0, box.size.height),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final position = _position ?? constraints.biggest.center(Offset.zero);
+      return GestureDetector(
+        behavior: .opaque,
+        onTapUp: (details) {
+          _move(details.localPosition);
+          _sample();
+        },
+        onPanStart: (details) => _move(details.localPosition),
+        onPanUpdate: (details) => _move(details.localPosition),
+        onPanEnd: (_) => _sample(),
+        child: Stack(
+          children: [
+            Positioned(
+              left: position.dx - 45,
+              top: position.dy - 45,
+              child: IgnorePointer(
+                child: RawMagnifier(
+                  size: const Size(90, 90),
+                  magnificationScale: widget.magnification,
+                  decoration: const MagnifierDecoration(
+                    shape: CircleBorder(
+                      side: BorderSide(color: KitStyle.accent, width: 2),
+                    ),
                   ),
-                ),
-              ),
-              focalPointOffset: Offset.zero,
-              child: Container(
-                width: widget.magnifierRadius * 2,
-                height: widget.magnifierRadius * 2,
-                color: Colors.transparent,
-                child: Center(
-                  child: Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      border: Border.all(
-                        color: Colors.grey,
-                        width: 1,
-                        style: BorderStyle.solid,
+                  child: Center(
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: KitStyle.accent),
                       ),
-                      borderRadius: BorderRadius.circular(20),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
+            if (_error case final error?)
+              Positioned(
+                left: 8,
+                right: 8,
+                bottom: 8,
+                child: Text(
+                  '$error',
+                  style: const TextStyle(color: KitStyle.danger),
+                ),
+              ),
+          ],
+        ),
+      );
+    },
+  );
 }

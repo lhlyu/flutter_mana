@@ -1,26 +1,36 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_mana/flutter_mana.dart';
+import 'package:flutter/widgets.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
+import '../builtin_kit.dart';
 import 'icon.dart';
-import 'widgets/package_info.dart';
+import '../../ui/kit_ui.dart';
 
-class ManaPackageInfo extends ManaPluggable {
+class ManaPackageInfo extends BuiltinKit {
+  ManaPackageInfo()
+    : super(
+        name: 'mana_package_info',
+        title: 'Package Info',
+        chineseTitle: '包信息',
+        iconImageProvider: iconImage,
+      );
   @override
-  Widget? buildWidget(BuildContext context) => PackageInfo(name: name);
-
-  @override
-  String getLocalizedDisplayName(Locale locale) {
-    switch (locale.languageCode) {
-      case 'zh':
-        return '包信息';
-      default:
-        return 'Package Info';
-    }
-  }
-
-  @override
-  ImageProvider<Object> get iconImageProvider => iconImage;
-
-  @override
-  String get name => 'mana_package_info';
+  Widget buildWidget(BuildContext context) => KitWindow(
+    name: name,
+    showBarrier: false,
+    content: KitAsync<PackageInfo>(
+      load: PackageInfo.fromPlatform,
+      builder: (context, info) => SingleChildScrollView(
+        child: KitDataTable({
+          'appName': info.appName,
+          'packageName': info.packageName,
+          'version': info.version,
+          'buildNumber': info.buildNumber,
+          'buildSignature': info.buildSignature,
+          'installerStore': info.installerStore,
+          'installTime': info.installTime,
+          'updateTime': info.updateTime,
+        }),
+      ),
+    ),
+  );
 }

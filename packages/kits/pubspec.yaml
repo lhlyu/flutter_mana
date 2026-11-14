@@ -10,7 +10,7 @@ topics: [ debug, in-app-debug, diagnostics, plugin ]
 environment:
   sdk: ">=3.14.0 <4.0.0"
   flutter: ">=3.50.0"
-resolution: workspace 
+resolution: workspace
 
 dependencies:
   flutter:
@@ -23,7 +23,6 @@ dependencies:
   device_info_plus: ^13.3.0
   package_info_plus: ^10.2.2
   vm_service: ^15.4.0
-  string_scanner: ^1.4.1
 
 dev_dependencies:
   flutter_test:

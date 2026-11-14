@@ -13,24 +13,13 @@ import 'widgets/animated_ball.dart';
 import 'widgets/custom_button.dart';
 
 void main() async {
-  final controller = ManaController();
-  controller
-    ..registerPlugin(ManaScreenInfo())
-    ..registerPlugin(ManaTouchIndicator())
-    ..registerPlugin(ManaVisualHelper())
-    ..registerPlugin(ManaGrid())
-    ..registerPlugin(ManaLicense())
-    ..registerPlugin(ManaPackageInfo())
-    ..registerPlugin(ManaMemoryInfo())
-    ..registerPlugin(ManaShowCode())
-    ..registerPlugin(ManaLogViewer())
-    ..registerPlugin(ManaDeviceInfo())
-    ..registerPlugin(ManaColorSucker())
-    ..registerPlugin(ManaDioInspector())
-    ..registerPlugin(ManaWidgetInfoInspector())
-    ..registerPlugin(ManaFpsMonitor())
-    ..registerPlugin(ManaSharedPreferencesViewer())
-    ..registerPlugin(ManaAlignRuler());
+  final controller = ManaController(
+    plugins: loadAllPlugins(
+      dioCollector: DioClient.collector,
+      logCollector: LogGenerator.collector,
+      captureDebugPrint: true,
+    ),
+  );
 
   runApp(MyApp(controller: controller));
 }
@@ -60,8 +49,6 @@ class _MyAppState extends State<MyApp> {
       navigatorObservers: [_observer],
       builder: (context, child) => ManaWidget.builder(
         controller: widget.controller,
-        overlayBuilder: (context, overlay) =>
-            Material(type: MaterialType.transparency, child: overlay),
         child: child ?? const SizedBox.shrink(),
       ),
       title: 'Example',

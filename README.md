@@ -62,8 +62,6 @@ class _AppState extends State<App> {
     home: const Text('Example'),
     builder: (context, child) => ManaWidget.builder(
       controller: controller,
-      overlayBuilder: (context, overlay) =>
-          Material(type: MaterialType.transparency, child: overlay),
       child: child!,
     ),
   );

@@ -12,4 +12,4 @@ void registerPlugin(ManaController controller) {
 }
 ```
 
-宿主接入与 Material 环境配置见[完整示例](../../../../../example/lib/main.dart)。
+接入见[完整示例](../../../../../example/lib/main.dart)。

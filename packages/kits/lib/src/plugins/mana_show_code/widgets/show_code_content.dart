@@ -1,110 +1,92 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_mana/flutter_mana.dart';
+import 'dart:async';
 
+import 'package:flutter/widgets.dart';
+import 'package:vm_service/vm_service.dart';
+
+import '../../../ui/kit_ui.dart';
 import '../code/code_widget.dart';
-import '../code/highlighter_style.dart';
-import '../utils/page_info_helper.dart';
-
-/// 直接缓存高亮后的代码
-final Map<String, _CodeInfo> _codeInfos = {};
+import '../utils/code_display_service.dart';
 
 class ShowCodeContent extends StatefulWidget {
-  const ShowCodeContent({super.key});
-
+  const ShowCodeContent({super.key, this.service});
+  final CodeDisplayService? service;
   @override
   State<ShowCodeContent> createState() => _ShowCodeContentState();
 }
 
 class _ShowCodeContentState extends State<ShowCodeContent> {
-  // 统一的字体大小
-  static const double _fontSize = 12.0;
-
-  // 分割线颜色
-  static final Color _dividerColor = Colors.grey.shade200;
-
-  late Future<_CodeInfo> _future;
-
+  late CodeDisplayService _service = widget.service ?? CodeDisplayService();
+  final _query = TextEditingController();
+  ScriptRef? _selected;
   @override
-  void initState() {
-    super.initState();
-    _future = _loadData();
+  void didUpdateWidget(ShowCodeContent old) {
+    super.didUpdateWidget(old);
+    if (old.service == widget.service) return;
+    if (old.service == null) unawaited(_service.close());
+    _service = widget.service ?? CodeDisplayService();
+    _selected = null;
   }
 
-  Future<_CodeInfo> _loadData() async {
-    final helper = PageInfoHelper(ManaScope.read(context).rootKey)
-      ..initialize();
-    try {
-      final packagePath = helper.packagePathConvertFromFilePath(
-        helper.filePath,
-      );
-
-      if (_codeInfos.containsKey(packagePath)) {
-        return _codeInfos[packagePath]!;
-      }
-
-      final code = await helper.getCode(packagePath) ?? '';
-
-      final codeInfo = _CodeInfo(packagePath, code);
-
-      _codeInfos[packagePath] = codeInfo;
-
-      return codeInfo;
-    } finally {
-      await helper.close();
-    }
+  @override
+  void dispose() {
+    _query.dispose();
+    if (widget.service == null) unawaited(_service.close());
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: _future,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData)
-          return const Center(child: CircularProgressIndicator());
-
-        final packagePath = snapshot.data!.packagePath;
-        final code = snapshot.data!.code;
-
-        return SelectionArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    if (_selected case final script?) {
+      return KitDetail(
+        title: script.uri ?? '',
+        onClose: () => setState(() => _selected = null),
+        child: KitAsync<String>(
+          key: ValueKey(script.id),
+          load: () => _service.source(script),
+          builder: (context, source) => Column(
             children: [
-              Divider(height: 1, color: _dividerColor),
-              SingleChildScrollView(
-                physics: const ClampingScrollPhysics(),
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.all(16),
-                child: SelectableText(
-                  packagePath,
-                  style: TextStyle(
-                    fontSize: _fontSize,
-                    color: Colors.blueAccent,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              Divider(height: 1, color: _dividerColor),
-
-              Expanded(
-                child: SizedBox(
-                  width: double.infinity,
-                  child: CodeWidget(
-                    code: code,
-                    style: HighlighterStyle.fromColors(HighlighterStyle.gitHub),
-                  ),
-                ),
-              ),
+              Align(alignment: .centerRight, child: KitCopyButton(source)),
+              Expanded(child: CodeWidget(code: source)),
             ],
           ),
+        ),
+      );
+    }
+    return KitAsync<List<ScriptRef>>(
+      key: ObjectKey(_service),
+      load: _service.scripts,
+      builder: (context, scripts) {
+        final query = _query.text.toLowerCase();
+        final items = scripts
+            .where((script) => script.uri!.toLowerCase().contains(query))
+            .toList();
+        return Column(
+          children: [
+            KitField(
+              controller: _query,
+              label: kitText(context, 'common.search'),
+              onChanged: (_) => setState(() {}),
+            ),
+            Expanded(
+              child: items.isEmpty
+                  ? KitMessage(kitText(context, 'common.empty'))
+                  : ListView.builder(
+                      itemCount: items.length,
+                      itemBuilder: (context, i) => ManaButton(
+                        onPressed: () => setState(() => _selected = items[i]),
+                        child: Align(
+                          alignment: .centerLeft,
+                          child: Text(
+                            items[i].uri!,
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ),
+                      ),
+                    ),
+            ),
+          ],
         );
       },
     );
   }
-}
-
-class _CodeInfo {
-  final String packagePath;
-  final String code;
-
-  const _CodeInfo(this.packagePath, this.code);
 }

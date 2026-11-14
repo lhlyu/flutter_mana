@@ -1,26 +1,23 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_mana/flutter_mana.dart';
+import 'package:flutter/widgets.dart';
 
+import '../builtin_kit.dart';
 import 'icon.dart';
-import 'widgets/visual_helper.dart';
+import '../../ui/kit_ui.dart';
+import 'widgets/visual_helper_content.dart';
 
-class ManaVisualHelper extends ManaPluggable {
+class ManaVisualHelper extends BuiltinKit {
+  ManaVisualHelper()
+    : super(
+        name: 'mana_visual_helper',
+        title: 'Visual Helper',
+        chineseTitle: '视觉辅助',
+        iconImageProvider: iconImage,
+      );
   @override
-  Widget? buildWidget(BuildContext context) => VisualHelper(name: name);
-
-  @override
-  String getLocalizedDisplayName(Locale locale) {
-    switch (locale.languageCode) {
-      case 'zh':
-        return '视觉辅助';
-      default:
-        return 'Visual Helper';
-    }
-  }
-
-  @override
-  ImageProvider<Object> get iconImageProvider => iconImage;
-
-  @override
-  String get name => 'mana_visual_helper';
+  Widget buildWidget(BuildContext context) => KitWindow(
+    name: name,
+    initialHeight: 290,
+    showBarrier: false,
+    content: const VisualHelperContent(),
+  );
 }

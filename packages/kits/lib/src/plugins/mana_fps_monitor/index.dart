@@ -1,30 +1,26 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_mana/flutter_mana.dart';
+import 'package:flutter/widgets.dart';
 
+import '../builtin_kit.dart';
 import 'icon.dart';
-import 'widgets/fps_monitor.dart';
+import '../../ui/kit_ui.dart';
 
-class ManaFpsMonitor extends ManaPluggable {
+class ManaFpsMonitor extends BuiltinKit {
+  ManaFpsMonitor()
+    : super(
+        name: 'mana_fps_monitor',
+        title: 'Frame Timing',
+        chineseTitle: '帧率监控',
+        iconImageProvider: iconImage,
+      );
   @override
-  Widget? buildWidget(BuildContext context) => FpsMonitor(name: name);
-
-  @override
-  String getLocalizedDisplayName(Locale locale) {
-    switch (locale.languageCode) {
-      case 'zh':
-        return '帧率监控';
-      default:
-        return 'Fps Monitor';
-    }
-  }
-
-  @override
-  ImageProvider<Object> get iconImageProvider => iconImage;
-
-  @override
-  String get name => 'mana_fps_monitor';
-
+  Widget buildWidget(BuildContext context) => KitWindow(
+    name: name,
+    initialHeight: 220,
+    initialWidth: 420,
+    showBarrier: false,
+    content: PerformanceOverlay.allEnabled(),
+  );
   @override
   bool get isSupported => !kIsWeb;
 }

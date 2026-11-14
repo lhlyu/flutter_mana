@@ -1,98 +1,125 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_mana/flutter_mana.dart';
 import 'package:flutter_mana/flutter_mana_diagnostics.dart';
 
-import 'widget_info_inspector_barrier.dart';
-import 'widget_info_inspector_content.dart';
+import '../../../diagnostics/debug_session.dart';
+import '../../../ui/kit_ui.dart';
+import 'widget_info_inspector_detail.dart';
 
 class WidgetInfoInspector extends StatefulWidget {
-  final String name;
-
   const WidgetInfoInspector({super.key, required this.name});
-
+  final String name;
   @override
   State<WidgetInfoInspector> createState() => _WidgetInfoInspectorState();
 }
 
-class _WidgetInfoInspectorState extends State<WidgetInfoInspector>
-    with WidgetsBindingObserver {
-  _WidgetInfoInspectorState()
-    : selection = WidgetInspectorService.instance.selection;
-
-  final InspectorSelection selection;
-
-  /// 强制整个渲染树所有节点调用 markNeedsPaint()
-  void markWholeRenderTreeNeedsPaint() {
-    late RenderObjectVisitor visitor;
-
-    visitor = (RenderObject child) {
-      child.markNeedsPaint();
-      child.visitChildren(visitor);
-    };
-
-    for (final renderView in RendererBinding.instance.renderViews) {
-      renderView.visitChildren(visitor);
-    }
-  }
-
-  void _inspectAt(Offset? position) {
-    if (position == null) return;
-
-    final List<RenderObject> renderObjects = HitTestUtils.hitTest(
-      position,
-      rootKey: ManaScope.read(context).rootKey,
-    );
-
-    setState(() {
-      selection.candidates = renderObjects;
-
-      markWholeRenderTreeNeedsPaint();
-    });
-  }
-
-  void _handleTapDown(TapDownDetails details) {
-    _inspectAt(details.globalPosition);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    selection.clear();
-  }
-
+class _WidgetInfoInspectorState extends State<WidgetInfoInspector> {
+  final _session = DebugSession();
+  final _paintKey = GlobalKey();
+  RenderObject? _selected;
+  bool _details = false;
+  bool _layout = DebugSession.read(.layout) as bool;
   @override
   void dispose() {
-    debugPaintSizeEnabled = false;
-
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      markWholeRenderTreeNeedsPaint();
-    });
+    _session.dispose();
     super.dispose();
   }
 
-  void _showAllSize() async {
-    debugPaintSizeEnabled = !debugPaintSizeEnabled;
-    markWholeRenderTreeNeedsPaint();
+  void _inspect(TapDownDetails details) {
+    final hits = HitTestUtils.hitTest(
+      details.globalPosition,
+      rootKey: ManaScope.read(context).rootKey,
+    );
+    setState(() {
+      _selected = hits.firstOrNull;
+      _details = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return ManaFloatingWindow(
+    final creator = _selected?.debugCreator;
+    final element = creator is DebugCreator && creator.element.mounted
+        ? creator.element
+        : null;
+    return KitWindow(
       name: widget.name,
-      initialWidth: 300,
-      initialHeight: 100,
-      barrier: WidgetInfoInspectorBarrier(
-        selection: selection,
-        onTapDown: _handleTapDown,
+      initialWidth: 360,
+      initialHeight: 340,
+      barrier: GestureDetector(
+        behavior: .opaque,
+        onTapDown: _inspect,
+        child: IgnorePointer(
+          child: CustomPaint(
+            key: _paintKey,
+            painter: _HighlightPainter(_selected, _paintKey),
+          ),
+        ),
       ),
-      content: WidgetInfoInspectorContent(
-        selection: selection,
-        onChanged: (value) {
-          selection.clear();
-          _showAllSize();
-        },
-      ),
+      content: _details && element != null
+          ? InfoPage(
+              elements: element.debugGetDiagnosticChain(),
+              onClose: () => setState(() => _details = false),
+            )
+          : SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: .stretch,
+                children: [
+                  KitToggle(
+                    label: kitText(context, 'visual_helper.layout_bounds'),
+                    value: _layout,
+                    onChanged: (value) => setState(() {
+                      _layout = value;
+                      _session.set(.layout, value);
+                    }),
+                  ),
+                  KitDataTable({
+                    'Widget': element?.widget.toStringShort(),
+                    'Bounds': _selected?.paintBounds,
+                  }),
+                  KitButton(
+                    label: kitText(context, 'common.details'),
+                    icon: .eye,
+                    onPressed: element == null
+                        ? null
+                        : () => setState(() => _details = true),
+                  ),
+                ],
+              ),
+            ),
     );
   }
+}
+
+class _HighlightPainter extends CustomPainter {
+  const _HighlightPainter(this.selected, this.key);
+  final RenderObject? selected;
+  final GlobalKey key;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final target = selected;
+    final box = key.currentContext?.findRenderObject();
+    if (target == null || !target.attached || box == null || !box.attached) {
+      return;
+    }
+    final rect = MatrixUtils.transformRect(
+      target.getTransformTo(box),
+      target.paintBounds,
+    );
+    if (!rect.isFinite) return;
+    canvas.drawRect(
+      rect,
+      Paint()..color = KitStyle.accent.withValues(alpha: .15),
+    );
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..color = KitStyle.accent
+        ..style = .stroke
+        ..strokeWidth = 2,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_HighlightPainter old) => true;
 }

@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_mana/flutter_mana.dart';
+import 'package:flutter/widgets.dart';
+
+import '../../../ui/kit_ui.dart';
 
 import 'color_sucker_barrier.dart';
 import 'color_sucker_content.dart';
@@ -14,30 +15,25 @@ class ColorSucker extends StatefulWidget {
 }
 
 class _ColorSuckerState extends State<ColorSucker> {
-  Color _color = Colors.black;
+  Color _color = KitStyle.text;
   double _magnification = 10.0;
 
   @override
   Widget build(BuildContext context) {
-    return ManaFloatingWindow(
+    return KitWindow(
       name: widget.name,
       barrier: ColorSuckerBarrier(
         magnification: _magnification,
-        onColorChanged: (color) {
-          _color = color;
-          setState(() {});
-        },
+        onColorChanged: (color) => setState(() => _color = color),
       ),
-      position: PositionType.top,
+      position: .top,
       initialWidth: 300,
-      initialHeight: 200,
+      initialHeight: 240,
       content: ColorSuckerContent(
         color: _color,
-        onMagnificationChanged: (value) {
-          setState(() {
-            _magnification = value;
-          });
-        },
+        magnification: _magnification,
+        onMagnificationChanged: (value) =>
+            setState(() => _magnification = value),
       ),
     );
   }

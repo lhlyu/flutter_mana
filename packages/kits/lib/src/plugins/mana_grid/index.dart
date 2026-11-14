@@ -1,26 +1,17 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_mana/flutter_mana.dart';
+import 'package:flutter/widgets.dart';
 
+import '../builtin_kit.dart';
 import 'icon.dart';
 import 'widgets/grid.dart';
 
-class ManaGrid extends ManaPluggable {
+class ManaGrid extends BuiltinKit {
+  ManaGrid()
+    : super(
+        name: 'mana_grid',
+        title: 'Grid',
+        chineseTitle: '网格',
+        iconImageProvider: iconImage,
+      );
   @override
-  Widget? buildWidget(BuildContext context) => Grid(name: name);
-
-  @override
-  String getLocalizedDisplayName(Locale locale) {
-    switch (locale.languageCode) {
-      case 'zh':
-        return '网格';
-      default:
-        return 'Grid';
-    }
-  }
-
-  @override
-  ImageProvider<Object> get iconImageProvider => iconImage;
-
-  @override
-  String get name => 'mana_grid';
+  Widget buildWidget(BuildContext context) => Grid(name: name);
 }

@@ -1,362 +1,116 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_mana_kits/src/i18n/i18n_mixin.dart';
-import 'package:flutter_mana_kits/src/icons/kit_icons.dart';
+import 'package:flutter/widgets.dart';
 
-class ResponseDetail extends StatelessWidget with I18nMixin {
-  final Response response;
+import '../../../ui/kit_ui.dart';
+import '../mana_dio_collector.dart';
+import '../request_format.dart';
 
-  final VoidCallback? onClose;
-
-  const ResponseDetail({super.key, required this.response, this.onClose});
-
-  static final _divider = Divider(height: 1, color: Colors.grey.shade200);
-
+class ResponseDetail extends StatefulWidget {
+  const ResponseDetail({
+    super.key,
+    required this.response,
+    required this.onClose,
+  });
+  final Response<dynamic> response;
+  final VoidCallback onClose;
   @override
-  Widget build(BuildContext context) {
-    final RequestOptions requestOptions = response.requestOptions;
-
-    final DateTime? requestStartTime =
-        requestOptions.extra['manaDioRequestStartTime'];
-    final DateTime? requestEndTime = response.extra['manaDioRequestEndTime'];
-
-    Duration duration = Duration.zero;
-    if (requestStartTime != null && requestEndTime != null) {
-      duration = requestEndTime.difference(requestStartTime);
-    }
-
-    String formattedRequestTime = requestStartTime != null
-        ? '${requestStartTime.hour.toString().padLeft(2, '0')}:${requestStartTime.minute.toString().padLeft(2, '0')}:${requestStartTime.second.toString().padLeft(2, '0')}.${requestStartTime.millisecond.toString().padLeft(3, '0')}'
-        : 'N/A';
-
-    // 请求详情
-    final Map<String, String> details = {
-      'URL': requestOptions.uri.toString(),
-      'Method': requestOptions.method.toString(),
-      'Time': formattedRequestTime,
-      'Duration': '${duration.inMilliseconds}ms',
-      'Status': response.statusCode?.toString() ?? 'N/A',
-      'Message': response.statusMessage ?? 'N/A',
-    };
-
-    // 请求头
-    final Map<String, String> requestHeaders = requestOptions.headers.map(
-      (key, value) => MapEntry(key, value.toString()),
-    );
-
-    // 请求体
-    var requestBody = '';
-    if (requestOptions.data != null) {
-      try {
-        requestBody = JsonEncoder.withIndent('  ').convert(requestOptions.data);
-      } catch (e) {
-        requestBody = requestOptions.data.toString();
-      }
-    }
-
-    // 响应头
-    final Map<String, String> responseHeaders = response.headers.map.map(
-      (key, value) => MapEntry(key, value.join(';')),
-    );
-
-    // 响应体
-    var responseBody = '';
-    if (response.data != null) {
-      try {
-        responseBody = JsonEncoder.withIndent('  ').convert(response.data);
-      } catch (e) {
-        responseBody = response.data.toString();
-      }
-    }
-
-    return DefaultTabController(
-      length: 3,
-      child: Column(
-        children: [
-          _divider,
-          Row(
-            children: [
-              IconButton(
-                icon: Icon(KitIcons.close, color: Colors.grey, size: 16),
-                style: IconButton.styleFrom(
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                onPressed: onClose,
-              ),
-              Expanded(
-                child: Text(
-                  requestOptions.uri.toString(),
-                  style: TextStyle(fontSize: 12, color: Colors.black87),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-              ),
-              MorePopupMenu(response: response),
-            ],
-          ),
-          _divider,
-          TabBar(
-            labelColor: Colors.black,
-            unselectedLabelColor: Colors.grey,
-            indicatorColor: Colors.transparent,
-            dividerHeight: 0,
-            isScrollable: false,
-            labelStyle: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-            tabs: [
-              Tab(text: t(context, 'dio_inspector.detail'), height: 36),
-              Tab(text: t(context, 'dio_inspector.request'), height: 36),
-              Tab(text: t(context, 'dio_inspector.response'), height: 36),
-            ],
-          ),
-          _divider,
-          Expanded(
-            child: TabBarView(
-              children: [
-                _buildDetails(context, details),
-                _buildRequestDetails(context, requestHeaders, requestBody),
-                _buildResponseDetails(context, responseHeaders, responseBody),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTable(Map<String, String> data) {
-    final children = data.entries.map((row) {
-      return TableRow(
-        children: [
-          TableCell(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              child: Text(
-                row.key,
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
-          TableCell(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              child: SelectableText(row.value, style: TextStyle(fontSize: 12)),
-            ),
-          ),
-        ],
-      );
-    }).toList();
-
-    return Table(
-      border: TableBorder(
-        verticalInside: BorderSide(color: Colors.grey.shade200),
-        horizontalInside: BorderSide(color: Colors.grey.shade200),
-        top: BorderSide(color: Colors.grey.shade200),
-        bottom: BorderSide(color: Colors.grey.shade200),
-      ),
-      columnWidths: {0: FixedColumnWidth(120), 1: FlexColumnWidth()},
-      children: children,
-    );
-  }
-
-  Widget _buildCodeBlock(String code) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: SelectableText(
-        code,
-        style: const TextStyle(fontSize: 13, color: Colors.black87),
-      ),
-    );
-  }
-
-  // 构建详情
-  Widget _buildDetails(BuildContext context, Map<String, String> details) {
-    return SingleChildScrollView(
-      physics: const ClampingScrollPhysics(),
-      padding: EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              t(context, 'dio_inspector.request_details'),
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-          ),
-          _buildTable(details),
-        ],
-      ),
-    );
-  }
-
-  // 构建请求详情
-  Widget _buildRequestDetails(
-    BuildContext context,
-    Map<String, String> requestHeaders,
-    String requestBody,
-  ) {
-    return SingleChildScrollView(
-      physics: const ClampingScrollPhysics(),
-      padding: EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              t(context, 'dio_inspector.request_header'),
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-          ),
-          _buildTable(requestHeaders),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              t(context, 'dio_inspector.request_body'),
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-          ),
-          _buildCodeBlock(requestBody),
-        ],
-      ),
-    );
-  }
-
-  // 构建响应详情
-  Widget _buildResponseDetails(
-    BuildContext context,
-    Map<String, String> responseHeaders,
-    String responseBody,
-  ) {
-    return SingleChildScrollView(
-      physics: const ClampingScrollPhysics(),
-      padding: EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              t(context, 'dio_inspector.response_header'),
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-          ),
-          _buildTable(responseHeaders),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              t(context, 'dio_inspector.response_body'),
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-          ),
-          _buildCodeBlock(responseBody),
-        ],
-      ),
-    );
-  }
+  State<ResponseDetail> createState() => _ResponseDetailState();
 }
 
-/// 通用“更多”弹出菜单
-class MorePopupMenu extends StatelessWidget {
-  final Response response;
-
-  const MorePopupMenu({super.key, required this.response});
-
-  static const List<String> items = ['复制URL', '复制cURL', '复制HTTP', '复制响应'];
-
+class _ResponseDetailState extends State<ResponseDetail> {
+  int _tab = 0;
   @override
   Widget build(BuildContext context) {
+    final response = widget.response;
     final request = response.requestOptions;
-    final method = request.method;
-    final url = request.uri.toString();
-
-    // 请求头
-    final Map<String, String> requestHeaders = request.headers.map(
-      (key, value) => MapEntry(key, value.toString()),
-    );
-
-    requestHeaders.remove('content-length');
-
-    // 请求体
-    var requestBody = '';
-    if (request.data != null) {
-      try {
-        requestBody = jsonEncode(request.data);
-      } catch (e) {
-        requestBody = request.data.toString();
-      }
-    }
-
-    // 响应体
-    var responseBody = '';
-    if (response.data != null) {
-      try {
-        responseBody = JsonEncoder.withIndent('  ').convert(response.data);
-      } catch (e) {
-        responseBody = response.data.toString();
-      }
-    }
-
-    /// 如果下拉框存在的时候，热更新会报错
-    /// https://github.com/flutter/flutter/pull/171970
-    return PopupMenuButton<int>(
-      icon: const Icon(KitIcons.more, size: 16, color: Colors.grey),
-      color: Colors.white,
-      elevation: 2,
-      padding: EdgeInsets.zero,
-      menuPadding: EdgeInsets.zero,
-      popUpAnimationStyle: AnimationStyle.noAnimation,
-      style: IconButton.styleFrom(
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    final start = request.extra[ManaDioCollector.startTimeKey];
+    final end = response.extra[ManaDioCollector.endTimeKey];
+    return KitDetail(
+      title: '${request.uri}',
+      onClose: widget.onClose,
+      child: Column(
+        children: [
+          KitTabs(
+            values: const [0, 1, 2],
+            value: _tab,
+            label: (tab) => kitText(
+              context,
+              [
+                'dio_inspector.detail',
+                'dio_inspector.request',
+                'dio_inspector.response',
+              ][tab],
+            ),
+            onChanged: (value) => setState(() => _tab = value),
+          ),
+          const KitDivider(),
+          Expanded(
+            child: SingleChildScrollView(
+              child: switch (_tab) {
+                0 => KitDataTable({
+                  'URL': request.uri,
+                  'Method': request.method,
+                  'Status': response.statusCode,
+                  'Message': response.statusMessage,
+                  'Time': start is DateTime ? start.toIso8601String() : null,
+                  'Duration': start is DateTime && end is DateTime
+                      ? '${end.difference(start).inMilliseconds}ms'
+                      : null,
+                  'Error': ?response.extra[ManaDioCollector.errorKey],
+                }),
+                1 => Column(
+                  children: [
+                    KitSection(
+                      kitText(context, 'dio_inspector.request_header'),
+                      child: KitDataTable(request.headers),
+                    ),
+                    KitSection(
+                      kitText(context, 'dio_inspector.request_body'),
+                      child: KitCode(formatBody(request.data)),
+                    ),
+                  ],
+                ),
+                _ => Column(
+                  children: [
+                    KitSection(
+                      kitText(context, 'dio_inspector.response_header'),
+                      child: KitDataTable(
+                        response.headers.map.map(
+                          (k, v) => MapEntry(k, v.join('; ')),
+                        ),
+                      ),
+                    ),
+                    KitSection(
+                      kitText(context, 'dio_inspector.response_body'),
+                      child: KitCode(formatBody(response.data)),
+                    ),
+                  ],
+                ),
+              },
+            ),
+          ),
+          KitToolbar(
+            children: [
+              for (final (label, value) in [
+                ('URL', () => request.uri.toString()),
+                ('cURL', () => formatCurl(request)),
+                ('HTTP', () => formatHttp(request)),
+                (
+                  kitText(context, 'dio_inspector.response'),
+                  () => formatBody(response.data),
+                ),
+              ])
+                KitButton(
+                  label: '${kitText(context, 'common.copy')} $label',
+                  icon: .copy,
+                  onPressed: () =>
+                      Clipboard.setData(ClipboardData(text: value())),
+                ),
+            ],
+          ),
+        ],
       ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-      itemBuilder: (_) => List.generate(
-        items.length,
-        (index) => PopupMenuItem<int>(
-          value: index,
-          height: 34,
-          child: Text(items[index], style: const TextStyle(fontSize: 12)),
-        ),
-      ),
-      onSelected: (index) {
-        String textToCopy = '';
-
-        switch (index) {
-          case 0:
-            textToCopy = request.uri.toString();
-            break;
-          case 1:
-            final headers = requestHeaders.entries
-                .map((e) => '\t-H "${e.key}: ${e.value}"')
-                .join(' \\\n');
-            textToCopy =
-                'curl -X $method "$url" \\\n$headers \\\n\t-d \'$requestBody\'';
-            break;
-          case 2:
-            final headers = requestHeaders.entries
-                .map((e) => '${e.key}: ${e.value}')
-                .join('\n');
-            textToCopy = '$method $url\n$headers\n\n$requestBody';
-            break;
-          case 3:
-            textToCopy = responseBody;
-            break;
-        }
-
-        Clipboard.setData(ClipboardData(text: textToCopy));
-      },
     );
   }
 }

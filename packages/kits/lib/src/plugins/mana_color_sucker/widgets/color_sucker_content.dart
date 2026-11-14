@@ -1,125 +1,60 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_mana/flutter_mana.dart';
-import 'package:flutter_mana_kits/src/i18n/i18n_mixin.dart';
-import 'package:flutter_mana_kits/src/icons/kit_icons.dart';
+import 'package:flutter/widgets.dart';
 
-class ColorSuckerContent extends StatefulWidget {
-  final Color color;
-  final ValueChanged<double>? onMagnificationChanged;
+import '../../../ui/kit_ui.dart';
 
+class ColorSuckerContent extends StatelessWidget {
   const ColorSuckerContent({
     super.key,
     required this.color,
-    this.onMagnificationChanged,
+    required this.magnification,
+    required this.onMagnificationChanged,
   });
-
-  @override
-  State<ColorSuckerContent> createState() => _ColorSuckerContentState();
-}
-
-class _ColorSuckerContentState extends State<ColorSuckerContent>
-    with I18nMixin {
-  late Color _color;
-
-  @override
-  void initState() {
-    super.initState();
-    _color = widget.color;
-  }
-
-  @override
-  void didUpdateWidget(covariant ColorSuckerContent oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.color != widget.color) {
-      setState(() {
-        _color = widget.color;
-      });
-    }
-  }
-
-  String get colorHex {
-    if (_color == Colors.transparent) {
-      return '#000000';
-    }
-    return '#${_color.toARGB32().toRadixString(16).substring(2)}';
-  }
-
-  void _copyToClipboard() {
-    Clipboard.setData(ClipboardData(text: colorHex));
-  }
-
-  double _zoomLevel = 10;
-  final List<double> _zoomOptions = [5, 10, 15, 20, 25, 30];
-
+  final Color color;
+  final double magnification;
+  final ValueChanged<double> onMagnificationChanged;
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
+    final hex =
+        '#${color.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()}';
+    final rgb =
+        'rgba(${(color.r * 255).round()}, ${(color.g * 255).round()}, ${(color.b * 255).round()}, ${color.a.toStringAsFixed(2)})';
+    return SingleChildScrollView(
+      padding: const .all(12),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .stretch,
         children: [
           Row(
+            spacing: 8,
             children: [
-              Text(
-                t(context, 'color_sucker.magnification'),
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: color,
+                  border: Border.all(color: KitStyle.border),
+                ),
               ),
-              const Spacer(),
-              Text(
-                '${_zoomLevel.toInt()}x',
-                style: const TextStyle(fontSize: 12, color: Colors.black54),
-              ),
+              Expanded(child: Text(hex, style: KitStyle.code)),
+              KitCopyButton(hex),
             ],
-          ),
-          Slider(
-            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-            value: _zoomLevel,
-            min: _zoomOptions.first,
-            max: _zoomOptions.last,
-            divisions: _zoomOptions.length - 1,
-            label: '${_zoomLevel.toInt()}x',
-            onChanged: (value) {
-              // 吸附到最近的预设值（可选）
-              _zoomLevel = _zoomOptions.reduce(
-                (a, b) => (value - a).abs() < (value - b).abs() ? a : b,
-              );
-              widget.onMagnificationChanged?.call(_zoomLevel);
-              setState(() {});
-            },
           ),
           Row(
             children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: _color == Colors.transparent ? Colors.black : _color,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: Colors.grey,
-                    width: 1,
-                    style: BorderStyle.solid,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  colorHex,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              CheckIconButton(
-                initialIcon: KitIcons.copy,
-                changedIcon: KitIcons.copy_success,
-                onPressed: _copyToClipboard,
-              ),
+              Expanded(child: Text(rgb, style: KitStyle.code)),
+              KitCopyButton(rgb),
             ],
+          ),
+          Text(
+            '${kitText(context, 'color_sucker.magnification')} ×${magnification.round()}',
+          ),
+          ManaSlider(
+            value: magnification,
+            min: 2,
+            max: 20,
+            divisions: 18,
+            formatValue: (v) => '×${v.round()}',
+            semanticLabel: kitText(context, 'color_sucker.magnification'),
+            onChanged: onMagnificationChanged,
           ),
         ],
       ),

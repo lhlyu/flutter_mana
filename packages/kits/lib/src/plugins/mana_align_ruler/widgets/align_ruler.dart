@@ -1,115 +1,51 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_mana/flutter_mana.dart';
+import 'package:flutter/widgets.dart';
 
+import '../../../ui/kit_ui.dart';
 import 'align_ruler_barrier.dart';
-import 'align_ruler_content.dart';
 
 class AlignRuler extends StatefulWidget {
-  final String name;
-
   const AlignRuler({super.key, required this.name});
-
+  final String name;
   @override
   State<AlignRuler> createState() => _AlignRulerState();
 }
 
 class _AlignRulerState extends State<AlignRuler> {
-  Size _windowSize = Size.zero;
-
-  Offset _dotPosition = Offset.zero;
-
-  final Size _dotSize = const Size(80, 80);
-
-  late Offset _dotCenterOffset;
-
-  static final TextStyle _coordinateTextStyle = TextStyle(
-    color: Colors.red,
-    fontSize: 15,
-    fontWeight: FontWeight.bold,
-  );
-
-  Size _coordinateTextSize = Size.zero;
-
-  double _toolBarY = 60.0;
-
-  bool _snapToWidgetEnabled = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _windowSize = MediaQuery.of(context).size;
-        _dotPosition = _windowSize.center(Offset.zero);
-        _dotCenterOffset = _dotSize.center(Offset.zero);
-        _coordinateTextSize = _getTextSize(_coordinateTextStyle);
-        setState(() {});
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  void _toolBarPanUpdate(DragUpdateDetails dragDetails) {
-    setState(() {
-      _toolBarY = dragDetails.globalPosition.dy - 40;
-      _toolBarY = _toolBarY.clamp(
-        0.0,
-        _windowSize.height - AlignRulerContent.estimatedToolbarHeight - 16,
-      );
-    });
-  }
-
-  Size _getTextSize(TextStyle style) {
-    final textPainter = TextPainter(
-      textDirection: TextDirection.ltr,
-      text: TextSpan(text: '9999.9', style: style),
-    );
-    textPainter.layout();
-    return Size(textPainter.width, textPainter.height);
-  }
-
-  void _switchSnapToWidget(bool enabled) {
-    setState(() {
-      _snapToWidgetEnabled = enabled;
-    });
-  }
-
+  Offset? _position;
+  bool _snap = false;
   @override
   Widget build(BuildContext context) {
-    if (_windowSize.isEmpty) {
-      _windowSize = MediaQuery.of(context).size;
-      _dotCenterOffset = _dotSize.center(Offset.zero);
-      _coordinateTextSize = _getTextSize(_coordinateTextStyle);
-    }
-
-    return ManaFloatingWindow(
+    final size = MediaQuery.sizeOf(context);
+    final raw = _position ?? size.center(Offset.zero);
+    final point = Offset(
+      raw.dx.clamp(0, size.width),
+      raw.dy.clamp(0, size.height),
+    );
+    return KitWindow(
       name: widget.name,
-      initialHeight: 180,
-      position: PositionType.top,
-      content: AlignRulerContent(
-        dotPosition: _dotPosition,
-        windowSize: _windowSize,
-        snapToWidgetEnabled: _snapToWidgetEnabled,
-        coordinateTextStyle: _coordinateTextStyle,
-        onSnapToWidgetChanged: _switchSnapToWidget,
-        onVerticalDragUpdate: _toolBarPanUpdate,
-      ),
+      initialHeight: 300,
+      position: .top,
       barrier: AlignRulerBarrier(
-        windowSize: _windowSize,
-        dotSize: _dotSize,
-        dotCenterOffset: _dotCenterOffset,
-        coordinateTextStyle: _coordinateTextStyle,
-        coordinateTextSize: _coordinateTextSize,
-        snapToWidgetEnabled: _snapToWidgetEnabled,
-        onDotPositionChanged: (Offset offset) {
-          setState(() {
-            _dotPosition = offset;
-          });
-        },
+        position: point,
+        snap: _snap,
+        onChanged: (value) => setState(() => _position = value),
+      ),
+      content: SingleChildScrollView(
+        child: Column(
+          children: [
+            KitDataTable({
+              'Left': point.dx.toStringAsFixed(1),
+              'Top': point.dy.toStringAsFixed(1),
+              'Right': (size.width - point.dx).toStringAsFixed(1),
+              'Bottom': (size.height - point.dy).toStringAsFixed(1),
+            }),
+            KitToggle(
+              label: kitText(context, 'align_ruler.snap'),
+              value: _snap,
+              onChanged: (value) => setState(() => _snap = value),
+            ),
+          ],
+        ),
       ),
     );
   }

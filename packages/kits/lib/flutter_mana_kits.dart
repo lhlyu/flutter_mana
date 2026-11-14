@@ -6,16 +6,24 @@ import 'src/plugins/plugins.dart';
 
 export 'src/plugins/plugins.dart';
 
-List<ManaPluggable> loadAllPlugins() {
+/// Each call creates fresh plugins. Pass collectors shared with Dio and Logger.
+List<ManaPluggable> loadAllPlugins({
+  ManaDioCollector? dioCollector,
+  ManaLogCollector? logCollector,
+  bool captureDebugPrint = false,
+}) {
   return [
     ManaAlignRuler(),
     ManaColorSucker(),
     ManaDeviceInfo(),
-    ManaDioInspector(),
+    ManaDioInspector(collector: dioCollector),
     ManaFpsMonitor(),
     ManaGrid(),
     ManaLicense(),
-    ManaLogViewer(),
+    ManaLogViewer(
+      collector: logCollector,
+      captureDebugPrint: captureDebugPrint,
+    ),
     ManaMemoryInfo(),
     ManaPackageInfo(),
     ManaScreenInfo(),

@@ -1,100 +1,71 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_mana/flutter_mana.dart';
-import 'package:flutter_mana_kits/src/icons/kit_icons.dart';
+import 'package:flutter/widgets.dart';
 import 'package:logger/logger.dart';
 
-const Map<Level, Color> _levelColorMap = {
-  Level.debug: Colors.green,
-  Level.info: Colors.blue,
-  Level.warning: Colors.orange,
-  Level.error: Colors.red,
-};
+import '../../../ui/kit_ui.dart';
+
+String formatLog(OutputEvent event, {required bool verbose}) {
+  final message = event.origin.message;
+  return [
+    message is Function && event.lines.isNotEmpty
+        ? event.lines.join('\n').replaceAll(RegExp(r'\x1B\[[0-9;]*m'), '')
+        : message.toString(),
+    if (verbose && event.origin.error != null) '${event.origin.error}',
+    if (verbose && event.origin.stackTrace != null)
+      '${event.origin.stackTrace}',
+  ].join('\n');
+}
 
 class LogItemWidget extends StatelessWidget {
-  final bool verboseLogs;
-  final OutputEvent log;
-
   const LogItemWidget({
     super.key,
     required this.verboseLogs,
     required this.log,
   });
-
-  Color get _levelColor => _levelColorMap[log.level] ?? Colors.black;
-
-  String _buildFullMessage() {
-    final buf = StringBuffer(log.origin.message);
-    if (verboseLogs) {
-      if (log.origin.error != null) {
-        buf.write(
-          '\n--------------- error ---------------\n${log.origin.error}',
-        );
-      }
-      if (log.origin.stackTrace != null) {
-        buf.write(
-          '\n--------------- stackTrace ---------------\n${log.origin.stackTrace}',
-        );
-      }
-    }
-    return buf.toString().trim();
-  }
-
-  Future<void> _copyToClipboard(String fullMessage) async {
-    await Clipboard.setData(ClipboardData(text: fullMessage));
-  }
-
+  final bool verboseLogs;
+  final OutputEvent log;
   @override
   Widget build(BuildContext context) {
-    final timeStr = log.origin.time.toIso8601String().split('T')[1];
-    final String fullMessage = _buildFullMessage();
-
+    final text = formatLog(log, verbose: verboseLogs);
+    final color = switch (log.level) {
+      .error || .fatal => KitStyle.danger,
+      .warning => KitStyle.warning,
+      .info => KitStyle.accent,
+      _ => KitStyle.muted,
+    };
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const .all(12),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .stretch,
+        spacing: 4,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text.rich(
-                TextSpan(
+              Expanded(
+                child: Wrap(
+                  spacing: 10,
                   children: [
-                    TextSpan(
-                      text: log.origin.level.name.toUpperCase(),
+                    Text(
+                      log.level.name.toUpperCase(),
                       style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: _levelColor,
+                        color: color,
+                        fontWeight: .bold,
                         fontSize: 12,
                       ),
                     ),
-                    const TextSpan(text: '  '),
-                    TextSpan(
-                      text: timeStr,
-                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                    Text(
+                      log.origin.time.toIso8601String().split('T').last,
+                      style: const TextStyle(
+                        color: KitStyle.muted,
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  const SizedBox(width: 12),
-                  CheckIconButton(
-                    initialIcon: KitIcons.copy,
-                    changedIcon: KitIcons.copy_success,
-                    size: 14,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    onPressed: () => _copyToClipboard(fullMessage),
-                  ),
-                ],
-              ),
+              KitCopyButton(text),
             ],
           ),
-          const SizedBox(height: 4),
-          Text(fullMessage, style: const TextStyle(fontSize: 12, height: 1.5)),
+          KitSelection(child: Text(text, style: KitStyle.code)),
         ],
       ),
     );

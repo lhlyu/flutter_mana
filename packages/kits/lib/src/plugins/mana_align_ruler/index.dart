@@ -1,24 +1,17 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_mana/flutter_mana.dart';
+import 'package:flutter/widgets.dart';
 
+import '../builtin_kit.dart';
 import 'icon.dart';
 import 'widgets/align_ruler.dart';
 
-class ManaAlignRuler extends ManaPluggable {
+class ManaAlignRuler extends BuiltinKit {
+  ManaAlignRuler()
+    : super(
+        name: 'mana_align_ruler',
+        title: 'Align Ruler',
+        chineseTitle: '对齐标尺',
+        iconImageProvider: iconImage,
+      );
   @override
-  Widget? buildWidget(BuildContext context) => AlignRuler(name: name);
-
-  @override
-  ImageProvider<Object> get iconImageProvider => iconImage;
-
-  @override
-  String get name => 'mana_align_ruler';
-
-  @override
-  String getLocalizedDisplayName(Locale locale) {
-    if (locale.languageCode == 'zh') {
-      return '对齐标尺';
-    }
-    return 'Align Ruler';
-  }
+  Widget buildWidget(BuildContext context) => AlignRuler(name: name);
 }

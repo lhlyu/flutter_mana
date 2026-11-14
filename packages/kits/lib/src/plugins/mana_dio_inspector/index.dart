@@ -1,26 +1,36 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_mana/flutter_mana.dart';
+import 'package:flutter/widgets.dart';
+
+import '../builtin_kit.dart';
 
 import 'icon.dart';
-import 'widgets/dio_inspector.dart';
+import 'mana_dio_collector.dart';
+import '../../ui/kit_ui.dart';
+import 'widgets/dio_inspector_content.dart';
 
-class ManaDioInspector extends ManaPluggable {
+class ManaDioInspector extends BuiltinKit {
+  ManaDioInspector({ManaDioCollector? collector})
+    : collector = collector ?? ManaDioCollector(),
+      _ownsCollector = collector == null,
+      super(
+        name: 'mana_dio_inspector',
+        title: 'Dio Inspector',
+        chineseTitle: 'Dio 网络检查器',
+        iconImageProvider: iconImage,
+      );
+  final ManaDioCollector collector;
+  final bool _ownsCollector;
   @override
-  Widget? buildWidget(BuildContext context) => DioInspector(name: name);
-
-  @override
-  String getLocalizedDisplayName(Locale locale) {
-    switch (locale.languageCode) {
-      case 'zh':
-        return 'Dio网络检查器';
-      default:
-        return 'Dio Inspector';
-    }
+  void dispose() {
+    if (_ownsCollector) collector.dispose();
   }
 
   @override
-  ImageProvider<Object> get iconImageProvider => iconImage;
-
-  @override
-  String get name => 'mana_dio_inspector';
+  Widget buildWidget(BuildContext context) => KitWindow(
+    name: name,
+    showBarrier: false,
+    initialWidth: double.infinity,
+    position: .bottom,
+    drag: false,
+    content: DioInspectorContent(collector: collector),
+  );
 }

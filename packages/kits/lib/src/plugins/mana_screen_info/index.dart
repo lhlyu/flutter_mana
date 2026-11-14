@@ -1,24 +1,22 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_mana/flutter_mana.dart';
+import 'package:flutter/widgets.dart';
 
+import '../builtin_kit.dart';
 import 'icon.dart';
-import 'widgets/screen_info.dart';
+import '../../ui/kit_ui.dart';
+import 'widgets/screen_info_content.dart';
 
-class ManaScreenInfo extends ManaPluggable {
+class ManaScreenInfo extends BuiltinKit {
+  ManaScreenInfo()
+    : super(
+        name: 'mana_screen_info',
+        title: 'Screen Info',
+        chineseTitle: '屏幕信息',
+        iconImageProvider: iconImage,
+      );
   @override
-  Widget? buildWidget(BuildContext context) => ScreenInfo(name: name);
-
-  @override
-  ImageProvider<Object> get iconImageProvider => iconImage;
-
-  @override
-  String get name => 'mana_screen_info';
-
-  @override
-  String getLocalizedDisplayName(Locale locale) {
-    if (locale.languageCode == 'zh') {
-      return '屏幕信息';
-    }
-    return 'Screen Info';
-  }
+  Widget buildWidget(BuildContext context) => KitWindow(
+    name: name,
+    showBarrier: false,
+    content: ScreenInfoContent(data: MediaQuery.of(context)),
+  );
 }
