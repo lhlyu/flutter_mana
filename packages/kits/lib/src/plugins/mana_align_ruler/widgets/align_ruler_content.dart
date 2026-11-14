@@ -70,7 +70,7 @@ class AlignRulerContent extends StatelessWidget with I18nMixin {
               children: [
                 Expanded(
                   child: Text(
-                    t('align_ruler.tip'),
+                    t(context, 'align_ruler.tip'),
                     style: const TextStyle(
                       color: Colors.red,
                       fontWeight: FontWeight.bold,

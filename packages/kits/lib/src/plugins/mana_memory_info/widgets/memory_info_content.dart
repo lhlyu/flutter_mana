@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_mana_kits/src/i18n/i18n_mixin.dart';
 import 'package:flutter_mana_kits/src/icons/kit_icons.dart';
@@ -27,21 +29,17 @@ class _MemoryInfoContentState extends State<MemoryInfoContent> with I18nMixin {
     var items = _memoryService.classHeapStatsList;
 
     if (_hidePrivateClasses) {
-      items =
-          items
-              .where((v) => !(v.classRef?.name?.startsWith('_') ?? false))
-              .toList();
+      items = items
+          .where((v) => !(v.classRef?.name?.startsWith('_') ?? false))
+          .toList();
     }
 
     if (_onlyCurrentPackage && _pkg.isNotEmpty) {
-      items =
-          items
-              .where(
-                (v) =>
-                    (v.classRef?.location?.script?.uri?.contains(_pkg) ??
-                        false),
-              )
-              .toList();
+      items = items
+          .where(
+            (v) => (v.classRef?.location?.script?.uri?.contains(_pkg) ?? false),
+          )
+          .toList();
     }
 
     return items;
@@ -53,6 +51,12 @@ class _MemoryInfoContentState extends State<MemoryInfoContent> with I18nMixin {
     _initData();
   }
 
+  @override
+  void dispose() {
+    unawaited(_memoryService.vmInspector.disconnect());
+    super.dispose();
+  }
+
   Future<void> _initData() async {
     await Future.wait([
       _memoryService.getInfos(() {}),
@@ -61,6 +65,7 @@ class _MemoryInfoContentState extends State<MemoryInfoContent> with I18nMixin {
       }),
     ]);
 
+    if (!mounted) return;
     _sortClassHeapStats(); // 初始排序
     setState(() => _dataReady = true);
   }
@@ -108,10 +113,9 @@ class _MemoryInfoContentState extends State<MemoryInfoContent> with I18nMixin {
     required String field,
     required String label,
   }) {
-    final icon =
-        _currentSortField == field
-            ? (_isAscending ? KitIcons.sort_asc : KitIcons.sort_desc)
-            : KitIcons.sort_auto;
+    final icon = _currentSortField == field
+        ? (_isAscending ? KitIcons.sort_asc : KitIcons.sort_desc)
+        : KitIcons.sort_auto;
 
     return Expanded(
       flex: flex,
@@ -120,7 +124,7 @@ class _MemoryInfoContentState extends State<MemoryInfoContent> with I18nMixin {
         child: Row(
           children: [
             Text(
-              t(label),
+              t(context, label),
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             Icon(icon, size: 16),
@@ -159,7 +163,7 @@ class _MemoryInfoContentState extends State<MemoryInfoContent> with I18nMixin {
           ),
         ),
         const SizedBox(width: 5),
-        Text(t(label)),
+        Text(t(context, label)),
       ],
     );
   }
@@ -197,7 +201,7 @@ class _MemoryInfoContentState extends State<MemoryInfoContent> with I18nMixin {
                   spacing: 2,
                   children: [
                     Text(
-                      t('memory_info.vm_info'),
+                      t(context, 'memory_info.vm_info'),
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -207,12 +211,12 @@ class _MemoryInfoContentState extends State<MemoryInfoContent> with I18nMixin {
                     _buildTableRow('PID:', '${vmInfo?.pid ?? 'N/A'}'),
                     _buildTableRow('CPU:', vmInfo?.hostCPU ?? 'N/A'),
                     _buildTableRow(
-                      t('memory_info.version'),
+                      t(context, 'memory_info.version'),
                       vmInfo?.version ?? 'N/A',
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      t('memory_info.memory_info'),
+                      t(context, 'memory_info.memory_info'),
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -245,7 +249,10 @@ class _MemoryInfoContentState extends State<MemoryInfoContent> with I18nMixin {
                       },
                     ),
                     const SizedBox(height: 4),
-                    _buildTableRow(t('memory_info.total'), '${items.length}'),
+                    _buildTableRow(
+                      t(context, 'memory_info.total'),
+                      '${items.length}',
+                    ),
                   ],
                 ),
               ),
@@ -284,16 +291,12 @@ class _MemoryInfoContentState extends State<MemoryInfoContent> with I18nMixin {
               final isEven = index.isOdd;
 
               return InkWell(
-                onTap:
-                    () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder:
-                            (_) => MemoryDetail(
-                              detail: item,
-                              service: _memoryService,
-                            ),
-                      ),
-                    ),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        MemoryDetail(detail: item, service: _memoryService),
+                  ),
+                ),
                 child: Container(
                   color: isEven ? Colors.grey.shade100 : Colors.white,
                   padding: const EdgeInsets.symmetric(

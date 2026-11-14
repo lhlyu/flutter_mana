@@ -37,40 +37,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mana/flutter_mana.dart';
 import 'package:flutter_mana_kits/flutter_mana_kits.dart';
 
+void main() => runApp(const App());
 
-void main() async {
-  ManaPluginManager.instance
-    ..register(ManaScreenInfo())
-    ..register(ManaTouchIndicator())
-    ..register(ManaVisualHelper())
-    ..register(ManaGrid())
-    ..register(ManaLicense())
-    ..register(ManaPackageInfo())
-    ..register(ManaMemoryInfo())
-    ..register(ManaShowCode())
-    ..register(ManaLogViewer())
-    ..register(ManaDeviceInfo())
-    ..register(ManaColorSucker())
-    ..register(ManaDioInspector())
-    ..register(ManaWidgetInfoInspector())
-    ..register(ManaFpsMonitor())
-    ..register(ManaSharedPreferencesViewer())
-    ..register(ManaAlignRuler());
-
-  runApp(ManaWidget(child: App()));
+class App extends StatefulWidget {
+  const App({super.key});
+  @override
+  State<App> createState() => _AppState();
 }
 
-class App extends StatelessWidget {
-  const App({super.key});
+class _AppState extends State<App> {
+  late final controller = ManaController(plugins: loadAllPlugins());
+  late final observer = ManaNavigatorObserver(controller);
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Example',
-      home: Text('Example'),
-    );
+  void dispose() {
+    observer.dispose();
+    controller.dispose();
+    super.dispose();
   }
+
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+    navigatorObservers: [observer],
+    home: const Text('Example'),
+    builder: (context, child) => ManaWidget.builder(
+      controller: controller,
+      overlayBuilder: (context, overlay) =>
+          Material(type: MaterialType.transparency, child: overlay),
+      child: child!,
+    ),
+  );
 }
 ```
 
@@ -147,7 +143,7 @@ final iconImage = MemoryImage(_iconBytes);
 class Demo extends ManaPluggable {
 
   @override
-  Widget? buildWidget(BuildContext? context) {
+  Widget? buildWidget(BuildContext context) {
     return Container(
       color: Colors.white,
       width: double.infinity,
@@ -186,9 +182,7 @@ class Demo extends ManaPluggable {
 
 ```dart
 void main() {
-  ManaPluginManager.instance.register(Demo());
-
-  runApp(ManaWidget(child: App()));
+  runApp(ManaWidget(plugins: [Demo()], child: App()));
 }
 
 class App extends StatelessWidget {

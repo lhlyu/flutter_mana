@@ -6,7 +6,9 @@ import 'widgets/touch_indicator.dart';
 
 class ManaTouchIndicator extends ManaPluggable {
   @override
-  Widget? buildWidget(BuildContext? context) => TouchIndicator(name: name);
+  ManaPresentation get presentation => .overlay;
+  @override
+  Widget? buildWidget(BuildContext context) => TouchIndicator(name: name);
 
   @override
   ImageProvider<Object> get iconImageProvider => iconImage;

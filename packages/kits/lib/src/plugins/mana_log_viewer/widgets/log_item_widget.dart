@@ -85,11 +85,8 @@ class LogItemWidget extends StatelessWidget {
                     initialIcon: KitIcons.copy,
                     changedIcon: KitIcons.copy_success,
                     size: 14,
-                    style: IconButton.styleFrom(
-                      minimumSize: Size.zero,
-                      padding: EdgeInsets.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
                     onPressed: () => _copyToClipboard(fullMessage),
                   ),
                 ],

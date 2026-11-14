@@ -6,7 +6,7 @@ import 'widgets/visual_helper.dart';
 
 class ManaVisualHelper extends ManaPluggable {
   @override
-  Widget? buildWidget(BuildContext? context) => VisualHelper(name: name);
+  Widget? buildWidget(BuildContext context) => VisualHelper(name: name);
 
   @override
   String getLocalizedDisplayName(Locale locale) {

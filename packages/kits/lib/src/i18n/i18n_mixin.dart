@@ -1,4 +1,4 @@
-import 'package:flutter_mana/flutter_mana.dart';
+import 'package:flutter/widgets.dart';
 
 mixin I18nMixin {
   static const _strings = {
@@ -99,14 +99,12 @@ mixin I18nMixin {
     ],
   };
 
-  static final _language = manaLocale.languageCode;
-
-  String t(String k, [String defaultValue = '']) {
+  String t(BuildContext context, String k, [String defaultValue = '']) {
     final ss = _strings[k];
     if (ss == null) {
       return defaultValue;
     }
-    switch (_language) {
+    switch (Localizations.localeOf(context).languageCode) {
       case 'zh':
         return ss[1];
       default:

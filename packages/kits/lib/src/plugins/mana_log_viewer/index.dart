@@ -12,7 +12,7 @@ class ManaLogViewer extends ManaPluggable {
   }
 
   @override
-  Widget? buildWidget(BuildContext? context) => LogViewer(name: name);
+  Widget? buildWidget(BuildContext context) => LogViewer(name: name);
 
   @override
   String getLocalizedDisplayName(Locale locale) {

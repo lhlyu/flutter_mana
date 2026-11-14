@@ -42,10 +42,9 @@ class _ModelDetailState extends State<ModelDetail> with I18nMixin {
     _keyController = TextEditingController(text: widget.model.key);
     _valueController = TextEditingController(text: widget.model.value);
 
-    _selectedKind =
-        _kindOptions.contains(widget.model.kind)
-            ? widget.model.kind
-            : _kindOptions.first;
+    _selectedKind = _kindOptions.contains(widget.model.kind)
+        ? widget.model.kind
+        : _kindOptions.first;
   }
 
   @override
@@ -94,7 +93,7 @@ class _ModelDetailState extends State<ModelDetail> with I18nMixin {
               value: _selectedKind,
               isExpanded: true,
               decoration: InputDecoration(
-                labelText: t('shared_preferences_viewer.type'),
+                labelText: t(context, 'shared_preferences_viewer.type'),
                 border: OutlineInputBorder(),
                 fillColor: Colors.white,
                 filled: true,
@@ -105,22 +104,21 @@ class _ModelDetailState extends State<ModelDetail> with I18nMixin {
                 ),
               ),
               style: const TextStyle(fontSize: 14, color: Colors.black),
-              items:
-                  _kindOptions.map((String kind) {
-                    var style = const TextStyle(fontSize: 14);
+              items: _kindOptions.map((String kind) {
+                var style = const TextStyle(fontSize: 14);
 
-                    if (kind == widget.model.kind) {
-                      style = const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      );
-                    }
+                if (kind == widget.model.kind) {
+                  style = const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  );
+                }
 
-                    return DropdownMenuItem<String>(
-                      value: kind,
-                      child: Text(kind, style: style),
-                    );
-                  }).toList(),
+                return DropdownMenuItem<String>(
+                  value: kind,
+                  child: Text(kind, style: style),
+                );
+              }).toList(),
               onChanged: (String? newValue) {
                 setState(() {
                   _selectedKind = newValue!;
@@ -130,7 +128,7 @@ class _ModelDetailState extends State<ModelDetail> with I18nMixin {
             TextFormField(
               controller: _keyController,
               decoration: InputDecoration(
-                labelText: t('shared_preferences_viewer.key'),
+                labelText: t(context, 'shared_preferences_viewer.key'),
                 border: OutlineInputBorder(),
                 fillColor: Colors.white,
                 filled: true,
@@ -143,7 +141,7 @@ class _ModelDetailState extends State<ModelDetail> with I18nMixin {
               style: const TextStyle(fontSize: 14),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return t('shared_preferences_viewer.key_required');
+                  return t(context, 'shared_preferences_viewer.key_required');
                 }
                 return null;
               },
@@ -151,7 +149,7 @@ class _ModelDetailState extends State<ModelDetail> with I18nMixin {
             TextFormField(
               controller: _valueController,
               decoration: InputDecoration(
-                labelText: t('shared_preferences_viewer.value'),
+                labelText: t(context, 'shared_preferences_viewer.value'),
                 border: OutlineInputBorder(),
                 fillColor: Colors.white,
                 filled: true,
@@ -166,29 +164,39 @@ class _ModelDetailState extends State<ModelDetail> with I18nMixin {
               minLines: 2,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return t('shared_preferences_viewer.value_required');
+                  return t(context, 'shared_preferences_viewer.value_required');
                 }
                 switch (_selectedKind) {
                   case 'double':
                     if (isDouble(value)) {
                       return null;
                     }
-                    return t('shared_preferences_viewer.value_must_double');
+                    return t(
+                      context,
+                      'shared_preferences_viewer.value_must_double',
+                    );
                   case 'bool':
                     if (isBool(value)) {
                       return null;
                     }
-                    return t('shared_preferences_viewer.value_must_bool');
+                    return t(
+                      context,
+                      'shared_preferences_viewer.value_must_bool',
+                    );
                   case 'int':
                     if (isInt(value)) {
                       return null;
                     }
-                    return t('shared_preferences_viewer.value_must_int');
+                    return t(
+                      context,
+                      'shared_preferences_viewer.value_must_int',
+                    );
                   case 'List<String>':
                     if (isListOfString(value)) {
                       return null;
                     }
                     return t(
+                      context,
                       'shared_preferences_viewer.value_must_list_of_string',
                     );
                   default:
@@ -209,7 +217,7 @@ class _ModelDetailState extends State<ModelDetail> with I18nMixin {
                       padding: const EdgeInsets.symmetric(vertical: 8),
                     ),
                     child: Text(
-                      t('shared_preferences_viewer.save'),
+                      t(context, 'shared_preferences_viewer.save'),
                       style: TextStyle(fontSize: 14),
                     ),
                   ),
@@ -225,7 +233,7 @@ class _ModelDetailState extends State<ModelDetail> with I18nMixin {
                       padding: const EdgeInsets.symmetric(vertical: 8),
                     ),
                     child: Text(
-                      t('shared_preferences_viewer.cancel'),
+                      t(context, 'shared_preferences_viewer.cancel'),
                       style: TextStyle(fontSize: 14),
                     ),
                   ),

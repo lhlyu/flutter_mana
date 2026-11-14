@@ -3,27 +3,12 @@
 ## 使用 - Use
 
 ```dart
-import 'package:flutter/material.dart';
 import 'package:flutter_mana/flutter_mana.dart';
 import 'package:flutter_mana_kits/flutter_mana_kits.dart';
 
-void main() {
-  /// add plugin
-  ManaPluginManager.instance.register(ManaShowCode());
-
-  runApp(ManaWidget(child: App()));
-}
-
-class App extends StatelessWidget {
-  const App({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'ShowCode',
-      home: Text('Show Code'),
-    );
-  }
+void registerPlugin(ManaController controller) {
+  controller.registerPlugin(ManaShowCode());
 }
 ```
+
+宿主接入与 Material 环境配置见[完整示例](../../../../../example/lib/main.dart)。

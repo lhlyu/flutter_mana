@@ -7,7 +7,7 @@ import 'widgets/fps_monitor.dart';
 
 class ManaFpsMonitor extends ManaPluggable {
   @override
-  Widget? buildWidget(BuildContext? context) => FpsMonitor(name: name);
+  Widget? buildWidget(BuildContext context) => FpsMonitor(name: name);
 
   @override
   String getLocalizedDisplayName(Locale locale) {

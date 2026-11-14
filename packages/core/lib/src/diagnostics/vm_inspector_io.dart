@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:isolate';
 
@@ -10,63 +11,71 @@ const _logPrefix = '[VmInspector]';
 /// `VmInspector` 类封装了与 Dart VM 服务交互的各种操作。
 /// 它提供了一系列方法来获取 VM 信息、内存使用情况、类列表、快照等。
 class VmInspector {
-  static final VmInspector _instance = VmInspector._internal();
-
-  factory VmInspector() => _instance;
-
-  VmInspector._internal() {
+  VmInspector({Future<vm.VmService> Function()? connect})
+    : _connector = connect {
     _isolateId = Service.getIsolateId(Isolate.current);
   }
 
+  final Future<vm.VmService> Function()? _connector;
   vm.VmService? _service;
   String? _isolateId;
-
-  // 是否已有连接正在创建中
   Future<vm.VmService>? _connectingFuture;
+  int _generation = 0;
 
-  String get isolateId {
-    if (_isolateId == null) {
-      throw StateError('$_logPrefix Isolate ID has not been initialized.');
-    }
-    return _isolateId!;
+  bool get isSupported => true;
+  String get isolateId =>
+      _isolateId ?? (throw StateError('$_logPrefix Isolate is unavailable.'));
+
+  Future<vm.VmService> getVMService() {
+    if (_service case final service?) return Future.value(service);
+    final generation = _generation;
+    return _connectingFuture ??= Future.microtask(() => _connect(generation));
   }
 
-  Future<vm.VmService> getVMService() async {
-    // 已连接，直接返回
-    if (_service != null) return _service!;
-
-    // 如果正在连接中，复用正在进行的 future
-    if (_connectingFuture != null) return _connectingFuture!;
-
-    // 否则新建连接并缓存 future，确保并发时只走一次连接逻辑
-    _connectingFuture = _connect();
+  Future<vm.VmService> _connect(int generation) async {
     try {
-      _service = await _connectingFuture!;
-      return _service!;
-    } finally {
-      _connectingFuture = null; // 清理
-    }
-  }
-
-  Future<vm.VmService> _connect() async {
-    try {
-      final info = await Service.getInfo();
-      final wsUri = convertToWebSocketUrl(serviceProtocolUrl: info.serverUri!);
-      final service = await vmServiceConnectUri(wsUri.toString());
+      final service = await (_connector?.call() ?? _openConnection());
+      if (generation != _generation) {
+        await service.dispose();
+        throw StateError('$_logPrefix Connection was cancelled.');
+      }
+      _service = service;
+      unawaited(
+        service.onDone.then((_) {
+          if (identical(_service, service)) _service = null;
+        }),
+      );
       return service;
-    } catch (e) {
-      rethrow;
+    } finally {
+      if (generation == _generation) _connectingFuture = null;
     }
+  }
+
+  Future<vm.VmService> _openConnection() async {
+    final uri = (await Service.getInfo()).serverUri;
+    if (uri == null) {
+      throw UnsupportedError(
+        '$_logPrefix VM Service is not enabled in this build.',
+      );
+    }
+    return vmServiceConnectUri(
+      convertToWebSocketUrl(serviceProtocolUrl: uri).toString(),
+    );
   }
 
   Future<void> disconnect() async {
-    if (_service != null) {
+    _generation++;
+    final service = _service;
+    final connecting = _connectingFuture;
+    _service = null;
+    _connectingFuture = null;
+    await service?.dispose();
+    if (connecting != null) {
       try {
-        await _service!.dispose();
-      } catch (e) {
-        rethrow;
+        await connecting;
+      } catch (_) {
+        /* Cancelled by the generation guard. */
       }
-      _service = null;
     }
   }
 
@@ -119,14 +128,9 @@ class VmInspector {
   /// 获取指定对象 ID 的实例集合。
   /// [objectId]：对象的 ID。
   /// [limit]：返回实例的最大数量。
-  /// 添加了错误处理以捕获 API 调用失败的情况。
   Future<vm.InstanceSet> getInstances(String objectId, int limit) async {
     vm.VmService virtualMachine = await getVMService();
-    try {
-      return virtualMachine.getInstances(isolateId, objectId, limit);
-    } catch (e) {
-      rethrow;
-    }
+    return virtualMachine.getInstances(isolateId, objectId, limit);
   }
 
   /// 获取当前协程的调用栈信息。
@@ -167,14 +171,13 @@ class VmInspector {
     int minInstances = 0,
   }) async {
     vm.AllocationProfile profile = await getAllocationProfile(); // 获取最新的分配概要
-    List<vm.ClassHeapStats> list =
-        profile.members!
-            .where(
-              (element) =>
-                  element.bytesCurrent! > minBytes ||
-                  element.instancesCurrent! > minInstances,
-            )
-            .toList();
+    List<vm.ClassHeapStats> list = profile.members!
+        .where(
+          (element) =>
+              element.bytesCurrent! > minBytes ||
+              element.instancesCurrent! > minInstances,
+        )
+        .toList();
     return list;
   }
 
@@ -187,13 +190,8 @@ class VmInspector {
   /// 在指定目标上评估一个表达式。
   /// [targetId]：目标对象的 ID，通常是库或类。
   /// [expression]：要评估的 Dart 表达式字符串。
-  /// 添加了错误处理以捕获评估失败的情况。
   Future<vm.Response> evaluate(String targetId, String expression) async {
     vm.VmService virtualMachine = await getVMService();
-    try {
-      return virtualMachine.evaluate(isolateId, targetId, expression);
-    } catch (e) {
-      rethrow;
-    }
+    return virtualMachine.evaluate(isolateId, targetId, expression);
   }
 }

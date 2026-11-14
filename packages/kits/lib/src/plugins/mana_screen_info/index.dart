@@ -6,7 +6,7 @@ import 'widgets/screen_info.dart';
 
 class ManaScreenInfo extends ManaPluggable {
   @override
-  Widget? buildWidget(BuildContext? context) => ScreenInfo(name: name);
+  Widget? buildWidget(BuildContext context) => ScreenInfo(name: name);
 
   @override
   ImageProvider<Object> get iconImageProvider => iconImage;

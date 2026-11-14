@@ -48,7 +48,7 @@ class MemoryDetail extends StatelessWidget with I18nMixin {
             if (!snapshot.hasData || snapshot.data == null) {
               return Center(
                 child: Text(
-                  t('memory_info.class_no_detail'),
+                  t(context, 'memory_info.class_no_detail'),
                   style: TextStyle(fontSize: 20),
                 ),
               );
@@ -70,7 +70,7 @@ class MemoryDetail extends StatelessWidget with I18nMixin {
                     Padding(
                       padding: EdgeInsets.only(bottom: 10),
                       child: Text(
-                        t('memory_info.class_name'),
+                        t(context, 'memory_info.class_name'),
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -86,7 +86,7 @@ class MemoryDetail extends StatelessWidget with I18nMixin {
                     Padding(
                       padding: EdgeInsets.only(bottom: 10),
                       child: Text(
-                        t('memory_info.location'),
+                        t(context, 'memory_info.location'),
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -102,7 +102,7 @@ class MemoryDetail extends StatelessWidget with I18nMixin {
                     Padding(
                       padding: EdgeInsets.only(bottom: 10),
                       child: Text(
-                        t('memory_info.property'),
+                        t(context, 'memory_info.property'),
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -118,7 +118,7 @@ class MemoryDetail extends StatelessWidget with I18nMixin {
                     Padding(
                       padding: EdgeInsets.only(bottom: 10),
                       child: Text(
-                        t('memory_info.function'),
+                        t(context, 'memory_info.function'),
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,

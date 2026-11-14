@@ -7,7 +7,7 @@ import 'widgets/show_code.dart';
 
 class ManaShowCode extends ManaPluggable {
   @override
-  Widget? buildWidget(BuildContext? context) => ShowCode(name: name);
+  Widget? buildWidget(BuildContext context) => ShowCode(name: name);
 
   @override
   String getLocalizedDisplayName(Locale locale) {

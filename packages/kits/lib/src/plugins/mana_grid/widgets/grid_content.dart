@@ -56,7 +56,7 @@ class _GridContentState extends State<GridContent> with I18nMixin {
               Row(
                 children: [
                   Text(
-                    t('grid.gap'),
+                    t(context, 'grid.gap'),
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                   ),
                   const Spacer(),
@@ -92,7 +92,7 @@ class _GridContentState extends State<GridContent> with I18nMixin {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      t('grid.show_numbers'),
+                      t(context, 'grid.show_numbers'),
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,

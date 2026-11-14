@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mana/flutter_mana.dart';
+import 'package:flutter_mana/flutter_mana_diagnostics.dart';
 
 import 'selected_rect_painter.dart';
 
@@ -71,7 +72,10 @@ class _AlignRulerBarrierState extends State<AlignRulerBarrier> {
       return;
     }
 
-    final List<RenderObject> objects = HitTestUtils.hitTest(_dotPosition);
+    final List<RenderObject> objects = HitTestUtils.hitTest(
+      _dotPosition,
+      rootKey: ManaScope.read(context).rootKey,
+    );
 
     Offset? snappedOffset;
     RenderObject? snappedObject;

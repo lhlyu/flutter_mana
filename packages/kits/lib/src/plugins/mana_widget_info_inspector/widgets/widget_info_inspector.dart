@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_mana/flutter_mana.dart';
+import 'package:flutter_mana/flutter_mana_diagnostics.dart';
 
 import 'widget_info_inspector_barrier.dart';
 import 'widget_info_inspector_content.dart';
@@ -38,7 +39,10 @@ class _WidgetInfoInspectorState extends State<WidgetInfoInspector>
   void _inspectAt(Offset? position) {
     if (position == null) return;
 
-    final List<RenderObject> renderObjects = HitTestUtils.hitTest(position);
+    final List<RenderObject> renderObjects = HitTestUtils.hitTest(
+      position,
+      rootKey: ManaScope.read(context).rootKey,
+    );
 
     setState(() {
       selection.candidates = renderObjects;

@@ -6,7 +6,6 @@
 
 ```dart
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_mana/flutter_mana.dart';
 import 'package:flutter_mana_kits/flutter_mana_kits.dart';
 
@@ -22,28 +21,9 @@ void sendRequest() {
       error) {});
 }
 
-void main() {
-  /// add plugin
-  ManaPluginManager.instance.register(ManaDioInspector());
-
-  runApp(ManaWidget(child: App()));
-}
-
-class App extends StatelessWidget {
-  const App({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Dio Inspector',
-      home: Scaffold(
-			body: ElevatedButton(
-			  onPressed: sendRequest,
-			  child: const Text('Send Request'),
-			),
-		),
-    );
-  }
+void registerPlugin(ManaController controller) {
+  controller.registerPlugin(ManaDioInspector());
 }
 ```
+
+宿主接入与 Material 环境配置见[完整示例](../../../../../example/lib/main.dart)。

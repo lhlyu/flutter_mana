@@ -6,7 +6,7 @@ import 'widgets/grid.dart';
 
 class ManaGrid extends ManaPluggable {
   @override
-  Widget? buildWidget(BuildContext? context) => Grid(name: name);
+  Widget? buildWidget(BuildContext context) => Grid(name: name);
 
   @override
   String getLocalizedDisplayName(Locale locale) {

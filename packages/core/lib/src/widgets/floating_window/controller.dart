@@ -1,160 +1,131 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter_mana/flutter_mana.dart';
+import 'dart:async';
 
-class FloatingWindowController extends ChangeNotifier {
+import 'package:flutter/widgets.dart';
+
+import '../../runtime/mana_controller.dart';
+import '../../runtime/mana_plugin_manager.dart';
+import '../../runtime/mana_scope.dart';
+import 'enum.dart';
+
+/// Window-local geometry only. Runtime session transitions belong to ManaController.
+class FloatingWindowController {
   FloatingWindowController(
     BuildContext context, {
-    String name = '',
-    PositionType position = PositionType.normal,
+    required this.name,
+    this.position = .normal,
     Offset? initialPosition,
-    double? initialWidth,
-    double? initialHeight,
-  }) {
-    _name = name;
-    _position = position;
-    _initialPosition = initialPosition;
-    _initialWidth = initialWidth;
-    _initialHeight = initialHeight;
-    _init(context);
+    this.initialWidth,
+    this.initialHeight,
+    bool hasBarrier = false,
+  }) : runtime = ManaScope.read(context) {
+    _resize(MediaQuery.sizeOf(context));
+    final x =
+        initialPosition?.dx ?? (_screenSize.width - _windowSize.width) / 2;
+    final y = switch (position) {
+      .normal =>
+        initialPosition?.dy ?? (_screenSize.height - _windowSize.height) / 2,
+      .top => 100.0,
+      .bottom => _screenSize.height - _windowSize.height,
+    };
+    offset.value = _clamp(Offset(x, y));
+    _unregister = runtime.registerWindow(
+      name,
+      hasBarrier: hasBarrier,
+      dismissSettings: _dismissSettings,
+    );
   }
 
-  late ManaState _manaState;
-
-  ManaState get manaState => _manaState;
-
-  String _name = '';
-  Size _screenSize = Size.zero;
+  final ManaController runtime;
+  final String name;
+  final PositionType position;
+  final double? initialWidth;
+  final double? initialHeight;
+  late final VoidCallback _unregister;
+  Size _screenSize = .zero;
+  Size _windowSize = .zero;
+  bool _closing = false;
 
   Size get screenSize => _screenSize;
-
-  Size _windowSize = Size.zero;
-
   Size get windowSize => _windowSize;
+  bool get isManager => name == ManaPluginManager.name;
+  bool get isFullscreen =>
+      isManager ? fullscreen.value : runtime.state.windowMode == .fullscreen;
+  bool get isVisible => isManager
+      ? runtime.state.pluginPanelVisible
+      : runtime.state.windowVisible;
 
-  PositionType _position = PositionType.normal;
-  Offset? _initialPosition;
-  double? _initialWidth;
-  double? _initialHeight;
-
-  /// 浮动窗口位置
   final offset = ValueNotifier(Offset.zero);
-
-  /// 全屏
   final fullscreen = ValueNotifier(false);
-
-  /// 关闭
-  final closing = ValueNotifier(false);
-
-  /// 展示设置
   final showSetting = ValueNotifier(false);
 
-  void _init(BuildContext context) {
-    _manaState = ManaScope.of(context);
-    _calculateInitialPosition(context);
+  bool _dismissSettings() {
+    if (!showSetting.value) return false;
+    showSetting.value = false;
+    return true;
   }
 
   void update(BuildContext context) {
-    _calculateInitialPosition(context);
+    final size = MediaQuery.sizeOf(context);
+    if (size == _screenSize) return;
+    _resize(size);
+    offset.value = _clamp(offset.value);
   }
 
-  @override
-  void dispose() {
-    offset.dispose();
-    fullscreen.dispose();
-    closing.dispose();
-    showSetting.dispose();
-    super.dispose();
+  void _resize(Size size) {
+    _screenSize = size;
+    final width = initialWidth ?? (size.width * 0.6).clamp(300, 600);
+    final height = switch (initialHeight) {
+      null => size.height * 0.6,
+      final value when value > 0 && value < 1 => size.height * value,
+      final value => value,
+    };
+    _windowSize = Size(
+      width.clamp(0, size.width),
+      height.clamp(0, size.height),
+    );
   }
 
-  Size _getWindowActualSize() {
-    double width = _initialWidth ?? 0;
-    if (_initialWidth == null) {
-      width = (_screenSize.width * 0.6).clamp(300, 600);
-    } else if (_initialWidth == double.infinity) {
-      width = _screenSize.width;
-    }
-    if (width > _screenSize.width) {
-      width = _screenSize.width;
-    }
+  Offset _clamp(Offset value) => Offset(
+    value.dx.clamp(0, _screenSize.width - _windowSize.width),
+    value.dy.clamp(0, _screenSize.height - _windowSize.height),
+  );
 
-    double height = _initialHeight ?? 0;
-    if (_initialHeight == null) {
-      height = _screenSize.height * 0.6;
-    } else if (_initialHeight == double.infinity) {
-      height = _screenSize.height;
-    } else if (_initialHeight != null && _initialHeight! > 0 && _initialHeight! < 1) {
-      height = _screenSize.height * _initialHeight!;
-    }
-    if (height > _screenSize.height) {
-      height = _screenSize.height;
-    }
-
-    return Size(width, height);
-  }
-
-  void _calculateInitialPosition(BuildContext context) {
-    _screenSize = MediaQuery.of(context).size;
-    _windowSize = _getWindowActualSize();
-
-    final dx = _initialPosition?.dx ?? (_screenSize.width - _windowSize.width) / 2;
-    double dy = 0;
-
-    switch (_position) {
-      case PositionType.normal:
-        dy = _initialPosition?.dy ?? (_screenSize.height - _windowSize.height) / 2;
-
-      case PositionType.top:
-        dy = 100;
-
-      case PositionType.bottom:
-        dy = _screenSize.height - _windowSize.height;
-    }
-
-    offset.value = Offset(dx, dy);
-  }
-
-  void onPanUpdate(DragUpdateDetails details) {
-    final dx = (offset.value.dx + details.delta.dx).clamp(0.0, screenSize.width - windowSize.width);
-    final dy = (offset.value.dy + details.delta.dy).clamp(0.0, screenSize.height - windowSize.height);
-    offset.value = Offset(dx, dy);
-  }
-
-  void onToggleSetting() {
-    showSetting.value = !showSetting.value;
-  }
+  void onPanUpdate(DragUpdateDetails details) =>
+      offset.value = _clamp(offset.value + details.delta);
+  void onToggleSetting() => showSetting.value = !showSetting.value;
 
   void onFullscreen() {
-    fullscreen.value = !fullscreen.value;
-    if (_name != ManaPluginManager.name) {
-      _manaState.floatingButtonVisible.value = !fullscreen.value;
-    }
-    _manaState.floatWindowMainFullscreen.value = fullscreen.value;
-  }
-
-  void onMinimize(bool showBarrier, VoidCallback? callback) {
-    callback?.call();
-    if (_name == ManaPluginManager.name) {
-      _manaState.pluginManagementPanelVisible.value = false;
+    if (isManager) {
+      fullscreen.value = !fullscreen.value;
     } else {
-      _manaState.floatWindowMainVisible.value = false;
-      if (!showBarrier) {
-        _manaState.activePluginPanelVisible.value = false;
-      }
+      runtime.toggleFullscreen();
     }
-    _manaState.floatingButtonVisible.value = true;
   }
 
-  void onClose(VoidCallback? callback) async {
-    if (closing.value) {
-      return;
-    }
-    closing.value = true;
+  void onMinimize(VoidCallback? callback) {
     callback?.call();
-    if (_name == ManaPluginManager.name) {
-      _manaState.pluginManagementPanelVisible.value = false;
+    if (isManager) {
+      runtime.closePluginPanel();
+    } else {
+      runtime.minimizeWindow();
     }
-    _manaState.activePluginName.value = '';
-    _manaState.activePluginPanelVisible.value = false;
-    _manaState.floatingButtonVisible.value = true;
+  }
+
+  void onClose(VoidCallback? callback) {
+    if (_closing) return;
+    _closing = true;
+    callback?.call();
+    if (isManager) {
+      runtime.closePluginPanel();
+    } else {
+      unawaited(runtime.closePlugin());
+    }
+  }
+
+  void dispose() {
+    _unregister();
+    offset.dispose();
+    fullscreen.dispose();
+    showSetting.dispose();
   }
 }

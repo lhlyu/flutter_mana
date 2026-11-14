@@ -147,12 +147,11 @@ class _SharedPreferencesViewerContentState
 
   /// 创建中部区域
   Widget _buildCenter() {
-    final filterData =
-        _filter && _filterKeywords.isNotEmpty
-            ? _data.where((value) {
-              return value.key.contains(_filterKeywords);
-            }).toList()
-            : _data;
+    final filterData = _filter && _filterKeywords.isNotEmpty
+        ? _data.where((value) {
+            return value.key.contains(_filterKeywords);
+          }).toList()
+        : _data;
 
     return Expanded(
       child: ListView.separated(
@@ -198,7 +197,10 @@ class _SharedPreferencesViewerContentState
               controller: _filterController,
               style: const TextStyle(fontSize: _fontSize),
               decoration: InputDecoration(
-                hintText: t('shared_preferences_viewer.filter_keywords'),
+                hintText: t(
+                  context,
+                  'shared_preferences_viewer.filter_keywords',
+                ),
                 hintStyle: TextStyle(
                   fontSize: _fontSize,
                   color: Colors.black54,

@@ -5,7 +5,7 @@ import 'icon.dart';
 
 class Demo extends ManaPluggable {
   @override
-  Widget? buildWidget(BuildContext? context) {
+  Widget? buildWidget(BuildContext context) {
     return Container(
       color: Colors.white,
       width: double.infinity,

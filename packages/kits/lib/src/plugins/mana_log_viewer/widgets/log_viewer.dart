@@ -15,18 +15,19 @@ class LogViewer extends StatefulWidget {
 
 class _LogViewerState extends State<LogViewer> {
   bool _verboseLogs = false;
+  late final ManaPreferences _preferences;
 
   @override
   void initState() {
     super.initState();
-    _verboseLogs = ManaStore.instance.prefs.getBool('mana_log_viewer_verbose_logs') ?? false;
+    _preferences = ManaScope.read(context).preferences;
+    _verboseLogs =
+        (_preferences.read('mana_log_viewer_verbose_logs') as bool?) ?? false;
   }
 
   void _onChange(bool? value) async {
-    await ManaStore.instance.prefs.setBool('mana_log_viewer_verbose_logs', value ?? false);
-    setState(() {
-      _verboseLogs = value ?? false;
-    });
+    setState(() => _verboseLogs = value ?? false);
+    await _preferences.write('mana_log_viewer_verbose_logs', _verboseLogs);
   }
 
   @override
@@ -38,7 +39,10 @@ class _LogViewerState extends State<LogViewer> {
       position: PositionType.bottom,
       drag: false,
       content: LogViewerContent(verboseLogs: _verboseLogs),
-      setting: LogViewerSetting(verboseLogs: _verboseLogs, onChanged: _onChange),
+      setting: LogViewerSetting(
+        verboseLogs: _verboseLogs,
+        onChanged: _onChange,
+      ),
     );
   }
 }

@@ -28,10 +28,9 @@ class ResponseDetail extends StatelessWidget with I18nMixin {
       duration = requestEndTime.difference(requestStartTime);
     }
 
-    String formattedRequestTime =
-        requestStartTime != null
-            ? '${requestStartTime.hour.toString().padLeft(2, '0')}:${requestStartTime.minute.toString().padLeft(2, '0')}:${requestStartTime.second.toString().padLeft(2, '0')}.${requestStartTime.millisecond.toString().padLeft(3, '0')}'
-            : 'N/A';
+    String formattedRequestTime = requestStartTime != null
+        ? '${requestStartTime.hour.toString().padLeft(2, '0')}:${requestStartTime.minute.toString().padLeft(2, '0')}:${requestStartTime.second.toString().padLeft(2, '0')}.${requestStartTime.millisecond.toString().padLeft(3, '0')}'
+        : 'N/A';
 
     // 请求详情
     final Map<String, String> details = {
@@ -110,18 +109,18 @@ class ResponseDetail extends StatelessWidget with I18nMixin {
               fontWeight: FontWeight.bold,
             ),
             tabs: [
-              Tab(text: t('dio_inspector.detail'), height: 36),
-              Tab(text: t('dio_inspector.request'), height: 36),
-              Tab(text: t('dio_inspector.response'), height: 36),
+              Tab(text: t(context, 'dio_inspector.detail'), height: 36),
+              Tab(text: t(context, 'dio_inspector.request'), height: 36),
+              Tab(text: t(context, 'dio_inspector.response'), height: 36),
             ],
           ),
           _divider,
           Expanded(
             child: TabBarView(
               children: [
-                _buildDetails(details),
-                _buildRequestDetails(requestHeaders, requestBody),
-                _buildResponseDetails(responseHeaders, responseBody),
+                _buildDetails(context, details),
+                _buildRequestDetails(context, requestHeaders, requestBody),
+                _buildResponseDetails(context, responseHeaders, responseBody),
               ],
             ),
           ),
@@ -131,37 +130,27 @@ class ResponseDetail extends StatelessWidget with I18nMixin {
   }
 
   Widget _buildTable(Map<String, String> data) {
-    final children =
-        data.entries.map((row) {
-          return TableRow(
-            children: [
-              TableCell(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8,
-                    horizontal: 16,
-                  ),
-                  child: Text(
-                    row.key,
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                  ),
-                ),
+    final children = data.entries.map((row) {
+      return TableRow(
+        children: [
+          TableCell(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              child: Text(
+                row.key,
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
               ),
-              TableCell(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8,
-                    horizontal: 16,
-                  ),
-                  child: SelectableText(
-                    row.value,
-                    style: TextStyle(fontSize: 12),
-                  ),
-                ),
-              ),
-            ],
-          );
-        }).toList();
+            ),
+          ),
+          TableCell(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              child: SelectableText(row.value, style: TextStyle(fontSize: 12)),
+            ),
+          ),
+        ],
+      );
+    }).toList();
 
     return Table(
       border: TableBorder(
@@ -192,7 +181,7 @@ class ResponseDetail extends StatelessWidget with I18nMixin {
   }
 
   // 构建详情
-  Widget _buildDetails(Map<String, String> details) {
+  Widget _buildDetails(BuildContext context, Map<String, String> details) {
     return SingleChildScrollView(
       physics: const ClampingScrollPhysics(),
       padding: EdgeInsets.only(bottom: 16),
@@ -202,7 +191,7 @@ class ResponseDetail extends StatelessWidget with I18nMixin {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              t('dio_inspector.request_details'),
+              t(context, 'dio_inspector.request_details'),
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ),
@@ -214,6 +203,7 @@ class ResponseDetail extends StatelessWidget with I18nMixin {
 
   // 构建请求详情
   Widget _buildRequestDetails(
+    BuildContext context,
     Map<String, String> requestHeaders,
     String requestBody,
   ) {
@@ -226,7 +216,7 @@ class ResponseDetail extends StatelessWidget with I18nMixin {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              t('dio_inspector.request_header'),
+              t(context, 'dio_inspector.request_header'),
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ),
@@ -234,7 +224,7 @@ class ResponseDetail extends StatelessWidget with I18nMixin {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              t('dio_inspector.request_body'),
+              t(context, 'dio_inspector.request_body'),
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ),
@@ -246,6 +236,7 @@ class ResponseDetail extends StatelessWidget with I18nMixin {
 
   // 构建响应详情
   Widget _buildResponseDetails(
+    BuildContext context,
     Map<String, String> responseHeaders,
     String responseBody,
   ) {
@@ -258,7 +249,7 @@ class ResponseDetail extends StatelessWidget with I18nMixin {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              t('dio_inspector.response_header'),
+              t(context, 'dio_inspector.response_header'),
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ),
@@ -266,7 +257,7 @@ class ResponseDetail extends StatelessWidget with I18nMixin {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              t('dio_inspector.response_body'),
+              t(context, 'dio_inspector.response_body'),
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ),
@@ -331,15 +322,14 @@ class MorePopupMenu extends StatelessWidget {
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-      itemBuilder:
-          (_) => List.generate(
-            items.length,
-            (index) => PopupMenuItem<int>(
-              value: index,
-              height: 34,
-              child: Text(items[index], style: const TextStyle(fontSize: 12)),
-            ),
-          ),
+      itemBuilder: (_) => List.generate(
+        items.length,
+        (index) => PopupMenuItem<int>(
+          value: index,
+          height: 34,
+          child: Text(items[index], style: const TextStyle(fontSize: 12)),
+        ),
+      ),
       onSelected: (index) {
         String textToCopy = '';
 

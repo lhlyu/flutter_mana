@@ -7,7 +7,7 @@ import 'widgets/memory_info.dart';
 
 class ManaMemoryInfo extends ManaPluggable {
   @override
-  Widget? buildWidget(BuildContext? context) {
+  Widget? buildWidget(BuildContext context) {
     return MemoryInfo(name: name);
   }
 

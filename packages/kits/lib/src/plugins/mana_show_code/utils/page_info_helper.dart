@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_mana/flutter_mana.dart';
 
 import 'code_display_service.dart';
 
@@ -18,9 +17,13 @@ class PageInfoHelper {
       WidgetInspectorService.instance.selection;
 
   // 构造函数，在创建实例时初始化选择器。
-  PageInfoHelper() {
-    _selectionInit();
-  }
+  PageInfoHelper(this.rootKey);
+
+  final GlobalKey rootKey;
+
+  void initialize() => _selectionInit();
+
+  Future<void> close() => _codeDisplayService.vmInspector.disconnect();
 
   /// 获取当前选中 Widget 的渲染对象。
   /// 如果 `selection.current` 为 `null`，则返回 `null`。
@@ -93,8 +96,11 @@ class PageInfoHelper {
       // 获取 Widget 的诊断节点 ID。
       // 这可能会在 Flutter 更新时导致兼容性问题，应寻找官方支持的替代方案。
       final widgetId = WidgetInspectorService.instance
-      // ignore: invalid_use_of_protected_member
-      .toId(renderObject!.toDiagnosticsNode(), ''); // renderObject 已在前面进行了空检查
+          // ignore: invalid_use_of_protected_member
+          .toId(
+            renderObject!.toDiagnosticsNode(),
+            '',
+          ); // renderObject 已在前面进行了空检查
 
       if (widgetId == null) {
         return null;
@@ -128,9 +134,9 @@ class PageInfoHelper {
   /// 遍历渲染树，收集所有 `RenderBox` 类型的对象，并按面积排序后去重，
   /// 然后将其设置为 Inspector Selection 的候选列表。
   void _selectionInit() {
-    // 确保 `manaRootKey.currentContext` 和其 `findRenderObject()` 非空。
-    final RenderObject? rootRenderObject =
-        manaRootKey.currentContext?.findRenderObject();
+    // Resolve the render root supplied by this Mana instance.
+    final RenderObject? rootRenderObject = rootKey.currentContext
+        ?.findRenderObject();
     if (rootRenderObject == null) {
       debugPrint(
         'Warning: Root render object not found for selection initialization.',
@@ -138,7 +144,7 @@ class PageInfoHelper {
       return;
     }
 
-    // 假设 `manaRootKey.currentContext!.findRenderObject()` 返回的是 `RenderView` 或类似的根节点，
+    // The host boundary contains the application render subtree,
     // 其 `child` 属性才是用户界面的根 `RenderObject`。
     // 最好明确类型或通过更安全的 API 获取子渲染对象。
     // 现在 _ignorePointer 是 RenderObject 类型

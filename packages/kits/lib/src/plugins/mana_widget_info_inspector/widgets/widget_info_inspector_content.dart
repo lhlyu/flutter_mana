@@ -42,7 +42,7 @@ class _WidgetInfoInspectorContentState extends State<WidgetInfoInspectorContent>
             children: [
               Switch(value: _debugPaintSizeEnabled, onChanged: _onChange),
               Text(
-                t('widget_info_inspector.tip'),
+                t(context, 'widget_info_inspector.tip'),
                 style: const TextStyle(
                   color: Colors.red,
                   fontWeight: FontWeight.bold,
@@ -54,22 +54,20 @@ class _WidgetInfoInspectorContentState extends State<WidgetInfoInspectorContent>
           Row(
             children: [
               IconButton(
-                onPressed:
-                    widget.selection.currentElement == null
-                        ? null
-                        : () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (ctx) {
-                                return InfoPage(
-                                  elements:
-                                      widget.selection.currentElement!
-                                          .debugGetDiagnosticChain(),
-                                );
-                              },
-                            ),
-                          );
-                        },
+                onPressed: widget.selection.currentElement == null
+                    ? null
+                    : () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (ctx) {
+                              return InfoPage(
+                                elements: widget.selection.currentElement!
+                                    .debugGetDiagnosticChain(),
+                              );
+                            },
+                          ),
+                        );
+                      },
                 constraints: const BoxConstraints(),
                 style: IconButton.styleFrom(
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,

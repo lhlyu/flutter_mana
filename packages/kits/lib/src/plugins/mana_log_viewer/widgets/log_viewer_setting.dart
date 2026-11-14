@@ -29,7 +29,7 @@ class LogViewerSetting extends StatelessWidget with I18nMixin {
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 onChanged: onChanged,
               ),
-              Text(t('log_viewer.verbose_logs')),
+              Text(t(context, 'log_viewer.verbose_logs')),
             ],
           ),
         ],

@@ -17,10 +17,14 @@ class FpsMonitor extends StatelessWidget with I18nMixin {
       showBarrier: false,
       content: SizedBox(
         width: MediaQuery.of(context).size.width,
-        child:
-            kIsWeb
-                ? Center(child: Text(t('fps_monitor.tip'), style: TextStyle(color: Colors.red, fontSize: 20)))
-                : PerformanceOverlay.allEnabled(),
+        child: kIsWeb
+            ? Center(
+                child: Text(
+                  t(context, 'fps_monitor.tip'),
+                  style: TextStyle(color: Colors.red, fontSize: 20),
+                ),
+              )
+            : PerformanceOverlay.allEnabled(),
       ),
     );
   }

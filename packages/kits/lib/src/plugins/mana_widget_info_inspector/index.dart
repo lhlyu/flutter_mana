@@ -7,7 +7,7 @@ import 'widgets/widget_info_inspector.dart';
 
 class ManaWidgetInfoInspector extends ManaPluggable {
   @override
-  Widget? buildWidget(BuildContext? context) => WidgetInfoInspector(name: name);
+  Widget? buildWidget(BuildContext context) => WidgetInfoInspector(name: name);
 
   @override
   String getLocalizedDisplayName(Locale locale) {

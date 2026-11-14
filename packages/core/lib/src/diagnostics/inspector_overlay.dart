@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
 // === 常量定义 ===
@@ -125,12 +125,10 @@ class RenderInspectorOverlay extends RenderBox {
   ///
   /// 创建一个 [RenderInspectorOverlay]。
   RenderInspectorOverlay({
-    required InspectorSelection selection,
-    required bool needEdges,
-    required bool needDescription,
-  }) : _selection = selection,
-       _needEdges = needEdges,
-       _needDescription = needDescription;
+    required this._selection,
+    required this._needEdges,
+    required this._needDescription,
+  });
 
   bool _needEdges;
 
@@ -270,11 +268,10 @@ class _InspectorOverlayLayer extends Layer {
 
     final info = _SelectionInfo(selection);
     final selected = _TransformedRect(selection.current!);
-    final candidates =
-        selection.candidates
-            .where((c) => c != selection.current && c.attached)
-            .map(_TransformedRect.new)
-            .toList();
+    final candidates = selection.candidates
+        .where((c) => c != selection.current && c.attached)
+        .map(_TransformedRect.new)
+        .toList();
 
     final state = _InspectorOverlayRenderState(
       overlayRect: overlayRect,
@@ -314,11 +311,10 @@ class _InspectorOverlayLayer extends Layer {
     // Draw the selection box.
     // 绘制选中框。
     final fillPaint = Paint()..color = _InspectorConstants.selectionFill;
-    final borderPaint =
-        Paint()
-          ..color = _InspectorConstants.selectionBorder
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = _InspectorConstants.strokeWidth;
+    final borderPaint = Paint()
+      ..color = _InspectorConstants.selectionBorder
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = _InspectorConstants.strokeWidth;
 
     final selectedRect = state.selected.rect.deflate(0.5);
     canvas
@@ -728,10 +724,7 @@ class _InspectorOverlayRenderState {
           other.candidates,
         ) && // Deep comparison for the list of candidates.
         textDirection == other.textDirection &&
-        selectionInfo.message ==
-            other
-                .selectionInfo
-                .message; // Compare by message as _SelectionInfo itself can be complex.
+        selectionInfo.message == other.selectionInfo.message; // Compare by message as _SelectionInfo itself can be complex.
   }
 
   @override

@@ -209,7 +209,7 @@ class _DioInspectorContentState extends State<DioInspectorContent>
               controller: _filterController,
               style: const TextStyle(fontSize: _fontSize),
               decoration: InputDecoration(
-                hintText: t('dio_inspector.filter_keywords'),
+                hintText: t(context, 'dio_inspector.filter_keywords'),
                 hintStyle: TextStyle(
                   fontSize: _fontSize,
                   color: Colors.black54,

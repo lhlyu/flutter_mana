@@ -6,7 +6,7 @@ import 'widgets/device_info.dart';
 
 class ManaDeviceInfo extends ManaPluggable {
   @override
-  Widget? buildWidget(BuildContext? context) => DeviceInfo(name: name);
+  Widget? buildWidget(BuildContext context) => DeviceInfo(name: name);
 
   @override
   String getLocalizedDisplayName(Locale locale) {

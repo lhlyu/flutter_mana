@@ -6,7 +6,7 @@ import 'widgets/align_ruler.dart';
 
 class ManaAlignRuler extends ManaPluggable {
   @override
-  Widget? buildWidget(BuildContext? context) => AlignRuler(name: name);
+  Widget? buildWidget(BuildContext context) => AlignRuler(name: name);
 
   @override
   ImageProvider<Object> get iconImageProvider => iconImage;

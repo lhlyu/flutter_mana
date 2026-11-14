@@ -1,14 +1,10 @@
-import 'package:flutter/material.dart';
+import 'dart:math' as math;
 
-// ignore_for_file: constant_identifier_names
+import 'package:flutter/widgets.dart';
 
-abstract final class _Icons {
-  static const fullscreen = Icons.fullscreen;
-  static const fullscreen_exit = Icons.fullscreen_exit;
-  static const minimize = Icons.remove;
-  static const settings = Icons.settings;
-  static const close = Icons.close;
-}
+import '../mana_button.dart';
+import '../mana_icon.dart';
+import '../mana_style.dart';
 
 @immutable
 class WindowControls extends StatefulWidget {
@@ -55,84 +51,83 @@ class WindowControls extends StatefulWidget {
 class _WindowControlsState extends State<WindowControls> {
   bool _isHandlePressed = false;
 
-  /// 统一 IconButton 构造
-  Widget _buildIconButton({required IconData icon, required VoidCallback? onPressed, String? tooltip}) {
-    return IconButton(
-      icon: Icon(icon, size: 16),
-      color: Colors.black54,
+  Widget _buildIconButton({
+    required ManaSymbol icon,
+    required VoidCallback? onPressed,
+    String? tooltip,
+  }) {
+    return ManaButton(
       tooltip: tooltip,
-      constraints: const BoxConstraints(),
-      style: IconButton.styleFrom(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
       onPressed: onPressed,
+      child: ManaIcon(icon),
     );
   }
 
+  Widget _buildHandle() => GestureDetector(
+    onPanStart: (_) => setState(() => _isHandlePressed = true),
+    onPanEnd: (_) => setState(() => _isHandlePressed = false),
+    onPanCancel: () => setState(() => _isHandlePressed = false),
+    onPanUpdate: widget.onPanUpdate,
+    child: Container(
+      color: ManaStyle.transparent,
+      alignment: .center,
+      child: _DragHandle(isPressed: _isHandlePressed),
+    ),
+  );
+
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 40,
-      padding: EdgeInsets.symmetric(horizontal: 8),
-      color: Colors.white,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
+  Widget build(BuildContext context) => Container(
+    height: 40,
+    padding: const .symmetric(horizontal: 8),
+    color: ManaStyle.surface,
+    child: LayoutBuilder(
+      builder: (context, constraints) {
+        final showHandle =
+            widget.drag && !widget.isFullscreen && constraints.maxWidth >= 184;
+        // 极窄窗口允许横向滚动控制栏，而不是让按钮溢出。
+        return SingleChildScrollView(
+          scrollDirection: .horizontal,
+          child: SizedBox(
+            width: math.max(128, constraints.maxWidth),
             child: Row(
               children: [
                 _buildIconButton(
-                  icon: widget.isFullscreen ? _Icons.fullscreen_exit : _Icons.fullscreen,
+                  icon: widget.isFullscreen ? .exitFullscreen : .fullscreen,
                   tooltip: widget.isFullscreen ? '退出全屏' : '全屏',
                   onPressed: widget.onFullscreen,
                 ),
-                _buildIconButton(icon: _Icons.minimize, tooltip: '最小化', onPressed: widget.onMinimize),
-              ],
-            ),
-          ),
-          if (widget.drag && !widget.isFullscreen)
-            Expanded(
-              child: GestureDetector(
-                onPanStart: (details) {
-                  setState(() {
-                    _isHandlePressed = true;
-                  });
-                },
-                onPanEnd: (details) {
-                  setState(() {
-                    _isHandlePressed = false;
-                  });
-                },
-                onPanUpdate: (details) {
-                  if (!_isHandlePressed) {
-                    return;
-                  }
-                  widget.onPanUpdate(details);
-                },
-                child: Container(
-                  color: Colors.transparent,
-                  alignment: Alignment.center,
-                  child: _DragHandle(isPressed: _isHandlePressed),
+                _buildIconButton(
+                  icon: .minimize,
+                  tooltip: '最小化',
+                  onPressed: widget.onMinimize,
                 ),
-              ),
-            ),
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
+                Expanded(
+                  child: showHandle ? _buildHandle() : const SizedBox.shrink(),
+                ),
                 Visibility(
                   visible: widget.showSettingButton,
                   maintainSize: true,
                   maintainAnimation: true,
                   maintainState: true,
-                  child: _buildIconButton(icon: _Icons.settings, tooltip: '设置', onPressed: widget.onToggleSetting),
+                  child: _buildIconButton(
+                    icon: .settings,
+                    tooltip: '设置',
+                    onPressed: widget.onToggleSetting,
+                  ),
                 ),
-                _buildIconButton(icon: _Icons.close, tooltip: '关闭', onPressed: widget.onClose),
+                _buildIconButton(
+                  icon: .close,
+                  tooltip: '关闭',
+                  onPressed: widget.onClose,
+                ),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
+        );
+      },
+    ),
+  );
 }
 
 /// 拖动把手视觉
@@ -149,8 +144,8 @@ class _DragHandle extends StatelessWidget {
       height: isPressed ? 6 : 4,
       width: isPressed ? 60 : 50,
       decoration: BoxDecoration(
-        color: isPressed ? Theme.of(context).primaryColor : Colors.grey.shade400,
-        borderRadius: BorderRadius.circular(isPressed ? 3 : 2),
+        color: isPressed ? ManaStyle.accent : ManaStyle.border,
+        borderRadius: .circular(isPressed ? 3 : 2),
       ),
     );
   }

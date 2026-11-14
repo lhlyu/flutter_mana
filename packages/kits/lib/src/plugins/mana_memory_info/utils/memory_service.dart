@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_mana/flutter_mana.dart';
+import 'package:flutter_mana/flutter_mana_diagnostics.dart';
 import 'package:vm_service/vm_service.dart';
 
 /// 表示一个类的属性信息。
@@ -34,14 +34,13 @@ class Property {
   /// 例如："static String propertyName" 或 "final int value"。
   String get propertyStr {
     // 根据属性类型确定修饰符，优先顺序：static > const > final
-    final String modifier =
-        isStatic
-            ? "static"
-            : isConst
-            ? "const"
-            : isFinal
-            ? "final"
-            : ""; // 如果都不是，则为空
+    final String modifier = isStatic
+        ? "static"
+        : isConst
+        ? "const"
+        : isFinal
+        ? "final"
+        : ""; // 如果都不是，则为空
 
     // 组合修饰符、类型和名称，注意修饰符和类型之间可能存在空格
     return "$modifier $type $name".trim();
@@ -193,8 +192,10 @@ class MemoryService with VmInspectorMixin {
     final instanceSet = await vmInspector.getInstances(classId, limit);
     // 使用 null-aware 操作符和 map 转换列表，确保安全。
     // 如果 instances 为 null，则返回一个空列表。
-    final instanceIds =
-        instanceSet.instances?.map((e) => e.id).whereType<String>().toList();
+    final instanceIds = instanceSet.instances
+        ?.map((e) => e.id)
+        .whereType<String>()
+        .toList();
     completion(instanceIds);
   }
 

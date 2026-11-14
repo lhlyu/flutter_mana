@@ -6,7 +6,7 @@ import 'widgets/dio_inspector.dart';
 
 class ManaDioInspector extends ManaPluggable {
   @override
-  Widget? buildWidget(BuildContext? context) => DioInspector(name: name);
+  Widget? buildWidget(BuildContext context) => DioInspector(name: name);
 
   @override
   String getLocalizedDisplayName(Locale locale) {

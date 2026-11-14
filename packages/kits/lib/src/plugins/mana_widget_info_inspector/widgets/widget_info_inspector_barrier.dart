@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mana/flutter_mana.dart';
+import 'package:flutter_mana/flutter_mana_diagnostics.dart';
 
 class WidgetInfoInspectorBarrier extends StatelessWidget {
   final InspectorSelection selection;

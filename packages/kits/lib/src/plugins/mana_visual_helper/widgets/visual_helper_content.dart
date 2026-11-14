@@ -50,7 +50,7 @@ class _VisualHelperContentState extends State<VisualHelperContent>
           Row(
             children: [
               Text(
-                t('visual_helper.animate_speed'),
+                t(context, 'visual_helper.animate_speed'),
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
               const Spacer(),
@@ -81,8 +81,8 @@ class _VisualHelperContentState extends State<VisualHelperContent>
 
           // 三项紧凑行
           _compactRow(
-            t('visual_helper.layout_bounds'),
-            t('visual_helper.show_widget_borders'),
+            t(context, 'visual_helper.layout_bounds'),
+            t(context, 'visual_helper.show_widget_borders'),
             debugPaintSizeEnabled,
             (v) {
               setState(() => debugPaintSizeEnabled = v);
@@ -90,8 +90,8 @@ class _VisualHelperContentState extends State<VisualHelperContent>
             },
           ),
           _compactRow(
-            t('visual_helper.repaint_highlight'),
-            t('visual_helper.frame_repaint_highlight'),
+            t(context, 'visual_helper.repaint_highlight'),
+            t(context, 'visual_helper.frame_repaint_highlight'),
             debugRepaintRainbowEnabled,
             (v) {
               setState(() => debugRepaintRainbowEnabled = v);
@@ -99,8 +99,8 @@ class _VisualHelperContentState extends State<VisualHelperContent>
             },
           ),
           _compactRow(
-            t('visual_helper.invert_oversized_images'),
-            t('visual_helper.invert_oversized_images_label'),
+            t(context, 'visual_helper.invert_oversized_images'),
+            t(context, 'visual_helper.invert_oversized_images_label'),
             debugInvertOversizedImages,
             (v) {
               setState(() => debugInvertOversizedImages = v);

@@ -16,25 +16,25 @@ class Grid extends StatefulWidget {
 class _GridState extends State<Grid> {
   double _gap = 50;
   bool _showNumbers = true;
+  late final ManaPreferences _preferences;
 
   @override
   void initState() {
     super.initState();
-    _gap = ManaStore.instance.prefs.getDouble('mana_grid_gap') ?? 50;
+    _preferences = ManaScope.read(context).preferences;
+    _gap = (_preferences.read('mana_grid_gap') as double?) ?? 50;
     _showNumbers =
-        ManaStore.instance.prefs.getBool('mana_grid_show_numbers') ?? true;
+        (_preferences.read('mana_grid_show_numbers') as bool?) ?? true;
   }
 
   void _onGapChanged(double value) async {
-    _gap = value;
-    await ManaStore.instance.prefs.setDouble('mana_grid_gap', value);
-    setState(() {});
+    setState(() => _gap = value);
+    await _preferences.write('mana_grid_gap', value);
   }
 
   void _onShowNumbersChanged(bool value) async {
-    _showNumbers = value;
-    await ManaStore.instance.prefs.setBool('mana_grid_show_numbers', value);
-    setState(() {});
+    setState(() => _showNumbers = value);
+    await _preferences.write('mana_grid_show_numbers', value);
   }
 
   @override

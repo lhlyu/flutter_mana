@@ -62,7 +62,7 @@ class _ColorSuckerContentState extends State<ColorSuckerContent>
           Row(
             children: [
               Text(
-                t('color_sucker.magnification'),
+                t(context, 'color_sucker.magnification'),
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
               const Spacer(),

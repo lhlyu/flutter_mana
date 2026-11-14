@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mana/flutter_mana.dart';
 
 import '../code/code_widget.dart';
 import '../code/highlighter_style.dart';
@@ -30,20 +31,27 @@ class _ShowCodeContentState extends State<ShowCodeContent> {
   }
 
   Future<_CodeInfo> _loadData() async {
-    final helper = PageInfoHelper();
-    final packagePath = helper.packagePathConvertFromFilePath(helper.filePath);
+    final helper = PageInfoHelper(ManaScope.read(context).rootKey)
+      ..initialize();
+    try {
+      final packagePath = helper.packagePathConvertFromFilePath(
+        helper.filePath,
+      );
 
-    if (_codeInfos.containsKey(packagePath)) {
-      return _codeInfos[packagePath]!;
+      if (_codeInfos.containsKey(packagePath)) {
+        return _codeInfos[packagePath]!;
+      }
+
+      final code = await helper.getCode(packagePath) ?? '';
+
+      final codeInfo = _CodeInfo(packagePath, code);
+
+      _codeInfos[packagePath] = codeInfo;
+
+      return codeInfo;
+    } finally {
+      await helper.close();
     }
-
-    final code = await helper.getCode(packagePath) ?? '';
-
-    final codeInfo = _CodeInfo(packagePath, code);
-
-    _codeInfos[packagePath] = codeInfo;
-
-    return codeInfo;
   }
 
   @override

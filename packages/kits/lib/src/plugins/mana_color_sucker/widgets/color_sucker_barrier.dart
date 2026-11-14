@@ -37,7 +37,9 @@ class _ColorSuckerBarrierState extends State<ColorSuckerBarrier> {
   @override
   void initState() {
     super.initState();
-    _pixelGrabber = ScreenPixelGrabber(repaintBoundaryKey: manaRootKey);
+    _pixelGrabber = ScreenPixelGrabber(
+      repaintBoundaryKey: ManaScope.read(context).rootKey,
+    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeColorSucker();

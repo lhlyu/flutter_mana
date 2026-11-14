@@ -1,7 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_mana/flutter_mana.dart';
+import 'package:flutter/widgets.dart';
 
-import '../nil.dart';
+import '../../runtime/mana_scope.dart';
+import 'enum.dart';
+
+import '../mana_style.dart';
 import 'controller.dart';
 import 'window_controls.dart';
 
@@ -72,95 +74,80 @@ class FloatingWindow extends StatefulWidget {
 }
 
 class _FloatingWindowState extends State<FloatingWindow> {
-  late final FloatingWindowController _controller;
-
-  bool _initialized = false;
+  FloatingWindowController? _controller;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_initialized) {
-      _controller.update(context);
-      return;
+    if (_controller case final controller?) {
+      controller.update(context);
+    } else {
+      _controller = FloatingWindowController(
+        context,
+        name: widget.name,
+        position: widget.position,
+        initialPosition: widget.initialPosition,
+        initialWidth: widget.initialWidth,
+        initialHeight: widget.initialHeight,
+        hasBarrier: widget.barrier != null || widget.content == null,
+      );
     }
-    _controller = FloatingWindowController(
-      context,
-      name: widget.name,
-      position: widget.position,
-      initialPosition: widget.initialPosition,
-      initialWidth: widget.initialWidth,
-      initialHeight: widget.initialHeight,
-    );
-    _initialized = true;
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
-  /// 构建barrier
-  Widget _buildBarrier() {
-    return widget.barrier ??
-        GestureDetector(
-          onTap: () => _controller.onMinimize(widget.showBarrier, widget.onMinimize),
-          behavior: HitTestBehavior.opaque,
-          child: Container(color: Colors.transparent, width: double.infinity, height: double.infinity),
-        );
-  }
-
-  Widget _buildContent(Size screenSize, Size windowSize, bool fullscreen) {
-    final radius =
-        (fullscreen || widget.initialHeight == double.infinity) ? BorderRadius.zero : BorderRadius.circular(8);
-
+  Widget _content(FloatingWindowController controller) {
+    final fullscreen = controller.isFullscreen;
     return Container(
-      clipBehavior: Clip.antiAlias,
+      clipBehavior: .antiAlias,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: radius,
-        boxShadow: [
-          BoxShadow(color: Colors.black.withAlpha(50), blurRadius: 16, spreadRadius: 0, offset: const Offset(0, 0)),
-        ],
+        color: ManaStyle.surface,
+        borderRadius: fullscreen || widget.initialHeight == double.infinity
+            ? .zero
+            : .circular(8),
+        boxShadow: const [BoxShadow(color: ManaStyle.shadow, blurRadius: 16)],
       ),
       child: SafeArea(
         left: fullscreen,
         top: fullscreen || widget.initialHeight == double.infinity,
         right: fullscreen,
-        bottom: fullscreen || widget.position == PositionType.bottom,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (widget.showControls)
-              WindowControls(
-                drag: widget.drag,
-                isFullscreen: fullscreen,
-                showSettingButton: widget.setting != null,
-                onPanUpdate: _controller.onPanUpdate,
-                onToggleSetting: _controller.onToggleSetting,
-                onFullscreen: _controller.onFullscreen,
-                onMinimize: () => _controller.onMinimize(widget.showBarrier, widget.onMinimize),
-                onClose: () => _controller.onClose(widget.onClose),
-              ),
-            Expanded(
-              child: Stack(
-                children: [
-                  widget.content ?? SizedBox(),
-                  Positioned.fill(
-                    child: ValueListenableBuilder(
-                      valueListenable: _controller.showSetting,
-                      builder: (context, showSetting, _) {
-                        if (showSetting && widget.setting != null) {
-                          return ColoredBox(color: Colors.white, child: widget.setting ?? SizedBox.shrink());
-                        }
-                        return SizedBox.shrink();
-                      },
-                    ),
+        bottom: fullscreen || widget.position == .bottom,
+        child: LayoutBuilder(
+          builder: (context, constraints) => Column(
+            children: [
+              if (widget.showControls)
+                SizedBox(
+                  height: constraints.maxHeight.clamp(0, 40),
+                  child: WindowControls(
+                    drag: widget.drag,
+                    isFullscreen: fullscreen,
+                    showSettingButton: widget.setting != null,
+                    onPanUpdate: controller.onPanUpdate,
+                    onToggleSetting: controller.onToggleSetting,
+                    onFullscreen: controller.onFullscreen,
+                    onMinimize: () => controller.onMinimize(widget.onMinimize),
+                    onClose: () => controller.onClose(widget.onClose),
                   ),
-                ],
+                ),
+              Expanded(
+                child: Stack(
+                  fit: .expand,
+                  children: [
+                    widget.content ?? const SizedBox.shrink(),
+                    if (controller.showSetting.value && widget.setting != null)
+                      ColoredBox(
+                        color: ManaStyle.surface,
+                        child: widget.setting!,
+                      ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -168,72 +155,46 @@ class _FloatingWindowState extends State<FloatingWindow> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false, // 拦截返回
-      onPopInvokedWithResult: (bool didPop, void result) {
-        if (!didPop) {
-          if (_controller.manaState.activePluginName.value == widget.name &&
-              _controller.manaState.pluginManagementPanelVisible.value) {
-            return;
-          }
-
-          if (_controller.manaState.pluginManagementPanelVisible.value) {
-            _controller.manaState.pluginManagementPanelVisible.value = false;
-            return;
-          }
-
-          if (widget.content == null) {
-            _controller.manaState.activePluginName.value = '';
-            _controller.manaState.activePluginPanelVisible.value = false;
-            _controller.manaState.floatingButtonVisible.value = true;
-            return;
-          }
-
-          if (!_controller.manaState.floatWindowMainVisible.value || !widget.showBarrier) {
-            _controller.manaState.activePluginPanelVisible.value = false;
-            if (widget.showBarrier) {
-              return;
-            }
-          }
-          _controller.manaState.floatWindowMainVisible.value = false;
-          _controller.manaState.floatingButtonVisible.value = true;
-        }
-      },
-      child: Stack(
-        children: [
-          if (widget.showBarrier) _buildBarrier(),
-          if (widget.content != null)
-            AnimatedBuilder(
-              animation: Listenable.merge([
-                _controller.manaState.floatWindowMainVisible,
-                _controller.fullscreen,
-                _controller.offset,
-              ]), // 合并多个 ValueListenable
-              builder: (context, _) {
-                final visible = _controller.manaState.floatWindowMainVisible.value;
-                final fullscreen = _controller.fullscreen.value;
-                final offset = _controller.offset.value;
-                final double currentLeft = fullscreen ? 0 : offset.dx;
-                final double currentTop = fullscreen ? 0 : offset.dy;
-                final double currentWidth = fullscreen ? _controller.screenSize.width : _controller.windowSize.width;
-                final double currentHeight = fullscreen ? _controller.screenSize.height : _controller.windowSize.height;
-                return Positioned(
-                  left: currentLeft,
-                  top: currentTop,
-                  width: currentWidth,
-                  height: currentHeight,
-                  child: Visibility(
-                    visible: visible,
-                    replacement: nil,
-                    maintainState: widget.maintainContent,
-                    maintainAnimation: widget.maintainContent,
-                    child: _buildContent(_controller.screenSize, _controller.windowSize, fullscreen),
+    ManaScope.of(context);
+    final controller = _controller!;
+    return ListenableBuilder(
+      listenable: Listenable.merge([
+        controller.offset,
+        controller.fullscreen,
+        controller.showSetting,
+      ]),
+      builder: (context, _) {
+        final fullscreen = controller.isFullscreen;
+        final visible = controller.isVisible;
+        return Stack(
+          children: [
+            if (widget.showBarrier && (visible || widget.barrier != null))
+              widget.barrier ??
+                  GestureDetector(
+                    behavior: .opaque,
+                    onTap: () => controller.onMinimize(widget.onMinimize),
+                    child: const SizedBox.expand(),
                   ),
-                );
-              },
-            ),
-        ],
-      ),
+            if (widget.content != null)
+              Positioned(
+                left: fullscreen ? 0 : controller.offset.value.dx,
+                top: fullscreen ? 0 : controller.offset.value.dy,
+                width: fullscreen
+                    ? controller.screenSize.width
+                    : controller.windowSize.width,
+                height: fullscreen
+                    ? controller.screenSize.height
+                    : controller.windowSize.height,
+                child: Visibility(
+                  visible: visible,
+                  maintainState: widget.maintainContent,
+                  maintainAnimation: widget.maintainContent,
+                  child: _content(controller),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }

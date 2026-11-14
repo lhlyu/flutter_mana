@@ -13,36 +13,61 @@ import 'widgets/animated_ball.dart';
 import 'widgets/custom_button.dart';
 
 void main() async {
-  ManaPluginManager.instance
-    ..register(ManaScreenInfo())
-    ..register(ManaTouchIndicator())
-    ..register(ManaVisualHelper())
-    ..register(ManaGrid())
-    ..register(ManaLicense())
-    ..register(ManaPackageInfo())
-    ..register(ManaMemoryInfo())
-    ..register(ManaShowCode())
-    ..register(ManaLogViewer())
-    ..register(ManaDeviceInfo())
-    ..register(ManaColorSucker())
-    ..register(ManaDioInspector())
-    ..register(ManaWidgetInfoInspector())
-    ..register(ManaFpsMonitor())
-    ..register(ManaSharedPreferencesViewer())
-    ..register(ManaAlignRuler());
+  final controller = ManaController();
+  controller
+    ..registerPlugin(ManaScreenInfo())
+    ..registerPlugin(ManaTouchIndicator())
+    ..registerPlugin(ManaVisualHelper())
+    ..registerPlugin(ManaGrid())
+    ..registerPlugin(ManaLicense())
+    ..registerPlugin(ManaPackageInfo())
+    ..registerPlugin(ManaMemoryInfo())
+    ..registerPlugin(ManaShowCode())
+    ..registerPlugin(ManaLogViewer())
+    ..registerPlugin(ManaDeviceInfo())
+    ..registerPlugin(ManaColorSucker())
+    ..registerPlugin(ManaDioInspector())
+    ..registerPlugin(ManaWidgetInfoInspector())
+    ..registerPlugin(ManaFpsMonitor())
+    ..registerPlugin(ManaSharedPreferencesViewer())
+    ..registerPlugin(ManaAlignRuler());
 
-  runApp(ManaWidget(child: MyApp()));
+  runApp(MyApp(controller: controller));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+  const MyApp({super.key, required this.controller});
+  final ManaController controller;
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late final _observer = ManaNavigatorObserver(widget.controller);
+
+  @override
+  void dispose() {
+    _observer.dispose();
+    widget.controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      navigatorObservers: [_observer],
+      builder: (context, child) => ManaWidget.builder(
+        controller: widget.controller,
+        overlayBuilder: (context, overlay) =>
+            Material(type: MaterialType.transparency, child: overlay),
+        child: child ?? const SizedBox.shrink(),
+      ),
       title: 'Example',
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent)),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
+      ),
       home: HomePage(),
     );
   }
@@ -62,9 +87,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   void toggleOrientation() {
     if (isLandscape) {
-      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
     } else {
-      SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
     }
     setState(() {
       isLandscape = !isLandscape;
@@ -87,7 +118,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(backgroundColor: Theme.of(context).colorScheme.inversePrimary, title: Text(widget.title)),
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(widget.title),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -99,12 +133,27 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 text: 'Detail Page',
                 backgroundColor: Colors.orange,
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const DetailPage()));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const DetailPage()),
+                  );
                 },
               ),
-              CustomButton(text: 'Toggle Orientation', backgroundColor: Colors.blue, onPressed: toggleOrientation),
-              CustomButton(text: 'Send Request', backgroundColor: Colors.red, onPressed: sendRequest),
-              CustomButton(text: 'Add Log', backgroundColor: Colors.cyan, onPressed: addLog),
+              CustomButton(
+                text: 'Toggle Orientation',
+                backgroundColor: Colors.blue,
+                onPressed: toggleOrientation,
+              ),
+              CustomButton(
+                text: 'Send Request',
+                backgroundColor: Colors.red,
+                onPressed: sendRequest,
+              ),
+              CustomButton(
+                text: 'Add Log',
+                backgroundColor: Colors.cyan,
+                onPressed: addLog,
+              ),
               CustomButton(
                 text: 'Add SharedPreferences',
                 backgroundColor: Colors.deepPurple,
@@ -117,7 +166,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 child: SelectableText('Test Animation'),
               ),
               AnimatedBall(),
-              SizedBox(width: 300, child: Image.asset('assets/test.jpeg', fit: BoxFit.cover)),
+              SizedBox(
+                width: 300,
+                child: Image.asset('assets/test.jpeg', fit: BoxFit.cover),
+              ),
             ],
           ),
         ),
