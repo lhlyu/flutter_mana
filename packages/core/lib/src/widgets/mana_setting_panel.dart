@@ -55,10 +55,12 @@ class ManaSettingPanel extends StatelessWidget with ManaI18n {
     crossAxisAlignment: .stretch,
     spacing: 8,
     children: [
-      Row(
+      Wrap(
+        alignment: .spaceBetween,
         spacing: 8,
+        runSpacing: 4,
         children: [
-          Expanded(child: Text(label, style: ManaStyle.textStyle)),
+          Text(label, style: ManaStyle.textStyle),
           Text(
             format(value),
             style: const TextStyle(fontSize: 12, color: ManaStyle.muted),
