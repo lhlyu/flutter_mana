@@ -1,15 +1,14 @@
-# Shared Preferences查看器 - SharedPreferencesViewer
+# 偏好设置
 
-## 使用 - Use
+查看、搜索、复制和编辑 SharedPreferences，支持新增、删除及清空。
 
 ```dart
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_mana/flutter_mana.dart';
 import 'package:flutter_mana_kits/flutter_mana_kits.dart';
 
-void registerPlugin(ManaController controller) {
-  controller.registerPlugin(ManaSharedPreferencesViewer());
-}
+final controller = ManaController(plugins: [ManaSharedPreferencesViewer()]);
 ```
 
-接入见[完整示例](../../../../../example/lib/main.dart)。
+支持 `String`、`int`、`double`、`bool` 和 `List<String>`；重名写入受保护，清空需确认。
+
+[接入指南](../../../../../../docs/getting-started.md) · [完整示例](../../../../../example/lib/main.dart)

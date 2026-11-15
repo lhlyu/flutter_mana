@@ -1,7 +1,6 @@
 # 2.0.0（开发中）
 
-- 新增可覆盖的 `buildIcon`，面板与悬浮入口支持自定义 Widget 图标，兼容原有 `iconImageProvider`，缺省使用 Mana 图标。
-
+- 新增 `buildIcon`，支持面板与悬浮入口使用 Widget 图标，兼容 `iconImageProvider`，默认使用 Mana 图标。
 - 以 Flutter 3.50.0 / Dart 3.14.0 为最低版本。
 - 用实例级 ManaController、不可变状态和统一命令取代全局单例与可写通知器。
 - 插件注册表只读，支持逐插件初始化、失败隔离与重试、动态注册和生命周期清理。

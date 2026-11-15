@@ -1,14 +1,14 @@
-# 内存信息 - MemoryInfo
+# 内存信息
 
-## 使用 - Use
+查看堆内存、外部内存及类的存活实例统计，支持搜索、排序和详情。
 
 ```dart
 import 'package:flutter_mana/flutter_mana.dart';
 import 'package:flutter_mana_kits/flutter_mana_kits.dart';
 
-void registerPlugin(ManaController controller) {
-  controller.registerPlugin(ManaMemoryInfo());
-}
+final controller = ManaController(plugins: [ManaMemoryInfo()]);
 ```
 
-接入见[完整示例](../../../../../example/lib/main.dart)。
+仅支持非 Web 的 Debug 构建，需要 VM Service；读取时不重置分配统计。
+
+[接入指南](../../../../../../docs/getting-started.md) · [完整示例](../../../../../example/lib/main.dart)

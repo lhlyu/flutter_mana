@@ -1,14 +1,12 @@
-# 网格 - Grid
+# 网格
 
-## 使用 - Use
+叠加网格与中心线，支持调整间距、显示坐标并保存设置。
 
 ```dart
 import 'package:flutter_mana/flutter_mana.dart';
 import 'package:flutter_mana_kits/flutter_mana_kits.dart';
 
-void registerPlugin(ManaController controller) {
-  controller.registerPlugin(ManaGrid());
-}
+final controller = ManaController(plugins: [ManaGrid()]);
 ```
 
-接入见[完整示例](../../../../../example/lib/main.dart)。
+[接入指南](../../../../../../docs/getting-started.md) · [完整示例](../../../../../example/lib/main.dart)

@@ -1,14 +1,12 @@
-# 颜色吸管 - ColorSucker
+# 颜色吸管
 
-## 使用 - Use
+放大屏幕局部并取色，支持复制 ARGB / RGBA 色值和调整放大率。
 
 ```dart
 import 'package:flutter_mana/flutter_mana.dart';
 import 'package:flutter_mana_kits/flutter_mana_kits.dart';
 
-void registerPlugin(ManaController controller) {
-  controller.registerPlugin(ManaColorSucker());
-}
+final controller = ManaController(plugins: [ManaColorSucker()]);
 ```
 
-接入见[完整示例](../../../../../example/lib/main.dart)。
+[接入指南](../../../../../../docs/getting-started.md) · [完整示例](../../../../../example/lib/main.dart)

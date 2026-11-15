@@ -1,14 +1,14 @@
-# 视觉辅助 - VisualHelper
+# 视觉辅助
 
-## 使用 - Use
+调整动画速度；Debug 模式下可显示布局边界、重绘高亮并反转超大图片。
 
 ```dart
 import 'package:flutter_mana/flutter_mana.dart';
 import 'package:flutter_mana_kits/flutter_mana_kits.dart';
 
-void registerPlugin(ManaController controller) {
-  controller.registerPlugin(ManaVisualHelper());
-}
+final controller = ManaController(plugins: [ManaVisualHelper()]);
 ```
 
-接入见[完整示例](../../../../../example/lib/main.dart)。
+关闭工具后恢复原有调试设置。
+
+[接入指南](../../../../../../docs/getting-started.md) · [完整示例](../../../../../example/lib/main.dart)

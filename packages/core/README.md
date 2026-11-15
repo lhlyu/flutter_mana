@@ -1,41 +1,28 @@
 # Flutter Mana
 
-Flutter 应用内调试插件平台，基于基础 Widgets，不依赖 Material / Cupertino UI 包。
+基于 Flutter Widgets 的应用内调试平台，不依赖 Material / Cupertino。
 
-## 架构
+**环境要求：Flutter 3.50.0+ / Dart 3.14.0+。建议仅在开发环境开启。**
 
-- **Runtime**：插件、生命周期与状态控制。
-- **Storage**：设置持久化，支持自定义存储与命名空间隔离。
-- **Widgets**：悬浮入口、插件面板与浮窗。
-- **Diagnostics**：可选的 VM 与 Widget 诊断，独立导入。
+## 接入
 
-## 最低版本
-
-Flutter **3.50.0** · Dart **3.14.0**
-
-## 使用
-
-安装：`flutter pub add flutter_mana`
-
-```dart
-import 'package:flutter/widgets.dart';
-import 'package:flutter_mana/flutter_mana.dart';
-
-void main() => runApp(ManaWidget(
-  plugins: [MyPlugin()], // 实现 ManaPluggable
-  child: const MyApp(),
-));
+```bash
+flutter pub add flutter_mana
 ```
 
-内置插件可选用 `flutter_mana_kits` 的 `loadAllPlugins()`。
-已有应用可用 `ManaWidget.builder`：Navigator 配置 `ManaNavigatorObserver`，Router 传入 `backButtonDispatcher`；`overlayBuilder` 为插件提供宿主设计系统环境。
+实现 `ManaPluggable` 注册自定义工具，或安装 `flutter_mana_kits` 使用内置工具。已有应用通过 `ManaWidget.builder` 接入；Navigator 配置 `ManaNavigatorObserver`，Router 传入 `backButtonDispatcher`。
 
-## 功能
+[完整接入](../../docs/getting-started.md) · [自定义插件](../../docs/custom-plugins.md) · [示例应用](../example/README.md)
 
-- 自定义插件、插件管理与生命周期管理。图标支持 `iconImageProvider`，或覆盖 `buildIcon(context, size: ...)` 返回 SVG／自绘 Widget。
-- 浮窗拖动、最小化、全屏及自定义覆盖层。
-- 悬浮按钮设置与位置保存。
-- 本地化、RTL、键盘及无障碍支持。
-- VM 诊断、Widget 检查与命中测试：导入 `flutter_mana_diagnostics.dart`。
+## 架构与能力
 
-更多示例见[项目文档](https://github.com/lhlyu/flutter_mana)。
+| 模块 | 职责 |
+| --- | --- |
+| Runtime | 插件注册、状态控制、生命周期与失败隔离。 |
+| Storage | 设置持久化、自定义存储与命名空间隔离。 |
+| Widgets | 悬浮入口、面板、浮窗；支持拖动、最小化、全屏、键盘、RTL 和无障碍。 |
+| Diagnostics | 可选的 VM 诊断、Widget 检查与命中测试，单独导入 `flutter_mana_diagnostics.dart`。 |
+
+图标支持图片、SVG 和自绘 Widget；`overlayBuilder` 可为调试层提供设计系统环境。外部传入的控制器由调用方释放。
+
+[项目架构](../../docs/architecture.md) · [文档目录](../../docs/README.md)

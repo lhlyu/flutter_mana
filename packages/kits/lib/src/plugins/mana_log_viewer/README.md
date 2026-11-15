@@ -1,6 +1,6 @@
 # 日志查看器
 
-将同一采集器交给 Logger 和插件：
+按级别或关键词筛选日志，支持详情、复制和滚动锁定。Logger 与插件须共享采集器：
 
 ```dart
 import 'package:flutter_mana/flutter_mana.dart';
@@ -14,6 +14,6 @@ final controller = ManaController(plugins: [
 ]);
 ```
 
-支持级别／关键词筛选、详细日志、滚动锁定和复制。debugPrint 捕获默认关闭，插件释放时自动恢复；注入的采集器由宿主释放。
+`debugPrint` 捕获默认关闭，插件释放时恢复；注入的采集器由宿主释放。日志是否输出仍受 Logger 过滤策略影响。
 
-完整接入见 [example](../../../../../example/lib/main.dart)。
+[接入与释放](../../../../../../docs/getting-started.md#网络与日志采集) · [完整示例](../../../../../example/lib/main.dart)

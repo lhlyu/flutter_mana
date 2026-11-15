@@ -1,14 +1,12 @@
-# 设备信息 - DeviceInfo
+# 设备信息
 
-## 使用 - Use
+查看设备型号、系统及硬件信息，字段随平台而异。
 
 ```dart
 import 'package:flutter_mana/flutter_mana.dart';
 import 'package:flutter_mana_kits/flutter_mana_kits.dart';
 
-void registerPlugin(ManaController controller) {
-  controller.registerPlugin(ManaDeviceInfo());
-}
+final controller = ManaController(plugins: [ManaDeviceInfo()]);
 ```
 
-接入见[完整示例](../../../../../example/lib/main.dart)。
+[接入指南](../../../../../../docs/getting-started.md) · [完整示例](../../../../../example/lib/main.dart)

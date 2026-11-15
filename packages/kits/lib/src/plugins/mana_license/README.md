@@ -1,14 +1,12 @@
-# 许可 - License
+# 开源许可
 
-## 使用 - Use
+搜索依赖包并查看许可文本。
 
 ```dart
 import 'package:flutter_mana/flutter_mana.dart';
 import 'package:flutter_mana_kits/flutter_mana_kits.dart';
 
-void registerPlugin(ManaController controller) {
-  controller.registerPlugin(ManaLicense());
-}
+final controller = ManaController(plugins: [ManaLicense()]);
 ```
 
-接入见[完整示例](../../../../../example/lib/main.dart)。
+[接入指南](../../../../../../docs/getting-started.md) · [完整示例](../../../../../example/lib/main.dart)
