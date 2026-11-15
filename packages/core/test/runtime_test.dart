@@ -28,7 +28,103 @@ class _FailOncePreferences extends MemoryManaPreferences {
   }
 }
 
+class _PendingSavePreferences extends MemoryManaPreferences {
+  final started = Completer<void>();
+  final firstSave = Completer<void>();
+  int saves = 0;
+
+  @override
+  Future<void> save(ManaSettings settings) async {
+    if (saves++ == 0) {
+      started.complete();
+      await firstSave.future;
+    }
+    await super.save(settings);
+  }
+}
+
 void main() {
+  test('newer settings are saved even when an in-flight write fails', () async {
+    final preferences = _PendingSavePreferences();
+    final errors = <Object>[];
+    final runtime = ManaController(
+      preferences: preferences,
+      onError: (error, _) => errors.add(error),
+    );
+    addTearDown(runtime.close);
+    await runtime.initialize();
+    runtime.updateSettings(buttonSize: 60);
+    await preferences.started.future;
+    runtime.updateSettings(buttonSize: 80);
+    preferences.firstSave.completeError(StateError('Temporary write failure'));
+    await runtime.flushSettings();
+    expect(preferences.read('mana_floating_button_size'), 80);
+    expect(preferences.saves, 2);
+    expect(errors, hasLength(1));
+  });
+
+  test('closing a pending activation waits for its cleanup', () async {
+    final started = Completer<void>();
+    final trigger = Completer<void>();
+    final plugin = TestPlugin(
+      triggerAction: () {
+        started.complete();
+        return trigger.future;
+      },
+    );
+    final runtime = ManaController(
+      plugins: [plugin],
+      preferences: MemoryManaPreferences(),
+    );
+    addTearDown(runtime.close);
+    final activation = runtime.activatePlugin(plugin.name);
+    await started.future;
+    var closed = false;
+    final closing = runtime.closePlugin().then((_) => closed = true);
+    await Future<void>.delayed(.zero);
+    final completedBeforeCleanup = closed;
+    trigger.complete();
+    expect(await activation, isFalse);
+    await closing;
+    expect(completedBeforeCleanup, isFalse);
+    expect(plugin.deactivateCount, 1);
+  });
+
+  test('registry shutdown waits for plugins already being removed', () async {
+    final started = Completer<void>();
+    final disposal = Completer<void>();
+    final plugin = TestPlugin(
+      disposeAction: () {
+        started.complete();
+        return disposal.future;
+      },
+    );
+    final registry = ManaPluginManager()..register(plugin);
+    final removal = registry.unregister(plugin.name);
+    await started.future;
+    var closed = false;
+    final closing = registry.close().then((_) => closed = true);
+    await Future<void>.delayed(.zero);
+    final completedBeforeDisposal = closed;
+    disposal.complete();
+    await Future.wait([removal, closing]);
+    expect(completedBeforeDisposal, isFalse);
+    expect(plugin.disposeCount, 1);
+  });
+
+  test('repeating a panel command does not notify unchanged state', () async {
+    final runtime = ManaController(preferences: MemoryManaPreferences());
+    addTearDown(runtime.close);
+    await runtime.initialize();
+    var notifications = 0;
+    runtime.addListener(() => notifications++);
+    runtime.closePluginPanel();
+    runtime.openPluginPanel();
+    runtime.openPluginPanel();
+    runtime.closePluginPanel();
+    runtime.closePluginPanel();
+    expect(notifications, 2);
+  });
   test('a throwing registry error handler cannot skip peer initialization or disposal', () async {
     final reports = <FlutterErrorDetails>[];
     final previous = FlutterError.onError;

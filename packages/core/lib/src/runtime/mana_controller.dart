@@ -244,7 +244,7 @@ final class ManaController extends ChangeNotifier {
     _generation++;
     final id = _state.activePluginId;
     _update(_state.copyWith(clearActivePlugin: true, windowMode: .normal));
-    if (id == null) return Future.value();
+    if (id == null) return _sessionWork ?? Future.value();
     return _sessionWork = (_sessionWork ?? Future.value()).then((_) async {
       final plugin = _plugins[id]?.plugin;
       if (plugin == null) return;
@@ -335,10 +335,12 @@ final class ManaController extends ChangeNotifier {
     try {
       while (_savePending) {
         _savePending = false;
-        await preferences.save(_state.settings);
+        try {
+          await preferences.save(_state.settings);
+        } catch (error, stack) {
+          _reportError(error, stack);
+        }
       }
-    } catch (error, stack) {
-      _reportError(error, stack);
     } finally {
       _saving = null;
     }
@@ -347,7 +349,14 @@ final class ManaController extends ChangeNotifier {
   Future<void> flushSettings() async => await _saving;
 
   void _update(ManaState state) {
-    if (_closed) return;
+    if (_closed ||
+        (state.activePluginId == _state.activePluginId &&
+            state.windowMode == _state.windowMode &&
+            state.pluginPanelVisible == _state.pluginPanelVisible &&
+            state.overlayVisible == _state.overlayVisible &&
+            state.settings == _state.settings)) {
+      return;
+    }
     _state = state;
     notifyListeners();
   }

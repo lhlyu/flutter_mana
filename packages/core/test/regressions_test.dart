@@ -47,6 +47,45 @@ void main() {
   }
 
   testRuntimeWidgets(
+    'minimized windows suspend tickers and focus while preserving content',
+    (tester) async {
+      final focus = FocusNode();
+      final plugin = TestPlugin();
+      runtime.registerPlugin(plugin);
+      await runtime.activatePlugin(plugin.name);
+      await tester.pumpWidget(
+        testApp(
+          ManaScope(
+            controller: runtime,
+            child: ManaFloatingWindow(
+              name: plugin.name,
+              content: Focus(
+                focusNode: focus,
+                child: const Text('Retained content'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final content = tester.element(find.text('Retained content'));
+      focus.requestFocus();
+      await tester.pump();
+      expect(focus.hasFocus, isTrue);
+      runtime.minimizeWindow();
+      await tester.pumpAndSettle();
+      expect(TickerMode.valuesOf(content).enabled, isFalse);
+      expect(focus.hasFocus, isFalse);
+      runtime.restoreWindow();
+      await tester.pumpAndSettle();
+      expect(tester.element(find.text('Retained content')), same(content));
+      expect(TickerMode.valuesOf(content).enabled, isTrue);
+      await tester.pumpWidget(const SizedBox());
+      focus.dispose();
+    },
+  );
+
+  testRuntimeWidgets(
     'custom barrier survives minimization until the next back action',
     (tester) async {
       final plugin = TestPlugin(

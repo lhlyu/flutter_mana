@@ -44,6 +44,7 @@ final class ManaPluginManager extends ChangeNotifier
   static const name = 'mana_plugin_manager';
   final void Function(Object error, StackTrace stack)? onError;
   final _entries = <String, _PluginEntry>{};
+  final _removals = <Future<void>>{};
   bool _started = false;
   bool _closed = false;
   Future<void>? _closing;
@@ -133,8 +134,14 @@ final class ManaPluginManager extends ChangeNotifier
     if (_closed) throw StateError('Registry is closed.');
     final entry = _entries.remove(id);
     if (entry == null) return;
+    final removal = _disposeEntry(entry);
+    _removals.add(removal);
     notifyListeners();
-    await _disposeEntry(entry);
+    try {
+      await removal;
+    } finally {
+      _removals.remove(removal);
+    }
   }
 
   Future<void> _disposeEntry(_PluginEntry entry) async {
@@ -158,6 +165,7 @@ final class ManaPluginManager extends ChangeNotifier
     final entries = _entries.values.toList();
     _entries.clear();
     super.dispose();
-    _closing = Future.wait(entries.map(_disposeEntry)).then((_) {});
+    _closing = Future.wait([..._removals, ...entries.map(_disposeEntry)])
+        .then((_) {});
   }
 }
