@@ -1,4 +1,4 @@
-# 2.0.0（开发中）
+# 2.0.0-rc.1
 
 - 改用彩色 SVG 图标，移除 PNG base64；面板与悬浮入口使用矢量 Widget，保留按尺寸和像素比生成图像的兼容接口。
 - 基于 Flutter 3.50.0 / Dart 3.14.0，将全部插件迁移至 Widgets，移除 Material / Cupertino 导入，不新增 UI 依赖。

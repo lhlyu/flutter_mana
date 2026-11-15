@@ -1,4 +1,4 @@
-# 2.0.0（开发中）
+# 2.0.0-rc.1
 
 - 新增 `buildIcon`，支持面板与悬浮入口使用 Widget 图标，兼容 `iconImageProvider`，默认使用 Mana 图标。
 - 以 Flutter 3.50.0 / Dart 3.14.0 为最低版本。
