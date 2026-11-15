@@ -9,19 +9,22 @@ class BoundedCollector<T> extends ChangeNotifier {
   }
   final int capacity;
   final _items = ListQueue<T>();
+  List<T>? _snapshot;
   bool _disposed = false;
   bool get isDisposed => _disposed;
-  List<T> get data => List.unmodifiable(_items);
+  List<T> get data => _snapshot ??= List.unmodifiable(_items);
   void add(T value) {
     if (_disposed) return;
     if (_items.length == capacity) _items.removeFirst();
     _items.addLast(value);
+    _snapshot = null;
     notifyListeners();
   }
 
   void clear() {
     if (_disposed || _items.isEmpty) return;
     _items.clear();
+    _snapshot = null;
     notifyListeners();
   }
 
@@ -30,6 +33,7 @@ class BoundedCollector<T> extends ChangeNotifier {
     if (_disposed) return;
     _disposed = true;
     _items.clear();
+    _snapshot = null;
     super.dispose();
   }
 }

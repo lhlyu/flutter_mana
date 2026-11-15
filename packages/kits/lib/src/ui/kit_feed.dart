@@ -28,6 +28,14 @@ class _KitFeedState<T> extends State<KitFeed<T>> {
   bool _filter = false;
   bool _locked = false;
   bool _updateScheduled = false;
+  bool _active = true;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _active = TickerMode.valuesOf(context).enabled;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -44,15 +52,15 @@ class _KitFeedState<T> extends State<KitFeed<T>> {
   }
 
   void _changed() {
-    if (!mounted || _updateScheduled) return;
+    if (!mounted || !_active || _updateScheduled) return;
     _updateScheduled = true;
     final binding = WidgetsBinding.instance;
     binding.addPostFrameCallback((_) {
       _updateScheduled = false;
-      if (!mounted) return;
+      if (!mounted || !_active) return;
       setState(() {});
       binding.addPostFrameCallback((_) {
-        if (mounted && !_locked && _scroll.hasClients) {
+        if (mounted && _active && !_locked && _scroll.hasClients) {
           _scroll.jumpTo(_scroll.position.maxScrollExtent);
         }
       });
@@ -71,14 +79,18 @@ class _KitFeedState<T> extends State<KitFeed<T>> {
   @override
   Widget build(BuildContext context) {
     final query = _filter ? _query.text.trim().toLowerCase() : '';
-    final items = widget.collector.data
-        .where(
-          (item) =>
-              (_category == null || widget.categoryOf(item) == _category) &&
-              (query.isEmpty ||
-                  widget.searchText(item).toLowerCase().contains(query)),
-        )
-        .toList();
+    final data = widget.collector.data;
+    final items = _category == null && query.isEmpty
+        ? data
+        : data
+              .where(
+                (item) =>
+                    (_category == null ||
+                        widget.categoryOf(item) == _category) &&
+                    (query.isEmpty ||
+                        widget.searchText(item).toLowerCase().contains(query)),
+              )
+              .toList();
     return KitScaffold(
       header: Column(
         mainAxisSize: .min,

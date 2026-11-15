@@ -1,6 +1,9 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_mana_kits/src/plugins/mana_dio_inspector/widgets/dio_inspector_content.dart';
+import 'package:flutter_mana_kits/src/plugins/mana_dio_inspector/widgets/response_tile.dart';
 import 'package:flutter_mana_kits/src/plugins/mana_shared_preferences_viewer/preferences_repository.dart';
 import 'package:flutter_mana_kits/src/plugins/mana_log_viewer/widgets/log_viewer_content.dart';
 import 'package:flutter_mana_kits/src/plugins/mana_shared_preferences_viewer/preference_entry.dart';
@@ -32,6 +35,75 @@ class _PendingPreferences extends PreferencesRepository {
 }
 
 void main() {
+  testWidgets(
+    'returning from request details preserves search and method filters',
+    (tester) async {
+      final collector = ManaDioCollector();
+      for (final method in ['GET', 'POST']) {
+        collector.addResponse(
+          Response<dynamic>(
+            requestOptions: RequestOptions(path: '/$method', method: method),
+            statusCode: 200,
+          ),
+        );
+      }
+      await tester.pumpWidget(
+        testHost(DioInspectorContent(collector: collector)),
+      );
+      await tester.tap(button('POST'));
+      await tester.pumpAndSettle();
+      await tester.tap(button('Search'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(EditableText), 'POST');
+      await tester.pumpAndSettle();
+      final field = tester.widget<EditableText>(find.byType(EditableText));
+      await tester.tap(find.byType(ResponseTile));
+      await tester.pumpAndSettle();
+      expect(field.focusNode.hasFocus, isFalse);
+      await tester.tap(button('Back'));
+      await tester.pumpAndSettle();
+      expect(find.byType(EditableText), findsOneWidget);
+      expect(
+        tester.widget<EditableText>(find.byType(EditableText)).controller.text,
+        'POST',
+      );
+      expect(tester.widget<KitButton>(button('POST')).selected, isTrue);
+      expect(find.byType(ResponseTile), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+      collector.dispose();
+    },
+  );
+
+  testWidgets('hidden log feeds defer formatting until visible again', (
+    tester,
+  ) async {
+    final logs = ManaLogCollector();
+    var visible = true;
+    late StateSetter rebuild;
+    await tester.pumpWidget(
+      testHost(
+        StatefulBuilder(
+          builder: (context, setState) {
+            rebuild = setState;
+            return TickerMode(
+              enabled: visible,
+              child: LogViewerContent(collector: logs, verboseLogs: false),
+            );
+          },
+        ),
+      ),
+    );
+    rebuild(() => visible = false);
+    await tester.pumpAndSettle();
+    logs.output(OutputEvent(LogEvent(Level.info, 'While hidden'), []));
+    await tester.pumpAndSettle();
+    expect(find.text('While hidden'), findsNothing);
+    rebuild(() => visible = true);
+    await tester.pumpAndSettle();
+    expect(find.text('While hidden'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+    logs.dispose();
+  });
   testWidgets(
     'screen diagnostics retain host insets before window keyboard avoidance',
     (tester) async {

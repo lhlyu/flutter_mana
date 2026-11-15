@@ -16,31 +16,47 @@ class DioInspectorContent extends StatefulWidget {
 class _DioInspectorContentState extends State<DioInspectorContent> {
   Response<dynamic>? _selected;
   @override
-  Widget build(BuildContext context) {
-    if (_selected case final response?) {
-      return ResponseDetail(
-        response: response,
-        onClose: () => setState(() => _selected = null),
-      );
-    }
-    return KitFeed<Response<dynamic>>(
-      collector: widget.collector,
-      categories: const [
-        'GET',
-        'POST',
-        'PUT',
-        'PATCH',
-        'DELETE',
-        'HEAD',
-        'OPTIONS',
-      ],
-      categoryOf: (response) => response.requestOptions.method.toUpperCase(),
-      searchText: (response) =>
-          '${response.requestOptions.uri} ${response.statusCode} ${response.extra[ManaDioCollector.errorKey] ?? ''}',
-      itemBuilder: (context, response) => ResponseTile(
-        response: response,
-        onTap: () => setState(() => _selected = response),
-      ),
-    );
+  void didUpdateWidget(DioInspectorContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.collector != widget.collector) _selected = null;
   }
+
+  @override
+  Widget build(BuildContext context) => Stack(
+    fit: .expand,
+    children: [
+      Visibility(
+        visible: _selected == null,
+        maintainState: true,
+        child: ExcludeFocus(
+          excluding: _selected != null,
+          child: KitFeed<Response<dynamic>>(
+            collector: widget.collector,
+            categories: const [
+              'GET',
+              'POST',
+              'PUT',
+              'PATCH',
+              'DELETE',
+              'HEAD',
+              'OPTIONS',
+            ],
+            categoryOf: (response) =>
+                response.requestOptions.method.toUpperCase(),
+            searchText: (response) =>
+                '${response.requestOptions.uri} ${response.statusCode} ${response.extra[ManaDioCollector.errorKey] ?? ''}',
+            itemBuilder: (context, response) => ResponseTile(
+              response: response,
+              onTap: () => setState(() => _selected = response),
+            ),
+          ),
+        ),
+      ),
+      if (_selected case final response?)
+        ResponseDetail(
+          response: response,
+          onClose: () => setState(() => _selected = null),
+        ),
+    ],
+  );
 }

@@ -159,40 +159,47 @@ class _FloatingWindowState extends State<FloatingWindow> {
     final controller = _controller!;
     return ListenableBuilder(
       listenable: Listenable.merge([
-        controller.offset,
         controller.fullscreen,
         controller.showSetting,
       ]),
       builder: (context, _) {
         final fullscreen = controller.isFullscreen;
         final visible = controller.isVisible;
-        return Stack(
-          children: [
-            if (widget.showBarrier && (visible || widget.barrier != null))
-              widget.barrier ??
-                  GestureDetector(
-                    behavior: .opaque,
-                    onTap: () => controller.onMinimize(widget.onMinimize),
-                    child: const SizedBox.expand(),
-                  ),
-            if (widget.content != null)
-              Positioned(
-                left: fullscreen ? 0 : controller.offset.value.dx,
-                top: fullscreen ? 0 : controller.offset.value.dy,
-                width: fullscreen
-                    ? controller.screenSize.width
-                    : controller.windowSize.width,
-                height: fullscreen
-                    ? controller.screenSize.height
-                    : controller.windowSize.height,
-                child: Visibility(
+        return ValueListenableBuilder<Offset>(
+          valueListenable: controller.offset,
+          child: widget.content == null
+              ? null
+              : Visibility(
                   visible: visible,
                   maintainState: widget.maintainContent,
-                  maintainAnimation: widget.maintainContent,
-                  child: _content(controller),
+                  child: ExcludeFocus(
+                    excluding: !visible,
+                    child: _content(controller),
+                  ),
                 ),
-              ),
-          ],
+          builder: (context, offset, content) => Stack(
+            children: [
+              if (widget.showBarrier && (visible || widget.barrier != null))
+                widget.barrier ??
+                    GestureDetector(
+                      behavior: .opaque,
+                      onTap: () => controller.onMinimize(widget.onMinimize),
+                      child: const SizedBox.expand(),
+                    ),
+              if (content != null)
+                Positioned(
+                  left: fullscreen ? 0 : offset.dx,
+                  top: fullscreen ? 0 : offset.dy,
+                  width: fullscreen
+                      ? controller.screenSize.width
+                      : controller.windowSize.width,
+                  height: fullscreen
+                      ? controller.screenSize.height
+                      : controller.windowSize.height,
+                  child: content,
+                ),
+            ],
+          ),
         );
       },
     );

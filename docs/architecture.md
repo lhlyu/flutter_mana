@@ -81,7 +81,7 @@ activatePlugin(id)
 
 - 同一控制器最多有一个活动插件，插件面板可独立打开。
 - 激活与关闭操作串行衔接，并用代次标识取消过期请求，防止异步操作覆盖新状态。
-- **最小化不等于关闭**：最小化不结束插件会话，自定义覆盖层可继续显示；关闭或切换时执行 `deactivate()`。
+- **最小化不等于关闭**：最小化不结束插件会话，默认保留窗口内容状态并暂停其动画、键盘焦点及列表刷新；自定义覆盖层可继续显示。关闭或切换时执行 `deactivate()`。
 - `action` 插件执行后即结束，不保留活动界面；最终注销或关闭运行时时执行 `dispose()`。
 
 注册表通过只读的 `ManaPluginRegistry` 暴露给调用方；注册、激活、重试和注销统一走控制器。具体实现见 [插件管理器](../packages/core/lib/src/runtime/mana_plugin_manager.dart)。
@@ -98,7 +98,7 @@ activatePlugin(id)
 业务 Logger → ManaLogCollector ┘
 ```
 
-业务和工具必须使用**同一采集器实例**。采集器基于 [BoundedCollector](../packages/kits/lib/src/data/bounded_collector.dart)，默认保留 1000 条记录，超出容量淘汰最早数据；关闭工具不会自动停止业务采集。
+业务和工具必须使用**同一采集器实例**。采集器基于 [BoundedCollector](../packages/kits/lib/src/data/bounded_collector.dart)，默认保留 1000 条记录，超出容量淘汰最早数据；数据未变化时复用只读列表快照。隐藏工具时继续采集，列表恢复显示时读取最新数据；网络详情返回列表时保留筛选和滚动位置。
 
 设备、包、偏好等工具直接访问对应平台服务；内存和源码通过 VM Service 读取当前应用。共享实例的组装与清理可参考 [DemoSession](../packages/example/lib/demo_session.dart)。
 
