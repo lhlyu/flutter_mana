@@ -30,24 +30,18 @@ class _ResponseDetailState extends State<ResponseDetail> {
       title: '${request.uri}',
       onClose: widget.onClose,
       child: KitScaffold(
-        header: Column(
-          mainAxisSize: .min,
-          children: [
-            KitTabs(
-              values: const [0, 1, 2],
-              value: _tab,
-              label: (tab) => kitText(
-                context,
-                [
-                  'dio_inspector.detail',
-                  'dio_inspector.request',
-                  'dio_inspector.response',
-                ][tab],
-              ),
-              onChanged: (value) => setState(() => _tab = value),
-            ),
-            const KitDivider(),
-          ],
+        header: KitTabs(
+          values: const [0, 1, 2],
+          value: _tab,
+          label: (tab) => kitText(
+            context,
+            [
+              'dio_inspector.detail',
+              'dio_inspector.request',
+              'dio_inspector.response',
+            ][tab],
+          ),
+          onChanged: (value) => setState(() => _tab = value),
         ),
         body: SingleChildScrollView(
           child: switch (_tab) {

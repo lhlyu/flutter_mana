@@ -183,7 +183,12 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(KitDetail), findsOneWidget);
       expect(find.byType(Navigator), findsOneWidget);
-      await tester.tap(button('Response'));
+      await tester.tap(
+        find.descendant(
+          of: find.byType(KitTabs<int>),
+          matching: find.text('Response'),
+        ),
+      );
       await tester.pumpAndSettle();
       expect(find.text('raw body'), findsOneWidget);
       await tester.tap(button('Back'));

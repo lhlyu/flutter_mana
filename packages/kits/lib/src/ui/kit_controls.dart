@@ -8,6 +8,8 @@ import 'kit_button.dart';
 import 'kit_icons.dart';
 import 'kit_selection.dart';
 
+export 'kit_choices.dart';
+
 class KitCopyButton extends StatelessWidget {
   const KitCopyButton(this.text, {super.key, this.label});
   final String text;
@@ -37,34 +39,6 @@ class KitToolbar extends StatelessWidget {
         crossAxisAlignment: .center,
         children: children,
       ),
-    ),
-  );
-}
-
-class KitTabs<T> extends StatelessWidget {
-  const KitTabs({
-    super.key,
-    required this.values,
-    required this.value,
-    required this.onChanged,
-    this.label,
-  });
-  final List<T> values;
-  final T value;
-  final ValueChanged<T> onChanged;
-  final String Function(T)? label;
-  @override
-  Widget build(BuildContext context) => SingleChildScrollView(
-    scrollDirection: .horizontal,
-    child: Row(
-      children: [
-        for (final item in values)
-          KitButton(
-            label: label?.call(item) ?? '$item',
-            selected: item == value,
-            onPressed: () => onChanged(item),
-          ),
-      ],
     ),
   );
 }

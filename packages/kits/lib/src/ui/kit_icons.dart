@@ -18,6 +18,7 @@ enum KitIcon {
   sort,
   eye,
   back,
+  chevronDown,
   more,
 }
 
@@ -64,6 +65,8 @@ class _GlyphPainter extends CustomPainter {
         path(const [Offset(15, 4), Offset(4, 4), Offset(4, 16)]);
       case .check:
         path(const [Offset(4, 12), Offset(10, 18), Offset(20, 6)]);
+      case .chevronDown:
+        path(const [Offset(6, 9), Offset(12, 15), Offset(18, 9)]);
       case .close:
         line(6, 6, 18, 18);
         line(6, 18, 18, 6);

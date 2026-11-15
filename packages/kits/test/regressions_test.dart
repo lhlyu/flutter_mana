@@ -50,7 +50,12 @@ void main() {
       await tester.pumpWidget(
         testHost(DioInspectorContent(collector: collector)),
       );
-      await tester.tap(button('POST'));
+      await tester.tap(
+        find.descendant(
+          of: find.byType(KitTabs<String?>),
+          matching: find.text('POST'),
+        ),
+      );
       await tester.pumpAndSettle();
       await tester.tap(button('Search'));
       await tester.pumpAndSettle();
@@ -67,7 +72,10 @@ void main() {
         tester.widget<EditableText>(find.byType(EditableText)).controller.text,
         'POST',
       );
-      expect(tester.widget<KitButton>(button('POST')).selected, isTrue);
+      expect(
+        tester.widget<KitTabs<String?>>(find.byType(KitTabs<String?>)).value,
+        'POST',
+      );
       expect(find.byType(ResponseTile), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
       collector.dispose();

@@ -7,6 +7,7 @@ import 'mana_style.dart';
 class ManaButton extends StatefulWidget {
   final Widget child;
   final VoidCallback? onPressed;
+  final FocusNode? focusNode;
   final String? tooltip;
   final EdgeInsetsGeometry padding;
   final BoxConstraints constraints;
@@ -16,6 +17,7 @@ class ManaButton extends StatefulWidget {
     super.key,
     required this.child,
     this.onPressed,
+    this.focusNode,
     this.tooltip,
     this.padding = const .all(8),
     this.constraints = const BoxConstraints(minWidth: 40, minHeight: 40),
@@ -40,6 +42,7 @@ class _ManaButtonState extends State<ManaButton> {
       tooltip: widget.tooltip,
       onTap: widget.onPressed,
       child: FocusableActionDetector(
+        focusNode: widget.focusNode,
         enabled: enabled,
         mouseCursor: enabled
             ? SystemMouseCursors.click

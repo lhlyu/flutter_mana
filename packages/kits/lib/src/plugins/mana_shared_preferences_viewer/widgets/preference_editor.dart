@@ -36,7 +36,8 @@ class _PreferenceEditorState extends State<PreferenceEditor> {
       child: Column(
         crossAxisAlignment: .stretch,
         children: [
-          KitTabs(
+          KitChoiceField(
+            fieldLabel: kitText(context, 'shared_preferences_viewer.type'),
             values: PreferenceKind.values,
             value: _kind,
             label: (kind) => kind.label,

@@ -47,6 +47,7 @@ const _strings = {
   'memory_info.class_no_detail': (en: 'No class details', zh: '暂无类信息'),
   'memory_info.fields': (en: 'Fields', zh: '字段'),
   'memory_info.functions': (en: 'Methods', zh: '方法'),
+  'shared_preferences_viewer.type': (en: 'Type', zh: '数据类型'),
   'shared_preferences_viewer.key': (en: 'Key', zh: '键'),
   'shared_preferences_viewer.value': (en: 'Value', zh: '值'),
   'grid.show_numbers': (en: 'Show Numbers', zh: '显示坐标'),
