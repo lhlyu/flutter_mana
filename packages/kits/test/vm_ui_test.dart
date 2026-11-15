@@ -89,6 +89,20 @@ class _Vm extends VmInspector {
   }
 }
 
+class _Code extends CodeDisplayService {
+  _Code(VmInspector inspector) : super(inspector: inspector);
+
+  @override
+  Future<PageSource?> currentPage(BuildContext? root) async {
+    final script = await inspector.getObject('script') as vm.Script;
+    return PageSource(
+      widgetName: 'Example',
+      uri: script.uri!,
+      source: script.source!,
+    );
+  }
+}
+
 Finder button(String label) => find.byWidgetPredicate(
   (widget) => widget is KitButton && widget.label == label,
 );
@@ -100,7 +114,7 @@ void main() {
       (tester) async {
         final inspector = _Vm();
         final service = MemoryService(inspector: inspector);
-        final code = CodeDisplayService(inspector: inspector);
+        final code = _Code(inspector);
         try {
           for (final size in [
             const Size(180, 100),
@@ -124,12 +138,17 @@ void main() {
             );
             await tester.pumpAndSettle();
             expect(tester.takeException(), isNull, reason: '$size');
-            final item = memory
-                ? find.text('Example')
-                : find.text('package:app/main.dart');
-            final list = memory
-                ? find.byType(CustomScrollView)
-                : find.byType(ListView);
+            if (!memory) {
+              expect(
+                find.text('sealed class Example {}', findRichText: true),
+                findsOneWidget,
+              );
+              expect(find.byType(EditableText), findsNothing);
+              expect(button('Back'), findsNothing);
+              continue;
+            }
+            final item = find.text('Example');
+            final list = find.byType(CustomScrollView);
             await tester.scrollUntilVisible(
               item,
               200,
@@ -169,9 +188,7 @@ void main() {
           testHost(
             memory
                 ? MemoryInfoContent(service: MemoryService(inspector: first))
-                : ShowCodeContent(
-                    service: CodeDisplayService(inspector: first),
-                  ),
+                : ShowCodeContent(service: _Code(first)),
           ),
         );
         await tester.pumpAndSettle();
@@ -179,9 +196,7 @@ void main() {
           testHost(
             memory
                 ? MemoryInfoContent(service: MemoryService(inspector: second))
-                : ShowCodeContent(
-                    service: CodeDisplayService(inspector: second),
-                  ),
+                : ShowCodeContent(service: _Code(second)),
           ),
         );
         await tester.pumpAndSettle();
@@ -232,15 +247,15 @@ void main() {
     await service.close();
   });
   testWidgets(
-    'source browser searches exact script URIs and renders code using Widgets',
+    'source browser directly renders the current page without search or a script list',
     (tester) async {
-      final service = CodeDisplayService(inspector: _Vm());
+      final service = _Code(_Vm());
       await tester.pumpWidget(testHost(ShowCodeContent(service: service)));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(EditableText), 'APP/MAIN');
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('package:app/main.dart'));
-      await tester.pumpAndSettle();
+      expect(find.byType(EditableText), findsNothing);
+      expect(find.byType(ListView), findsNothing);
+      expect(find.text('Example\npackage:app/main.dart'), findsOneWidget);
+      expect(button('Copy'), findsOneWidget);
       expect(
         find.text('sealed class Example {}', findRichText: true),
         findsOneWidget,
