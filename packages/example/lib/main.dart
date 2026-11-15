@@ -123,6 +123,7 @@ class _ExamplePageState extends State<_ExamplePage>
   );
   bool animate = false;
   double radius = 8;
+  String dropdownValue = 'default';
 
   String t(String en, String zh) =>
       Localizations.localeOf(context).languageCode == 'zh' ? zh : en;
@@ -146,6 +147,39 @@ class _ExamplePageState extends State<_ExamplePage>
           SnackBar(content: Text('${t('Storage error', '存储失败')}: $error')),
         );
       }
+    }
+  }
+
+  Future<void> openSampleDialog() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        key: const Key('sample-dialog'),
+        title: Text(t('Sample dialog', '弹窗示例')),
+        content: Text(
+          t(
+            'Try inspecting this dialog with the Mana tools.',
+            '试试使用 Mana 工具检查这个弹窗。',
+          ),
+        ),
+        actions: [
+          TextButton(
+            key: const Key('dialog-cancel'),
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(t('Cancel', '取消')),
+          ),
+          FilledButton(
+            key: const Key('dialog-confirm'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(t('Confirm', '确认')),
+          ),
+        ],
+      ),
+    );
+    if (mounted && confirmed == true) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t('Dialog confirmed.', '已确认弹窗。'))));
     }
   }
 
@@ -230,6 +264,43 @@ class _ExamplePageState extends State<_ExamplePage>
                     decoration: InputDecoration(
                       labelText: t('Sample input', '输入示例'),
                     ),
+                  ),
+                  const SizedBox(height: 20),
+                  Wrap(
+                    spacing: 16,
+                    runSpacing: 12,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      OutlinedButton(
+                        key: const Key('open-dialog'),
+                        onPressed: openSampleDialog,
+                        child: Text(t('Open dialog', '打开弹窗')),
+                      ),
+                      DropdownButton<String>(
+                        key: const Key('sample-dropdown'),
+                        value: dropdownValue,
+                        borderRadius: BorderRadius.circular(6),
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() => dropdownValue = value);
+                          }
+                        },
+                        items: [
+                          DropdownMenuItem(
+                            value: 'default',
+                            child: Text(t('Default', '默认')),
+                          ),
+                          DropdownMenuItem(
+                            value: 'compact',
+                            child: Text(t('Compact', '紧凑')),
+                          ),
+                          DropdownMenuItem(
+                            value: 'comfortable',
+                            child: Text(t('Comfortable', '舒适')),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 20),
                   Center(

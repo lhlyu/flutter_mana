@@ -117,6 +117,76 @@ void main() {
     expect(session.requests.data.length, 1);
   }, size: const Size(390, 844));
 
+  exampleTest('sample dialog confirms, cancels and dismisses', (
+    tester,
+    session,
+  ) async {
+    final open = find.byKey(const Key('open-dialog'));
+    final dialog = find.byKey(const Key('sample-dialog'));
+    await tester.ensureVisible(open);
+    await tester.tap(open);
+    await tester.pumpAndSettle();
+    expect(dialog, findsOneWidget);
+    await tester.tap(find.byKey(const Key('dialog-cancel')));
+    await tester.pumpAndSettle();
+    expect(dialog, findsNothing);
+    expect(find.text('Dialog confirmed.'), findsNothing);
+
+    await tester.tap(open);
+    await tester.pumpAndSettle();
+    await tester.tapAt(const Offset(10, 100));
+    await tester.pumpAndSettle();
+    expect(dialog, findsNothing);
+    expect(find.text('Dialog confirmed.'), findsNothing);
+
+    await tester.tap(open);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('dialog-confirm')));
+    await tester.pumpAndSettle();
+    expect(dialog, findsNothing);
+    expect(find.text('Dialog confirmed.'), findsOneWidget);
+    expect(session.controller.state.activePluginId, isNull);
+    expect(tester.takeException(), isNull);
+  });
+
+  exampleTest('dropdown selection survives locale and theme changes', (
+    tester,
+    session,
+  ) async {
+    final dropdown = find.byKey(const Key('sample-dropdown'));
+    await tester.ensureVisible(dropdown);
+    await tester.tap(dropdown);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Compact').last);
+    await tester.pumpAndSettle();
+    expect(tester.widget<DropdownButton<String>>(dropdown).value, 'compact');
+
+    await tester.tap(find.byTooltip('Toggle theme'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('中文'));
+    await tester.pumpAndSettle();
+    expect(tester.widget<DropdownButton<String>>(dropdown).value, 'compact');
+    expect(Theme.of(tester.element(dropdown)).brightness, Brightness.dark);
+    await tester.tap(dropdown);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('舒适').last);
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<DropdownButton<String>>(dropdown).value,
+      'comfortable',
+    );
+
+    final open = find.byKey(const Key('open-dialog'));
+    await tester.ensureVisible(open);
+    await tester.tap(open);
+    await tester.pumpAndSettle();
+    expect(find.text('弹窗示例'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('dialog-confirm')));
+    await tester.pumpAndSettle();
+    expect(find.text('已确认弹窗。'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  }, size: const Size(390, 844));
+
   exampleTest(
     'preferences open with platform-decoded lists and seeded samples',
     (tester, session) async {
@@ -179,7 +249,18 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('中文'));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.byKey(const Key('sample-input')));
+    final dropdown = find.byKey(const Key('sample-dropdown'));
+    await tester.ensureVisible(dropdown);
+    await tester.tap(dropdown);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('紧凑').last);
+    await tester.pumpAndSettle();
+    final open = find.byKey(const Key('open-dialog'));
+    await tester.ensureVisible(open);
+    await tester.tap(open);
+    await tester.pumpAndSettle();
+    expect(find.text('弹窗示例'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('dialog-cancel')));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   }, size: const Size(360, 780));
