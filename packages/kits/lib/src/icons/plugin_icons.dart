@@ -4,125 +4,119 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+/// Transparent, saturated tool silhouettes; never add a shared tile or backdrop.
+/// Keep details bold enough for the 24 px compact and 40 px panel sizes.
 enum PluginIcon {
-  ruler('#E6F7F1', '#2DB493', '''
-    <path d="M16 13h14v22h21v15H16z" fill="currentColor"/>
-    <path d="M23 20h7m-7 8h7m-7 8h7m-7 7h7m7-8v7m7-7v7"/>
+  ruler('#00B878', '''
+    <path d="M10 9h15v30h30v15H10z" fill="currentColor" stroke="none"/>
+    <path d="M19 16h6m-6 10h6m-6 10h6m0 11v7m10-7v7m10-7v7"
+      stroke="#005CFF" stroke-width="3"/>
   '''),
-  colorPicker('#FFF0F4', '#ED7599', '''
-    <circle cx="21" cy="44" r="9" fill="currentColor" stroke="none"/>
-    <path d="m35 22 8 8-19 19-9 2 2-9z" fill="#FFFFFF"/>
-    <path d="m38 15 11 11-6 6-11-11z" fill="currentColor"/>
-    <path d="m31 22 12 12M23 40l7-7"/>
+  colorPicker('#FF2D87', '''
+    <path d="m34 22 8 8-23 23-10 2 2-10z"/>
+    <path d="m32 21 11 11M17 44l12-12"/>
+    <path d="m35 12 5-5a6 6 0 0 1 8 0l9 9a6 6 0 0 1 0 8l-5 5z"
+      fill="currentColor" stroke="none"/>
+    <circle cx="47" cy="47" r="6" fill="#00C8F0" stroke="none"/>
+    <circle cx="33" cy="54" r="4" fill="#FFB300" stroke="none"/>
   '''),
-  device('#EAF2FF', '#638FE8', '''
-    <rect x="20" y="11" width="26" height="42" rx="6" fill="#FFFFFF"/>
-    <rect x="24" y="19" width="18" height="23" rx="3" fill="currentColor" stroke="none"/>
-    <path d="M29 15h8"/>
-    <circle cx="33" cy="47" r="1.7" fill="#26384D" stroke="none"/>
+  device('#2979FF', '''
+    <rect x="17" y="6" width="30" height="52" rx="7" stroke-width="4"/>
+    <path d="M27 12h10M27 51h10"/>
+    <path d="M24 38v-9m8 9V23m8 15V18" stroke="#00B8D9" stroke-width="4"/>
   '''),
-  network('#E4F7FC', '#35B5D1', '''
-    <path d="M26 32h7V19h6M33 32v13h6"/>
-    <rect x="10" y="24" width="17" height="16" rx="4" fill="#FFFFFF"/>
-    <rect x="38" y="11" width="16" height="16" rx="4" fill="currentColor"/>
-    <rect x="38" y="37" width="16" height="16" rx="4" fill="#FFFFFF"/>
-    <circle cx="18.5" cy="32" r="3" fill="currentColor" stroke="none"/>
-    <path d="M43 19h6m-6 26h6"/>
+  network('#00B8D9', '''
+    <path d="M24 32h9V16h8M33 32v16h8" stroke-width="4"/>
+    <rect x="6" y="23" width="18" height="18" rx="5" fill="currentColor" stroke="none"/>
+    <rect x="40" y="7" width="18" height="18" rx="5" fill="#2979FF" stroke="none"/>
+    <rect x="40" y="39" width="18" height="18" rx="5" fill="#00C67A" stroke="none"/>
   '''),
-  performance('#EDF8E8', '#76B75B', '''
-    <rect x="12" y="15" width="40" height="30" rx="5" fill="#FFFFFF"/>
-    <path d="M18 33h7l5-11 7 17 5-10h4" stroke="currentColor" stroke-width="3"/>
-    <path d="M32 45v7m-8 0h16"/>
+  performance('#39C600', '''
+    <path d="M10 46a25 25 0 1 1 44 0" stroke-width="5"/>
+    <path d="M14 37h5m-1-17 4 4m10-13v6m14 3-4 4m8 13h-5"/>
+    <path d="m32 39 12-13" stroke="#FF6D00" stroke-width="4"/>
+    <circle cx="32" cy="39" r="5" fill="#FF6D00" stroke="none"/>
+    <path d="M23 53h18" stroke-width="4"/>
   '''),
-  grid('#E8F7F6', '#42B6AF', '''
-    <rect x="14" y="14" width="36" height="36" rx="5" fill="#FFFFFF"/>
-    <path d="M26 26h12v12H26z" fill="currentColor" stroke="none"/>
-    <path d="M26 14v36m12-36v36M14 26h36M14 38h36"/>
+  grid('#00BFA5', '''
+    <path d="M22 8v48M42 8v48M8 22h48M8 42h48" stroke-width="4"/>
+    <rect x="27" y="27" width="10" height="10" rx="2" fill="currentColor" stroke="none"/>
+    <circle cx="52" cy="12" r="4" fill="#2979FF" stroke="none"/>
   '''),
-  license('#FFF6E4', '#EEB64E', '''
-    <rect x="16" y="11" width="30" height="40" rx="5" fill="#FFFFFF"/>
-    <path d="M23 20h16M23 27h12M23 34h7"/>
-    <path d="m36 43-2 11 8-4 8 4-2-11" fill="currentColor"/>
-    <circle cx="42" cy="38" r="10" fill="currentColor"/>
-    <path d="m37 38 3 3 6-6" stroke="#FFFFFF" stroke-width="2.6"/>
+  license('#FFAB00', '''
+    <path d="M28 55H12V7h32v17"/>
+    <path d="M20 17h16M20 26h12M20 35h5"/>
+    <path d="m34 45-3 13 10-5 10 5-3-13" stroke="#FF6D00"/>
+    <circle cx="41" cy="37" r="11" stroke="#FF6D00" stroke-width="4"/>
+    <path d="m36 37 3 3 6-6" stroke="#00B878"/>
   '''),
-  logs('#F0EDFF', '#9A82E3', '''
-    <rect x="12" y="12" width="40" height="40" rx="6" fill="#FFFFFF"/>
-    <path d="M13 23h38"/>
-    <path d="M19 18h1m5 0h1m5 0h1" stroke="currentColor" stroke-width="3"/>
-    <circle cx="20" cy="31" r="2" fill="currentColor" stroke="none"/>
-    <circle cx="20" cy="39" r="2" fill="#EEB64E" stroke="none"/>
-    <circle cx="20" cy="47" r="2" fill="#ED7599" stroke="none"/>
-    <path d="M27 31h17M27 39h13M27 47h16"/>
+  logs('#9C36FF', '''
+    <path d="M24 11h30M24 25h22M24 39h30M24 53h22" stroke-width="4"/>
+    <circle cx="11" cy="11" r="4" fill="currentColor" stroke="none"/>
+    <circle cx="11" cy="25" r="4" fill="#00B8D9" stroke="none"/>
+    <circle cx="11" cy="39" r="4" fill="#FFAB00" stroke="none"/>
+    <circle cx="11" cy="53" r="4" fill="#FF3D57" stroke="none"/>
   '''),
-  memory('#FFF0EB', '#ED9576', '''
-    <path d="M24 12v8m8-8v8m8-8v8M24 44v8m8-8v8m8-8v8M12 24h8m-8 8h8m-8 8h8M44 24h8m-8 8h8m-8 8h8"/>
-    <rect x="20" y="20" width="24" height="24" rx="4" fill="currentColor"/>
-    <rect x="26" y="26" width="12" height="12" rx="2" fill="#FFFFFF"/>
+  memory('#FF5733', '''
+    <path d="M22 7v10M32 7v10M42 7v10M22 47v10M32 47v10M42 47v10M7 22h10M7 32h10M7 42h10M47 22h10M47 32h10M47 42h10"/>
+    <rect x="17" y="17" width="30" height="30" rx="5" stroke-width="4"/>
+    <rect x="25" y="25" width="14" height="14" rx="3" fill="currentColor" stroke="none"/>
   '''),
-  package('#FFF3E6', '#EFA35C', '''
-    <path d="m32 11 20 11v21L32 54 12 43V22z" fill="#FFFFFF"/>
-    <path d="m12 22 20 11 20-11-20-11z" fill="currentColor"/>
-    <path d="m24 15 20 11-7 4-20-11" fill="#FFFFFF" stroke="none"/>
-    <path d="M32 33v21M18 37l7 4"/>
+  package('#FF9100', '''
+    <path d="m32 6 24 13v26L32 58 8 45V19z"/>
+    <path d="m8 19 24 13 24-13M32 32v26"/>
+    <path d="m20 13 24 13v11l-8 4V30L12 17z" fill="currentColor" stroke="none"/>
+    <path d="m15 40 9 5" stroke="#FF5733"/>
   '''),
-  screen('#E8F4FF', '#55A5DF', '''
-    <rect x="11" y="14" width="42" height="31" rx="5" fill="#FFFFFF"/>
-    <rect x="16" y="19" width="32" height="21" rx="2" fill="currentColor" stroke="none"/>
-    <path d="M32 45v7m-9 0h18"/>
-    <path d="M22 28v-4h6m14 7v4h-6M23 34l18-9" stroke="#FFFFFF" stroke-width="2.2"/>
+  screen('#009DFF', '''
+    <rect x="6" y="10" width="52" height="36" rx="5" stroke-width="4"/>
+    <path d="M32 46v10m-12 0h24" stroke-width="4"/>
+    <path d="M15 26v-7h9m25 11v7h-9m-23-2 29-14" stroke="#00BFA5"/>
   '''),
-  preferences('#FCEEF7', '#CE7EB0', '''
-    <rect x="12" y="12" width="40" height="40" rx="7" fill="#FFFFFF"/>
-    <path d="M18 22h28M18 32h28M18 42h28"/>
-    <circle cx="25" cy="22" r="5" fill="currentColor"/>
-    <circle cx="39" cy="32" r="5" fill="#FFFFFF"/>
-    <circle cx="28" cy="42" r="5" fill="currentColor"/>
+  preferences('#E800C6', '''
+    <path d="M9 14h46M9 32h46M9 50h46" stroke-width="4"/>
+    <circle cx="23" cy="14" r="7" fill="currentColor" stroke="none"/>
+    <circle cx="42" cy="32" r="7" fill="#9C36FF" stroke="none"/>
+    <circle cx="27" cy="50" r="7" fill="currentColor" stroke="none"/>
   '''),
-  code('#EEEDFF', '#8C87E2', '''
-    <rect x="11" y="13" width="42" height="38" rx="6" fill="#FFFFFF"/>
-    <path d="M12 24h40"/>
-    <path d="M18 19h1m5 0h1m5 0h1" stroke="currentColor" stroke-width="3"/>
-    <path d="m24 31-6 6 6 6m16-12 6 6-6 6m-5-14-6 16" stroke="currentColor" stroke-width="2.8"/>
+  code('#7047FF', '''
+    <path d="m20 17-14 15 14 15m24-30 14 15-14 15" stroke-width="5"/>
+    <path d="m38 9-12 46" stroke="#00B8D9" stroke-width="5"/>
   '''),
-  touch('#FFF0F5', '#E983AF', '''
-    <circle cx="29" cy="23" r="13" stroke="currentColor" stroke-width="2"/>
-    <circle cx="29" cy="23" r="7" fill="currentColor" stroke="none"/>
-    <path d="M25 37V23a4 4 0 0 1 8 0v11l3-3a4 4 0 0 1 6 0l5 5v5c0 7-4 11-10 11h-5c-4 0-6-2-8-5l-6-9a4 4 0 0 1 6-5z" fill="#FFFFFF"/>
-    <rect x="29" y="47" width="15" height="7" rx="2.5" fill="currentColor"/>
+  touch('#FF3D70', '''
+    <path d="M13 26a16 16 0 1 1 30 0"/>
+    <path d="M8 12 5 9m23-1V5m20 7 3-3" stroke="#FF9100"/>
+    <path d="M24 38V22a4 4 0 0 1 8 0v13l4-4a4 4 0 0 1 6 0l9 9v6c0 7-5 12-12 12h-7c-4 0-7-2-9-5l-9-14a4 4 0 0 1 6-5z"/>
+    <path d="M32 50h12" stroke-width="4"/>
   '''),
-  visual('#FFF7E6', '#EFB64E', '''
-    <path d="M10 33c10-17 34-17 44 0-10 17-34 17-44 0z" fill="#FFFFFF"/>
-    <circle cx="32" cy="33" r="9" fill="currentColor"/>
-    <circle cx="32" cy="33" r="3" fill="#26384D" stroke="none"/>
-    <circle cx="35" cy="30" r="2" fill="#FFFFFF" stroke="none"/>
-    <path d="M48 11v8m-4-4h8" stroke="currentColor"/>
+  visual('#FF7800', '''
+    <path d="M5 33c12-21 42-21 54 0-12 21-42 21-54 0z" stroke-width="4"/>
+    <circle cx="32" cy="33" r="10"/>
+    <circle cx="32" cy="33" r="4" fill="currentColor" stroke="none"/>
+    <path d="M49 6v10m-5-5h10" stroke="#FFAB00"/>
   '''),
-  inspector('#EDF0FD', '#8396DB', '''
-    <path d="M28 21h9M21 28v9"/>
-    <rect x="12" y="12" width="17" height="16" rx="4" fill="currentColor"/>
-    <rect x="37" y="13" width="15" height="14" rx="4" fill="#FFFFFF"/>
-    <rect x="13" y="37" width="15" height="15" rx="4" fill="#FFFFFF"/>
-    <path d="m47 47 7 7" stroke-width="4"/>
-    <circle cx="39" cy="39" r="11" fill="#FFFFFF"/>
-    <rect x="35" y="35" width="8" height="8" rx="2" fill="currentColor"/>
+  inspector('#536DFE', '''
+    <path d="M25 17h13M17 25v13"/>
+    <rect x="7" y="7" width="18" height="18" rx="4" fill="currentColor" stroke="none"/>
+    <path d="M39 8h14v14M8 39v14h14"/>
+    <circle cx="39" cy="39" r="12" stroke="#00B8D9" stroke-width="4"/>
+    <path d="m48 48 9 9" stroke="#00B8D9" stroke-width="5"/>
+    <rect x="35" y="35" width="8" height="8" rx="2" fill="currentColor" stroke="none"/>
   '''),
-  demo('#F6ECFC', '#BD87D6', '''
-    <path d="m31 12 6 14 14 6-14 6-6 14-6-14-14-6 14-6z" fill="currentColor"/>
-    <path d="m31 26 6 6-6 6-6-6z" fill="#FFFFFF" stroke="none"/>
-    <circle cx="50" cy="14" r="4" fill="#EEB64E"/>
+  demo('#C62BFF', '''
+    <path d="m29 8 7 15 15 7-15 7-7 17-7-17-16-7 16-7z"
+      fill="currentColor" stroke="none"/>
+    <path d="M51 5v12m-6-6h12M49 46v10m-5-5h10" stroke="#FFAB00" stroke-width="4"/>
   ''');
 
-  const PluginIcon(this.background, this.accent, this._paths);
-  final String background;
+  const PluginIcon(this.accent, this._paths);
   final String accent;
   final String _paths;
 
   String get svg =>
       '''
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-  <rect x="1" y="1" width="62" height="62" rx="15" fill="$background"/>
-  <g fill="none" stroke="#26384D" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${_paths.replaceAll('currentColor', accent)}</g>
+  <g fill="none" stroke="$accent" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">${_paths.replaceAll('currentColor', accent)}</g>
 </svg>''';
 }
 
