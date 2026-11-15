@@ -152,6 +152,58 @@ void main() {
     await runtime.close();
   });
 
+  testWidgets(
+    'widget inspector fills its host and selects behind the overlay',
+    (tester) async {
+      final runtime = ManaController(
+        plugins: [ManaWidgetInfoInspector()],
+        preferences: MemoryManaPreferences(),
+      );
+      var taps = 0;
+      await tester.pumpWidget(
+        testHost(
+          ManaWidget.builder(
+            controller: runtime,
+            child: Stack(
+              children: [
+                Positioned(
+                  left: 20,
+                  top: 20,
+                  width: 80,
+                  height: 60,
+                  child: GestureDetector(
+                    onTap: () => taps++,
+                    child: const ColoredBox(
+                      key: Key('inspect-target'),
+                      color: Color(0xFF336699),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await runtime.activatePlugin('mana_widget_info_inspector');
+      await tester.pumpAndSettle();
+      expect(find.text('Widget').hitTestable(), findsOneWidget);
+      runtime.minimizeWindow();
+      await tester.pumpAndSettle();
+      await tester.tapAt(
+        tester.getCenter(find.byKey(const Key('inspect-target'))),
+      );
+      await tester.pumpAndSettle();
+      expect(taps, 0, reason: 'The inspector must intercept taps on the host.');
+      runtime.restoreWindow();
+      await tester.pumpAndSettle();
+      expect(find.textContaining('ColoredBox').hitTestable(), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      await runtime.close();
+    },
+  );
+
   for (final gap in [0.0, -1.0, double.nan, double.infinity]) {
     testWidgets('grid painting rejects unsafe spacing $gap', (tester) async {
       await tester.pumpWidget(

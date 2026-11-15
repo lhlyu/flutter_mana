@@ -49,10 +49,12 @@ class _WidgetInfoInspectorState extends State<WidgetInfoInspector> {
       barrier: GestureDetector(
         behavior: .opaque,
         onTapDown: _inspect,
-        child: IgnorePointer(
-          child: CustomPaint(
-            key: _paintKey,
-            painter: _HighlightPainter(_selected, _paintKey),
+        child: SizedBox.expand(
+          child: IgnorePointer(
+            child: CustomPaint(
+              key: _paintKey,
+              painter: _HighlightPainter(_selected, _paintKey),
+            ),
           ),
         ),
       ),
