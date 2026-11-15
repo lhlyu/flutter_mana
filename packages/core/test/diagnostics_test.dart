@@ -7,7 +7,36 @@ import 'package:vm_service/vm_service.dart' as vm;
 
 import 'support/helpers.dart';
 
+class _HeapInspector extends VmInspector {
+  vm.AllocationProfile profile = vm.AllocationProfile();
+  bool? lastReset;
+
+  @override
+  Future<vm.AllocationProfile> getAllocationProfile({bool reset = true}) async {
+    lastReset = reset;
+    return profile;
+  }
+}
+
 void main() {
+  test(
+    'heap summaries tolerate omitted fields without resetting VM counters',
+    () async {
+      final inspector = _HeapInspector();
+      expect(await inspector.getClassHeapStats(), isEmpty);
+      final used = vm.ClassHeapStats(bytesCurrent: 16);
+      final instantiated = vm.ClassHeapStats(instancesCurrent: 2);
+      inspector.profile = vm.AllocationProfile(
+        members: [vm.ClassHeapStats(), used, instantiated],
+      );
+      expect(await inspector.getClassHeapStats(), [used, instantiated]);
+      expect(
+        await inspector.getClassHeapStats(minBytes: 16, minInstances: 2),
+        isEmpty,
+      );
+      expect(inspector.lastReset, isFalse);
+    },
+  );
   vm.VmService service() => vm.VmService(const Stream.empty(), (_) {});
 
   test('VM connections are shared in flight but not shared between inspector instances', () async {
@@ -59,6 +88,94 @@ void main() {
       await connection.onDone;
     },
   );
+
+  testWidgets(
+    'inspector selection changes repaint without rebuilding its host',
+    (tester) async {
+      final selection = InspectorSelection();
+      final target = GlobalKey();
+      await tester.pumpWidget(
+        testApp(
+          Stack(
+            children: [
+              SizedBox(key: target, width: 40, height: 40),
+              InspectorOverlay(selection: selection, needDescription: false),
+            ],
+          ),
+        ),
+      );
+      final overlay = tester.renderObject<RenderBox>(
+        find.byType(InspectorOverlay),
+      );
+      expect(overlay.debugNeedsPaint, isFalse);
+      selection.current = target.currentContext!.findRenderObject();
+      expect(overlay.debugNeedsPaint, isTrue);
+      await tester.pump();
+      selection.clear();
+      expect(overlay.debugNeedsPaint, isTrue);
+      await tester.pumpWidget(const SizedBox());
+      selection.clear();
+      expect(tester.takeException(), isNull);
+      selection.dispose();
+    },
+  );
+
+  for (final size in [const Size(20, 20), const Size(120, 60)]) {
+    testWidgets('inspector tooltip fits a $size viewport', (tester) async {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final selection = InspectorSelection();
+      final target = GlobalKey();
+      await tester.pumpWidget(
+        testApp(
+          Stack(
+            children: [
+              SizedBox(key: target, width: 10, height: 10),
+              InspectorOverlay(selection: selection),
+            ],
+          ),
+        ),
+      );
+      selection.current = target.currentContext!.findRenderObject();
+      tester.renderObject(find.byType(InspectorOverlay)).markNeedsPaint();
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      selection.dispose();
+    });
+  }
+
+  testWidgets('inspector descriptions support slivers as well as boxes', (
+    tester,
+  ) async {
+    final selection = InspectorSelection();
+    final target = GlobalKey();
+    await tester.pumpWidget(
+      testApp(
+        Stack(
+          children: [
+            CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  key: target,
+                  child: const SizedBox(height: 40),
+                ),
+              ],
+            ),
+            InspectorOverlay(selection: selection),
+          ],
+        ),
+      ),
+    );
+    selection.current = target.currentContext!.findRenderObject();
+    tester.renderObject(find.byType(InspectorOverlay)).markNeedsPaint();
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+    selection.dispose();
+  });
 
   testWidgets(
     'hit testing converts global coordinates for an embedded host boundary',
