@@ -146,22 +146,35 @@ class _ManaWidgetState extends State<ManaWidget> with WidgetsBindingObserver {
             builder: (context, _) {
               if (!_controller.isReady) return const SizedBox.shrink();
               const overlay = ManaOverlay();
-              return LayoutBuilder(
-                builder: (context, constraints) => MediaQuery(
-                  data: MediaQuery.of(context)
-                      .copyWith(size: constraints.biggest),
-                  child: Builder(
-                    builder: (context) => Overlay.wrap(
-                      child: DefaultTextStyle(
-                        style: ManaStyle.textStyle,
-                        child: IconTheme(
-                          data: const IconThemeData(
-                            color: ManaStyle.text,
-                            size: 24,
+              final visible = _controller.state.overlayVisible;
+              return Offstage(
+                offstage: !visible,
+                child: TickerMode(
+                  enabled: visible,
+                  child: ExcludeFocus(
+                    excluding: !visible,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) => MediaQuery(
+                        data: MediaQuery.of(context)
+                            .copyWith(size: constraints.biggest),
+                        child: Builder(
+                          builder: (context) => Overlay.wrap(
+                            child: DefaultTextStyle(
+                              style: ManaStyle.textStyle,
+                              child: IconTheme(
+                                data: const IconThemeData(
+                                  color: ManaStyle.text,
+                                  size: 24,
+                                ),
+                                child:
+                                    widget.overlayBuilder?.call(
+                                      context,
+                                      overlay,
+                                    ) ??
+                                    overlay,
+                              ),
+                            ),
                           ),
-                          child:
-                              widget.overlayBuilder?.call(context, overlay) ??
-                              overlay,
                         ),
                       ),
                     ),

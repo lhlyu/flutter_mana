@@ -66,6 +66,58 @@ void main() {
     expect(find.text('Show Numbers'), findsOneWidget);
   });
 
+  exampleTest('debug overlay toggles from the host page and preserves state', (
+    tester,
+    session,
+  ) async {
+    final input = find.byKey(const Key('sample-input'));
+    await tester.enterText(input, 'Keep this input');
+    final toggle = find.byKey(const Key('toggle-overlay'));
+    expect(find.text('Hide debug overlay'), findsOneWidget);
+    await tester.tap(toggle);
+    await tester.pumpAndSettle();
+    expect(session.controller.state.overlayVisible, isFalse);
+    expect(floatingButton(), findsNothing);
+    expect(find.text('Show debug overlay'), findsOneWidget);
+    expect(find.text('Keep this input'), findsOneWidget);
+
+    await tester.tap(find.text('中文'));
+    await tester.pumpAndSettle();
+    expect(find.text('显示调试层'), findsOneWidget);
+    await tester.tap(toggle);
+    await tester.pumpAndSettle();
+    expect(session.controller.state.overlayVisible, isTrue);
+    expect(floatingButton(), findsOneWidget);
+    expect(find.text('隐藏调试层'), findsOneWidget);
+
+    await openTool(tester, 'mana_grid');
+    session.controller.minimizeWindow();
+    await tester.pumpAndSettle();
+    await tester.tap(toggle);
+    await tester.pumpAndSettle();
+    expect(floatingButton(), findsNothing);
+    expect(find.byKey(const Key('mana_grid')), findsNothing);
+    expect(session.controller.state.activePluginId, 'mana_grid');
+    expect(session.controller.state.windowMode, ManaWindowMode.minimized);
+    await tester.tap(toggle);
+    await tester.pumpAndSettle();
+    expect(session.controller.state.activePluginId, 'mana_grid');
+    expect(session.controller.state.windowMode, ManaWindowMode.minimized);
+    session.controller.restoreWindow();
+    await tester.pumpAndSettle();
+    expect(find.text('显示坐标'), findsOneWidget);
+    expect(find.text('Keep this input'), findsOneWidget);
+
+    session.controller.toggleOverlay(visible: false);
+    await tester.pumpAndSettle();
+    expect(find.text('显示调试层'), findsOneWidget);
+    expect(find.text('显示坐标'), findsNothing);
+    expect(session.controller.handleBack(), isFalse);
+    await tester.tap(toggle);
+    await tester.pumpAndSettle();
+    expect(find.text('显示坐标'), findsOneWidget);
+  }, size: const Size(390, 844));
+
   exampleTest(
     'language switches the app and an already open kit without resetting it',
     (tester, session) async {

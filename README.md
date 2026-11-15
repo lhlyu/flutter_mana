@@ -37,6 +37,7 @@ flutter pub add flutter_mana_kits
 | 文档 | 内容 |
 | --- | --- |
 | [使用指南](docs/getting-started.md) | 应用接入、返回行为、按需加载、网络 / 日志采集与资源释放。 |
+| [公开 API 速查](docs/api.md) | 调试层显隐、插件 / 窗口控制、状态、生命周期与采集器方法。 |
 | [项目架构](docs/architecture.md) | 包依赖、核心分层、状态与数据流、生命周期和资源归属。 |
 | [自定义插件](docs/custom-plugins.md) | 最小示例、图标、展示方式、生命周期与插件生成。 |
 | [内置插件与平台支持](docs/kits.md) | 全部 16 个工具的使用说明、支持矩阵及限制。 |

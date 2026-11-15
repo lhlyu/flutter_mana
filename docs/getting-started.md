@@ -58,6 +58,21 @@ class _AppState extends State<App> {
 
 点击 Mana 悬浮按钮选择工具。窗口支持拖动、最小化和全屏；入口大小、透明度和位置可在设置中调整。
 
+### 代码控制与临时隐藏
+
+持有传给宿主的 `controller`，即可由业务代码控制调试界面：
+
+```dart
+controller.toggleOverlay();               // 切换整个调试层的显隐
+controller.toggleOverlay(visible: false); // 隐藏，包括悬浮入口
+controller.toggleOverlay(visible: true);  // 恢复
+await controller.closePlugin();           // 只关闭当前插件
+```
+
+隐藏保留插件和窗口状态，不影响业务页面，也不停止网络 / 日志采集；恢复应由业务按钮或外部代码触发。显隐不持久化。录屏前如需等待隐藏绘制完成，可自行等待 `await WidgetsBinding.instance.endOfFrame`。
+
+所有控制方法及区别见 [公开 API 速查](api.md)。
+
 ### 返回行为与 Router
 
 - **Navigator**：配置 `ManaNavigatorObserver`，让调试界面优先处理返回。

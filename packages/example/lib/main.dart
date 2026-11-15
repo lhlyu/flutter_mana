@@ -233,6 +233,18 @@ class _ExamplePageState extends State<_ExamplePage>
                               : () => session.send(scenario),
                           child: Text(scenario),
                         ),
+                      ListenableBuilder(
+                        listenable: session.controller,
+                        builder: (context, _) => OutlinedButton(
+                          key: const Key('toggle-overlay'),
+                          onPressed: () => session.controller.toggleOverlay(),
+                          child: Text(
+                            session.controller.state.overlayVisible
+                                ? t('Hide debug overlay', '隐藏调试层')
+                                : t('Show debug overlay', '显示调试层'),
+                          ),
+                        ),
+                      ),
                       OutlinedButton(
                         onPressed: session.writeLogs,
                         child: Text(t('Generate logs', '生成日志')),

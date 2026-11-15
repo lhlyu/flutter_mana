@@ -67,6 +67,72 @@ void main() {
     },
   );
 
+  testWidgets(
+    'overlay toggle hides all debug UI without unmounting it or the host',
+    (tester) async {
+      final plugin = TestPlugin();
+      final runtime = ManaController(
+        preferences: MemoryManaPreferences(),
+        plugins: [plugin],
+      );
+      final focus = FocusNode();
+      var hostTaps = 0;
+      late BuildContext overlayContext;
+      await tester.pumpWidget(
+        ManaWidget(
+          controller: runtime,
+          overlayBuilder: (context, child) {
+            overlayContext = context;
+            return Focus(focusNode: focus, child: child!);
+          },
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => hostTaps++,
+            child: const Center(child: Text('Host')),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await runtime.activatePlugin(plugin.name);
+      runtime.openPluginPanel();
+      await tester.pumpAndSettle();
+      focus.requestFocus();
+      await tester.pump();
+      expect(focus.hasFocus, isTrue);
+      final hostElement = tester.element(find.text('Host'));
+      final pluginElement = tester.element(find.text('Plugin content'));
+      final buttonPosition = tester.getCenter(find.byType(FloatingButton));
+
+      runtime.toggleOverlay(visible: false);
+      await tester.pumpAndSettle();
+      expect(find.byType(FloatingButton), findsNothing);
+      expect(find.text('Plugin content'), findsNothing);
+      expect(find.byType(ManaFloatingWindow), findsNothing);
+      expect(find.text('Plugin content', skipOffstage: false), findsOneWidget);
+      expect(focus.hasFocus, isFalse);
+      expect(TickerMode.valuesOf(overlayContext).enabled, isFalse);
+      expect(runtime.canHandleBack, isFalse);
+      expect(runtime.handleBack(), isFalse);
+      await tester.tapAt(buttonPosition);
+      await tester.pump();
+      expect(hostTaps, 1);
+
+      runtime.toggleOverlay();
+      await tester.pumpAndSettle();
+      expect(find.byType(FloatingButton), findsOneWidget);
+      expect(find.byType(ManaFloatingWindow), findsNWidgets(2));
+      expect(tester.element(find.text('Plugin content')), same(pluginElement));
+      expect(tester.element(find.text('Host')), same(hostElement));
+      expect(TickerMode.valuesOf(overlayContext).enabled, isTrue);
+      expect(plugin.triggerCount, 1);
+      expect(plugin.deactivateCount, 0);
+      expect(plugin.disposeCount, 0);
+      await tester.pumpWidget(const SizedBox());
+      await runtime.close();
+      focus.dispose();
+    },
+  );
+
   testWidgets('Navigator observer consumes debug back before host route back', (
     tester,
   ) async {
@@ -106,10 +172,17 @@ void main() {
     await tester.pumpAndSettle();
     expect(runtime.state.pluginPanelVisible, isFalse);
     expect(find.text('Details'), findsOneWidget);
+    runtime.openPluginPanel();
+    runtime.toggleOverlay(visible: false);
+    await tester.pumpAndSettle();
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
     expect(find.text('Details'), findsNothing);
     expect(find.text('Home'), findsOneWidget);
+    expect(runtime.state.pluginPanelVisible, isTrue);
+    runtime.toggleOverlay(visible: true);
+    await tester.pumpAndSettle();
+    expect(runtime.canHandleBack, isTrue);
     observer.dispose();
     await tester.pumpWidget(const SizedBox());
     await runtime.close();
@@ -140,9 +213,13 @@ void main() {
       await tester.pumpAndSettle();
       expect(runtime.state.pluginPanelVisible, isFalse);
       expect(router.details, isTrue);
+      runtime.openPluginPanel();
+      runtime.toggleOverlay(visible: false);
+      await tester.pumpAndSettle();
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
       expect(router.details, isFalse);
+      expect(runtime.state.pluginPanelVisible, isTrue);
       await tester.pumpWidget(const SizedBox());
       router.dispose();
       await runtime.close();

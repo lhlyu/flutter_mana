@@ -243,6 +243,66 @@ void main() {
     await runtime.close();
   });
 
+  test('overlay visibility preserves sessions and is not persisted', () async {
+    final storage = _RecordingPreferences();
+    final plugin = TestPlugin();
+    final runtime = ManaController(plugins: [plugin], preferences: storage);
+    addTearDown(runtime.close);
+    await runtime.activatePlugin(plugin.name);
+    runtime.toggleFullscreen();
+    runtime.openPluginPanel();
+    expect(runtime.state.overlayVisible, isTrue);
+    expect(runtime.canHandleBack, isTrue);
+
+    runtime.toggleOverlay();
+    expect(runtime.state.overlayVisible, isFalse);
+    expect(runtime.canHandleBack, isFalse);
+    expect(runtime.handleBack(), isFalse);
+    expect(runtime.state.activePluginId, plugin.name);
+    expect(runtime.state.pluginPanelVisible, isTrue);
+    expect(runtime.state.windowMode, ManaWindowMode.fullscreen);
+    runtime.updateSettings(buttonSize: 60);
+    expect(runtime.state.overlayVisible, isFalse);
+
+    runtime.toggleOverlay();
+    expect(runtime.state.overlayVisible, isTrue);
+    expect(runtime.canHandleBack, isTrue);
+    expect(plugin.triggerCount, 1);
+    expect(plugin.deactivateCount, 0);
+    expect(plugin.disposeCount, 0);
+    await runtime.flushSettings();
+    expect(storage.saves, 1);
+    await runtime.close();
+    final restored = ManaController(preferences: storage);
+    await restored.initialize();
+    expect(restored.state.overlayVisible, isTrue);
+    await restored.close();
+  });
+
+  test('explicit overlay visibility is idempotent and safe before init or after close', () async {
+    final storage = _RecordingPreferences();
+    final runtime = ManaController(preferences: storage);
+    var notifications = 0;
+    runtime.addListener(() => notifications++);
+    runtime.toggleOverlay(visible: false);
+    runtime.toggleOverlay(visible: false);
+    expect(notifications, 1);
+    await runtime.initialize();
+    expect(runtime.state.overlayVisible, isFalse);
+    runtime.openPluginPanel();
+    expect(runtime.state.overlayVisible, isFalse);
+    runtime.toggleOverlay(visible: true);
+    runtime.toggleOverlay(visible: true);
+    expect(runtime.state.overlayVisible, isTrue);
+    runtime.toggleOverlay(visible: false);
+    await runtime.flushSettings();
+    expect(storage.saves, 0);
+    await runtime.close();
+    runtime.toggleOverlay();
+    runtime.toggleOverlay(visible: true);
+    expect(runtime.state.overlayVisible, isFalse);
+  });
+
   test(
     'session commands retain fullscreen on restore and clean up on close',
     () async {

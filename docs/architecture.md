@@ -28,7 +28,7 @@ flowchart LR
 
 | 模块 | 关键类型 | 职责 |
 | --- | --- | --- |
-| `runtime` | `ManaController`、`ManaState` | 统一命令入口，维护当前插件、窗口模式、面板显隐和入口设置。 |
+| `runtime` | `ManaController`、`ManaState` | 统一命令入口，维护当前插件、窗口模式、调试层 / 面板显隐和入口设置。 |
 | `runtime` | `ManaPluginManager`、`ManaPluggable` | 插件注册、支持检查、初始化、失败隔离和生命周期。 |
 | `runtime` | `ManaWidget`、`ManaScope` | 挂载宿主，向调试层提供控制器并订阅状态。 |
 | `storage` | `ManaPreferences`、`ManaStore` | 抽象设置读写，默认适配 SharedPreferences。 |

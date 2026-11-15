@@ -200,6 +200,16 @@ final class ManaController extends ChangeNotifier {
     }
   }
 
+  /// Toggles the entire debug overlay, or explicitly sets [visible].
+  /// Hiding preserves plugin/widget state and does not stop data collection.
+  /// Visibility is runtime-only and is not persisted to preferences.
+  void toggleOverlay({bool? visible}) {
+    if (_closed) return;
+    final next = visible ?? !_state.overlayVisible;
+    if (next == _state.overlayVisible) return;
+    _update(_state.copyWith(overlayVisible: next));
+  }
+
   void openPluginPanel() => _update(_state.copyWith(pluginPanelVisible: true));
   void closePluginPanel() =>
       _update(_state.copyWith(pluginPanelVisible: false));
@@ -259,7 +269,7 @@ final class ManaController extends ChangeNotifier {
   }
 
   bool get canHandleBack {
-    if (_closed) return false;
+    if (_closed || !_state.overlayVisible) return false;
     if (_state.pluginPanelVisible) return true;
     final id = _state.activePluginId;
     return id != null &&
@@ -269,7 +279,7 @@ final class ManaController extends ChangeNotifier {
   }
 
   bool handleBack() {
-    if (_closed) return false;
+    if (_closed || !_state.overlayVisible) return false;
     if (_state.pluginPanelVisible) {
       if (!(_windows[ManaPluginManager.name]?.dismissSettings() ?? false)) {
         closePluginPanel();
