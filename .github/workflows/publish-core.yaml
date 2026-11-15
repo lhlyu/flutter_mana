@@ -1,0 +1,69 @@
+name: 发布核心包 flutter_mana
+
+on:
+  push:
+    tags:
+      - 'flutter_mana-v[0-9]+.[0-9]+.[0-9]+*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-core-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  FLUTTER_VERSION: '3.50.0'
+  PUB_HOSTED_URL: https://pub.dev
+
+jobs:
+  validate:
+    name: 校验并测试核心包
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      should_publish: ${{ steps.status.outputs.should_publish }}
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: 安装 Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: 校验发布 tag、包版本和更新日志
+        run: dart scripts/release.dart check packages/core
+      - name: 安装项目依赖
+        run: flutter pub get
+      - name: 静态分析发布脚本
+        run: dart analyze scripts
+      - name: 测试发布脚本
+        run: dart scripts/release_test.dart
+      - name: 静态分析核心包
+        run: flutter analyze
+        working-directory: packages/core
+      - name: 测试核心包
+        run: flutter test
+        working-directory: packages/core
+      - name: 检查当前版本是否已经发布
+        id: status
+        run: dart scripts/release.dart status packages/core
+
+  publish:
+    name: 使用官方工作流发布核心包
+    needs: validate
+    if: needs.validate.outputs.should_publish == 'true'
+    permissions:
+      contents: read
+      id-token: write
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@2286a0c042b44434fe26d292bbce8d34f7ec662b # v1
+    with:
+      environment: pub.dev
+      working-directory: packages/core
+      sdk: '3.14.0'
+      use-flutter: true

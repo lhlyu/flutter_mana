@@ -1,36 +1,115 @@
-name: Build and Release Flutter APK
+name: 构建并发布 ARM64 安装包
 
 on:
-  release:
-    types: [created]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-apk-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  FLUTTER_VERSION: '3.50.0'
+  PUB_HOSTED_URL: https://pub.dev
 
 jobs:
   build-apk:
-    runs-on: macos-latest
+    name: 构建 arm64-v8a 调试安装包
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: 安装 Java
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: 安装 Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: 校验示例应用版本
+        id: version
+        run: dart scripts/release.dart version packages/example
+      - name: 安装项目依赖
+        run: flutter pub get
+      - name: 静态分析示例应用
+        run: flutter analyze
+        working-directory: packages/example
+      - name: 测试示例应用
+        run: flutter test
+        working-directory: packages/example
+
+      # 保留 VM Service 和仅在调试模式下可用的工具。
+      - name: 构建 ARM64 调试安装包
+        working-directory: packages/example
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: >-
+          flutter build apk --debug --no-pub
+          --target-platform android-arm64 --split-per-abi
+          --build-name "$RELEASE_VERSION" --build-number "$BUILD_NUMBER"
+
+      - name: 整理安装包并生成校验文件
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          mkdir -p dist
+          cp packages/example/build/app/outputs/flutter-apk/app-arm64-v8a-debug.apk \
+            "dist/flutter-mana-${RELEASE_VERSION}-arm64-v8a-debug.apk"
+          cd dist
+          sha256sum *.apk > SHA256SUMS.txt
+
+      - name: 保存安装包构建产物
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: android-arm64-apk
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    name: 上传安装包到 GitHub Release
+    needs: build-apk
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+      - name: 下载安装包构建产物
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
-          channel: stable
-      - run: flutter --version
+          name: android-arm64-apk
+          path: dist
 
-      - name: Install dependencies
-        run: flutter pub get
-        working-directory: ./packages/example
+      - name: 验证安装包完整性
+        working-directory: dist
+        run: sha256sum --check --strict SHA256SUMS.txt
 
-      - name: Build APK
-        run: flutter build apk --debug
-        working-directory: ./packages/example
-
-      - name: Upload APK to Release
-        uses: softprops/action-gh-release@v2
+      - name: 创建或更新 GitHub Release 并上传附件
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
-          files: ./packages/example/build/app/outputs/flutter-apk/app-debug.apk
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: apk-v${{ needs.build-apk.outputs.version }}-build.${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          name: 示例应用 ${{ needs.build-apk.outputs.version }}（构建 ${{ github.run_number }}）
+          prerelease: ${{ needs.build-apk.outputs.prerelease == 'true' }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            dist/*.apk
+            dist/SHA256SUMS.txt
