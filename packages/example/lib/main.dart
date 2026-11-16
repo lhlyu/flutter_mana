@@ -2,6 +2,7 @@ import 'package:flutter_mana/flutter_mana.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'demo_session.dart';
+import 'secondary_page.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -195,8 +196,8 @@ class _ExamplePageState extends State<_ExamplePage>
     final colors = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'mana / example',
+        title: Text(
+          t('mana / home', 'mana / 主页'),
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         actions: [
@@ -228,6 +229,18 @@ class _ExamplePageState extends State<_ExamplePage>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  OutlinedButton.icon(
+                    key: const Key('open-secondary-page'),
+                    onPressed: () => Navigator.of(context).push<void>(
+                      MaterialPageRoute<void>(
+                        settings: const RouteSettings(name: '/secondary'),
+                        builder: (context) => SecondaryPage(session: session),
+                      ),
+                    ),
+                    icon: const Icon(Icons.arrow_forward_rounded),
+                    label: Text(t('Open secondary page', '进入副页')),
+                  ),
+                  const SizedBox(height: 12),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,

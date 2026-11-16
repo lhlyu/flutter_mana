@@ -128,6 +128,118 @@ void main() {
     expect(find.text('显示坐标'), findsOneWidget);
   }, size: const Size(390, 844));
 
+  exampleTest('pages share collectors and returning preserves home input', (
+    tester,
+    session,
+  ) async {
+    await tester.enterText(
+      find.byKey(const Key('sample-input')),
+      'Home state survives',
+    );
+    await tester.tap(find.byKey(const Key('request-GET')));
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+    expect(session.requests.data.length, 1);
+
+    await tester.tap(find.byKey(const Key('open-secondary-page')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('secondary-page')), findsOneWidget);
+    expect(floatingButton(), findsOneWidget);
+    await tester.enterText(
+      find.byKey(const Key('secondary-input')),
+      'Secondary state',
+    );
+    await tester.tap(find.byKey(const Key('secondary-counter')));
+    await tester.pumpAndSettle();
+    expect(find.text('Count: 1'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('secondary-request-POST')));
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+    await tester.tap(find.byKey(const Key('secondary-generate-logs')));
+    await tester.pumpAndSettle();
+    expect(session.requests.data.length, 2);
+    expect(session.logs.data, isNotEmpty);
+
+    await tester.tap(find.byKey(const Key('back-to-home')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('secondary-page')), findsNothing);
+    expect(find.text('Home state survives'), findsOneWidget);
+    expect(session.requests.data.length, 2);
+    expect(session.logs.data, isNotEmpty);
+
+    // Re-entering creates a fresh host page, not a new debugging session.
+    await tester.tap(find.byKey(const Key('open-secondary-page')));
+    await tester.pumpAndSettle();
+    expect(find.text('Count: 0'), findsOneWidget);
+    expect(find.text('Secondary state'), findsNothing);
+    expect(session.requests.data.length, 2);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('Home state survives'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  }, size: const Size(390, 844));
+
+  exampleTest('active tools survive navigation and consume back first', (
+    tester,
+    session,
+  ) async {
+    await openTool(tester, 'mana_log_viewer');
+    session.controller.minimizeWindow();
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('open-secondary-page')));
+    await tester.pumpAndSettle();
+    expect(session.controller.state.activePluginId, 'mana_log_viewer');
+    expect(session.controller.state.windowMode, ManaWindowMode.minimized);
+
+    session.controller.restoreWindow();
+    await tester.pumpAndSettle();
+    expect(session.controller.state.windowVisible, isTrue);
+    // System back must act on the current route's debug history entry.
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('secondary-page')), findsOneWidget);
+    expect(session.controller.state.windowMode, ManaWindowMode.minimized);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('secondary-page')), findsNothing);
+    expect(session.controller.state.activePluginId, 'mana_log_viewer');
+    session.controller.restoreWindow();
+    await tester.pumpAndSettle();
+    expect(session.controller.state.windowVisible, isTrue);
+    expect(tester.takeException(), isNull);
+  });
+
+  exampleTest('hidden debug overlay can be restored on the secondary page', (
+    tester,
+    session,
+  ) async {
+    await tester.tap(find.text('中文'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('切换主题'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('toggle-overlay')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('open-secondary-page')));
+    await tester.pumpAndSettle();
+    expect(find.text('mana / 副页'), findsOneWidget);
+    expect(
+      Theme.of(tester.element(find.byKey(const Key('secondary-input'))))
+          .brightness,
+      Brightness.dark,
+    );
+    expect(floatingButton(), findsNothing);
+    await tester.tap(find.byKey(const Key('secondary-request-GET')));
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+    expect(session.requests.data.length, 1);
+    await tester.tap(find.byKey(const Key('secondary-toggle-overlay')));
+    await tester.pumpAndSettle();
+    expect(floatingButton(), findsOneWidget);
+    await tester.tap(find.byKey(const Key('back-to-home')));
+    await tester.pumpAndSettle();
+    expect(find.text('mana / 主页'), findsOneWidget);
+    expect(session.controller.state.overlayVisible, isTrue);
+    expect(session.requests.data.length, 1);
+    expect(tester.takeException(), isNull);
+  });
+
   exampleTest(
     'language switches the app and an already open kit without resetting it',
     (tester, session) async {
