@@ -181,9 +181,16 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
+    final copyMenu = find.byWidgetPredicate(
+      (widget) => widget is ManaButton && widget.tooltip == 'Copy',
+    );
+    await tester.ensureVisible(copyMenu);
+    await tester.tap(copyMenu);
+    await tester.pumpAndSettle();
     await tester.ensureVisible(button('Copy HTTP'));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
+    expect(button('Copy HTTP').hitTestable(), findsOneWidget);
     expect(tester.getSize(find.byType(KitScaffold).first).height, 100);
     await tester.pumpWidget(const SizedBox());
   });

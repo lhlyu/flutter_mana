@@ -1,6 +1,6 @@
 # Flutter Mana Example
 
-展示全部 16 个内置工具的黑白单页示例。**Flutter 3.50.0+ / Dart 3.14.0+**。
+展示全部 16 个内置工具的黑白双页示例（主页 + 副页）。**Flutter 3.50.0+ / Dart 3.14.0+**。
 
 ## 运行
 
@@ -18,6 +18,7 @@ flutter run -d macos
 ## 体验
 
 - **工具**：点击 Mana 悬浮按钮打开面板。
+- **切页**：点击主页“进入副页”，通过顶部返回按钮、系统返回或“返回主页”回到主页。两页共享同一 `DemoSession` 和应用级 `ManaWidget.builder`，可检查切页前后工具状态、调试层显隐和网络 / 日志数据是否保留；主页输入内容也会保留。副页提供请求、日志、调试层显隐、输入框和计数器，退出后重新进入会重置副页本地状态。返回操作会优先处理展开的调试工具 / 面板，再次返回才退出副页。
 - **显隐**：业务页面的“隐藏调试层 / 显示调试层”按钮调用 `controller.toggleOverlay()`，隐藏悬浮入口、面板与插件，保留状态及数据采集；隐藏后仍可点击同一按钮恢复。方法说明见 [公开 API 速查](../../docs/api.md)。
 - **数据**：GET、POST、404、Timeout 使用本地 Dio Adapter，无需联网；日志和存储按钮只生成样本，不切换工具。
 - **界面**：用标尺、取色、网格和组件检查检查灰阶色板、输入框与圆角；打开动画查看帧耗时。
@@ -27,7 +28,8 @@ flutter run -d macos
 
 ## 代码与数据
 
-- [main.dart](lib/main.dart)：应用环境、`ManaWidget.builder`、返回行为与单页界面；少量双语文案使用 `t(en, zh)`。
+- [main.dart](lib/main.dart)：应用环境、`ManaWidget.builder`、`ManaNavigatorObserver` 与主页；少量双语文案使用 `t(en, zh)`。
+- [secondary_page.dart](lib/secondary_page.dart)：副页与共享采集操作，通过 `/secondary` 路由测试页面切换及返回。
 - [demo_session.dart](lib/demo_session.dart)：共享 Dio / Logger 采集器、控制器与样本数据，统一释放资源并恢复 `debugPrint`。
 
 存储样本只写入 `example.*` 下的五个固定键；网络与日志各最多保留 100 条。共享采集器的接入方式见 [使用指南](../../docs/getting-started.md#网络与日志采集)。
@@ -45,4 +47,4 @@ flutter analyze
 flutter test
 ```
 
-[测试](test) 覆盖工具入口、数据采集、语言 / 主题切换、调试层显隐与状态保留、浮层交互、小屏大字体及资源释放。示例仅用于开发或内部演示，不向生产用户暴露调试数据。
+[测试](test) 覆盖工具入口、数据采集、语言 / 主题切换、调试层显隐与状态保留、跨页采集与工具状态、返回优先级、浮层交互、小屏大字体及资源释放。示例仅用于开发或内部演示，不向生产用户暴露调试数据。

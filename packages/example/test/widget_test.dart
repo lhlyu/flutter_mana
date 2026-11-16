@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:example/demo_session.dart';
 import 'package:example/main.dart';
 import 'package:flutter_mana/flutter_mana.dart';
@@ -12,6 +14,7 @@ void main() {
     String name,
     Future<void> Function(WidgetTester, DemoSession) body, {
     Size size = const Size(1100, 1000),
+    bool pauseAnimation = true,
   }) {
     testWidgets(name, (tester) async {
       tester.view.physicalSize = size;
@@ -21,7 +24,14 @@ void main() {
       final session = DemoSession(preferences: MemoryManaPreferences());
       try {
         await tester.pumpWidget(ExampleApp(session: session));
-        await tester.pumpAndSettle();
+        if (pauseAnimation) {
+          // A repeating demo animation never settles. Pause it for tests that
+          // exercise unrelated controls; the default-on behavior is tested below.
+          tester.widget<SwitchListTile>(find.byType(SwitchListTile)).onChanged!(
+            false,
+          );
+          await tester.pumpAndSettle();
+        }
         await body(tester, session);
       } finally {
         await tester.pumpWidget(const SizedBox.shrink());
@@ -118,6 +128,118 @@ void main() {
     expect(find.text('显示坐标'), findsOneWidget);
   }, size: const Size(390, 844));
 
+  exampleTest('pages share collectors and returning preserves home input', (
+    tester,
+    session,
+  ) async {
+    await tester.enterText(
+      find.byKey(const Key('sample-input')),
+      'Home state survives',
+    );
+    await tester.tap(find.byKey(const Key('request-GET')));
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+    expect(session.requests.data.length, 1);
+
+    await tester.tap(find.byKey(const Key('open-secondary-page')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('secondary-page')), findsOneWidget);
+    expect(floatingButton(), findsOneWidget);
+    await tester.enterText(
+      find.byKey(const Key('secondary-input')),
+      'Secondary state',
+    );
+    await tester.tap(find.byKey(const Key('secondary-counter')));
+    await tester.pumpAndSettle();
+    expect(find.text('Count: 1'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('secondary-request-POST')));
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+    await tester.tap(find.byKey(const Key('secondary-generate-logs')));
+    await tester.pumpAndSettle();
+    expect(session.requests.data.length, 2);
+    expect(session.logs.data, isNotEmpty);
+
+    await tester.tap(find.byKey(const Key('back-to-home')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('secondary-page')), findsNothing);
+    expect(find.text('Home state survives'), findsOneWidget);
+    expect(session.requests.data.length, 2);
+    expect(session.logs.data, isNotEmpty);
+
+    // Re-entering creates a fresh host page, not a new debugging session.
+    await tester.tap(find.byKey(const Key('open-secondary-page')));
+    await tester.pumpAndSettle();
+    expect(find.text('Count: 0'), findsOneWidget);
+    expect(find.text('Secondary state'), findsNothing);
+    expect(session.requests.data.length, 2);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('Home state survives'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  }, size: const Size(390, 844));
+
+  exampleTest('active tools survive navigation and consume back first', (
+    tester,
+    session,
+  ) async {
+    await openTool(tester, 'mana_log_viewer');
+    session.controller.minimizeWindow();
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('open-secondary-page')));
+    await tester.pumpAndSettle();
+    expect(session.controller.state.activePluginId, 'mana_log_viewer');
+    expect(session.controller.state.windowMode, ManaWindowMode.minimized);
+
+    session.controller.restoreWindow();
+    await tester.pumpAndSettle();
+    expect(session.controller.state.windowVisible, isTrue);
+    // System back must act on the current route's debug history entry.
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('secondary-page')), findsOneWidget);
+    expect(session.controller.state.windowMode, ManaWindowMode.minimized);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('secondary-page')), findsNothing);
+    expect(session.controller.state.activePluginId, 'mana_log_viewer');
+    session.controller.restoreWindow();
+    await tester.pumpAndSettle();
+    expect(session.controller.state.windowVisible, isTrue);
+    expect(tester.takeException(), isNull);
+  });
+
+  exampleTest('hidden debug overlay can be restored on the secondary page', (
+    tester,
+    session,
+  ) async {
+    await tester.tap(find.text('中文'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('切换主题'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('toggle-overlay')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('open-secondary-page')));
+    await tester.pumpAndSettle();
+    expect(find.text('mana / 副页'), findsOneWidget);
+    expect(
+      Theme.of(tester.element(find.byKey(const Key('secondary-input'))))
+          .brightness,
+      Brightness.dark,
+    );
+    expect(floatingButton(), findsNothing);
+    await tester.tap(find.byKey(const Key('secondary-request-GET')));
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+    expect(session.requests.data.length, 1);
+    await tester.tap(find.byKey(const Key('secondary-toggle-overlay')));
+    await tester.pumpAndSettle();
+    expect(floatingButton(), findsOneWidget);
+    await tester.tap(find.byKey(const Key('back-to-home')));
+    await tester.pumpAndSettle();
+    expect(find.text('mana / 主页'), findsOneWidget);
+    expect(session.controller.state.overlayVisible, isTrue);
+    expect(session.requests.data.length, 1);
+    expect(tester.takeException(), isNull);
+  });
+
   exampleTest(
     'language switches the app and an already open kit without resetting it',
     (tester, session) async {
@@ -138,6 +260,64 @@ void main() {
       expect(find.text('Show Numbers'), findsOneWidget);
       expect(session.controller.state.activePluginId, 'mana_grid');
     },
+  );
+
+  exampleTest(
+    'animation starts enabled and its switch has contrast in both themes',
+    (tester, session) async {
+      final toggle = find.byType(SwitchListTile);
+      final rotation = find.byWidgetPredicate(
+        (widget) =>
+            widget is RotationTransition && widget.turns is AnimationController,
+      );
+      final controller =
+          tester.widget<RotationTransition>(rotation).turns
+              as AnimationController;
+      expect(tester.widget<SwitchListTile>(toggle).value, isTrue);
+      expect(controller.isAnimating, isTrue);
+      await tester.pump(const Duration(milliseconds: 100));
+      final before = controller.value;
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(controller.value, greaterThan(before));
+
+      await tester.ensureVisible(toggle);
+      await tester.tap(toggle);
+      await tester.pumpAndSettle();
+      expect(tester.widget<SwitchListTile>(toggle).value, isFalse);
+      expect(controller.isAnimating, isFalse);
+      final stopped = controller.value;
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(controller.value, stopped);
+
+      for (final brightness in [Brightness.light, Brightness.dark]) {
+        if (brightness == Brightness.dark) {
+          await tester.tap(find.byTooltip('Toggle theme'));
+          await tester.pumpAndSettle();
+        }
+        final control = tester.widget<Switch>(find.byType(Switch));
+        expect(Theme.of(tester.element(toggle)).brightness, brightness);
+        for (final states in [
+          <WidgetState>{},
+          {WidgetState.selected},
+        ]) {
+          final thumb = control.thumbColor!.resolve(states)!.computeLuminance();
+          final track = control.trackColor!.resolve(states)!.computeLuminance();
+          final contrast =
+              (math.max(thumb, track) + .05) / (math.min(thumb, track) + .05);
+          expect(
+            contrast,
+            greaterThanOrEqualTo(3),
+            reason: '$brightness $states',
+          );
+        }
+      }
+
+      await tester.tap(toggle);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(tester.widget<SwitchListTile>(toggle).value, isTrue);
+      expect(controller.isAnimating, isTrue);
+    },
+    pauseAnimation: false,
   );
 
   exampleTest('request, input, animation and theme work on mobile', (

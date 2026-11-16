@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
 
 enum KitIcon {
@@ -77,8 +79,21 @@ class _GlyphPainter extends CustomPainter {
         canvas.drawCircle(const Offset(10, 10), 6, p);
         line(15, 15, 21, 21);
       case .refresh:
-        canvas.drawArc(const Rect.fromLTWH(4, 4, 16, 16), 0.5, 5, false, p);
-        path(const [Offset(15, 4), Offset(20, 4), Offset(20, 9)]);
+        // End the clockwise arc at the arrow tip. The two wings straddle
+        // its down-right tangent instead of floating above the circle.
+        final tip = Offset(12 + 8 / math.sqrt2, 12 - 8 / math.sqrt2);
+        canvas.drawPath(
+          Path()
+            ..addArc(
+              const Rect.fromLTWH(4, 4, 16, 16),
+              math.pi / 4,
+              3 * math.pi / 2,
+            )
+            ..lineTo(tip.dx, tip.dy - 4)
+            ..moveTo(tip.dx - 4, tip.dy)
+            ..lineTo(tip.dx, tip.dy),
+          p,
+        );
       case .clear:
         line(4, 6, 20, 6);
         line(9, 3, 15, 3);

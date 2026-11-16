@@ -1,3 +1,7 @@
+# 2.0.0-rc.2
+
+- 同步升级至第二个候选版本，与 Kits 和示例应用保持版本一致。
+
 # 2.0.0-rc.1
 
 - 新增 `buildIcon`，支持面板与悬浮入口使用 Widget 图标，兼容 `iconImageProvider`，默认使用 Mana 图标。

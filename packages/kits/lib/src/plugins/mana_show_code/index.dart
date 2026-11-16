@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_mana/flutter_mana.dart';
 
 import '../builtin_kit.dart';
 import '../../ui/kit_ui.dart';
@@ -22,7 +23,9 @@ class ManaShowCode extends BuiltinKit {
     drag: false,
     showBarrier: false,
     maintainContent: false,
-    content: const ShowCodeContent(),
+    content: ShowCodeContent(
+      root: ManaScope.read(context).rootKey.currentContext,
+    ),
   );
   @override
   bool get isSupported => !kIsWeb && kDebugMode;

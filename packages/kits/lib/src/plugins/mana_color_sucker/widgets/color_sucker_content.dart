@@ -16,8 +16,6 @@ class ColorSuckerContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final hex =
         '#${color.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()}';
-    final rgb =
-        'rgba(${(color.r * 255).round()}, ${(color.g * 255).round()}, ${(color.b * 255).round()}, ${color.a.toStringAsFixed(2)})';
     return SingleChildScrollView(
       padding: const .all(12),
       child: Column(
@@ -36,12 +34,6 @@ class ColorSuckerContent extends StatelessWidget {
               ),
               Expanded(child: Text(hex, style: KitStyle.code)),
               KitCopyButton(hex),
-            ],
-          ),
-          Row(
-            children: [
-              Expanded(child: Text(rgb, style: KitStyle.code)),
-              KitCopyButton(rgb),
             ],
           ),
           Text(

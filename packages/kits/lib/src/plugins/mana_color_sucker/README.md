@@ -1,6 +1,6 @@
 # 颜色吸管
 
-放大屏幕局部并取色，支持复制 ARGB / RGBA 色值和调整放大率。
+放大屏幕局部并取色，支持复制 ARGB 十六进制色值和调整放大率。
 
 ```dart
 import 'package:flutter_mana/flutter_mana.dart';

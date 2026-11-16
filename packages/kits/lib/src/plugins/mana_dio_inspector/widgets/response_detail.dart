@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../ui/kit_ui.dart';
 import '../mana_dio_collector.dart';
 import '../request_format.dart';
+import 'response_copy_menu.dart';
 
 class ResponseDetail extends StatefulWidget {
   const ResponseDetail({
@@ -29,6 +29,7 @@ class _ResponseDetailState extends State<ResponseDetail> {
     return KitDetail(
       title: '${request.uri}',
       onClose: widget.onClose,
+      actions: [ResponseCopyMenu(response: response)],
       child: KitScaffold(
         header: KitTabs(
           values: const [0, 1, 2],
@@ -85,25 +86,6 @@ class _ResponseDetailState extends State<ResponseDetail> {
               ],
             ),
           },
-        ),
-        footer: KitToolbar(
-          children: [
-            for (final (label, value) in [
-              ('URL', () => request.uri.toString()),
-              ('cURL', () => formatCurl(request)),
-              ('HTTP', () => formatHttp(request)),
-              (
-                kitText(context, 'dio_inspector.response'),
-                () => formatBody(response.data),
-              ),
-            ])
-              KitButton(
-                label: '${kitText(context, 'common.copy')} $label',
-                icon: .copy,
-                onPressed: () =>
-                    Clipboard.setData(ClipboardData(text: value())),
-              ),
-          ],
         ),
       ),
     );

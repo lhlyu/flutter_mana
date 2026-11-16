@@ -40,6 +40,10 @@ const _strings = {
   'dio_inspector.response_header': (en: 'Response Header', zh: '响应头'),
   'dio_inspector.response_body': (en: 'Response Body', zh: '响应体'),
   'log_viewer.verbose_logs': (en: 'Verbose Logs', zh: '详细日志'),
+  'show_code.no_page': (
+    en: 'Unable to locate the current page source. Open this tool on an app page in a native Debug build.',
+    zh: '无法定位当前页面源码，请在原生 Debug 构建的应用页面中打开此工具。',
+  ),
   'memory_info.hide_private_classes': (en: 'Hide private classes', zh: '隐藏私有类'),
   'memory_info.size': (en: 'Size', zh: '大小'),
   'memory_info.number': (en: 'Number', zh: '数量'),
