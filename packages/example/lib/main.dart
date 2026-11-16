@@ -121,12 +121,18 @@ class _ExamplePageState extends State<_ExamplePage>
     vsync: this,
     duration: const Duration(seconds: 3),
   );
-  bool animate = false;
+  bool animate = true;
   double radius = 8;
   String dropdownValue = 'default';
 
   String t(String en, String zh) =>
       Localizations.localeOf(context).languageCode == 'zh' ? zh : en;
+
+  @override
+  void initState() {
+    super.initState();
+    animation.repeat();
+  }
 
   @override
   void dispose() {
@@ -186,6 +192,7 @@ class _ExamplePageState extends State<_ExamplePage>
   @override
   Widget build(BuildContext context) {
     final session = widget.session;
+    final colors = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -360,6 +367,16 @@ class _ExamplePageState extends State<_ExamplePage>
                       style: const TextStyle(fontSize: 13),
                     ),
                     value: animate,
+                    thumbColor: WidgetStateProperty.resolveWith(
+                      (states) => states.contains(WidgetState.selected)
+                          ? colors.onPrimary
+                          : colors.onSurface,
+                    ),
+                    trackColor: WidgetStateProperty.resolveWith(
+                      (states) => states.contains(WidgetState.selected)
+                          ? colors.primary
+                          : colors.secondaryContainer,
+                    ),
                     onChanged: (value) => setState(() {
                       animate = value;
                       if (value) {

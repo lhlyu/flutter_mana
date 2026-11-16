@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:example/demo_session.dart';
 import 'package:example/main.dart';
 import 'package:flutter_mana/flutter_mana.dart';
@@ -12,6 +14,7 @@ void main() {
     String name,
     Future<void> Function(WidgetTester, DemoSession) body, {
     Size size = const Size(1100, 1000),
+    bool pauseAnimation = true,
   }) {
     testWidgets(name, (tester) async {
       tester.view.physicalSize = size;
@@ -21,7 +24,14 @@ void main() {
       final session = DemoSession(preferences: MemoryManaPreferences());
       try {
         await tester.pumpWidget(ExampleApp(session: session));
-        await tester.pumpAndSettle();
+        if (pauseAnimation) {
+          // A repeating demo animation never settles. Pause it for tests that
+          // exercise unrelated controls; the default-on behavior is tested below.
+          tester.widget<SwitchListTile>(find.byType(SwitchListTile)).onChanged!(
+            false,
+          );
+          await tester.pumpAndSettle();
+        }
         await body(tester, session);
       } finally {
         await tester.pumpWidget(const SizedBox.shrink());
@@ -138,6 +148,64 @@ void main() {
       expect(find.text('Show Numbers'), findsOneWidget);
       expect(session.controller.state.activePluginId, 'mana_grid');
     },
+  );
+
+  exampleTest(
+    'animation starts enabled and its switch has contrast in both themes',
+    (tester, session) async {
+      final toggle = find.byType(SwitchListTile);
+      final rotation = find.byWidgetPredicate(
+        (widget) =>
+            widget is RotationTransition && widget.turns is AnimationController,
+      );
+      final controller =
+          tester.widget<RotationTransition>(rotation).turns
+              as AnimationController;
+      expect(tester.widget<SwitchListTile>(toggle).value, isTrue);
+      expect(controller.isAnimating, isTrue);
+      await tester.pump(const Duration(milliseconds: 100));
+      final before = controller.value;
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(controller.value, greaterThan(before));
+
+      await tester.ensureVisible(toggle);
+      await tester.tap(toggle);
+      await tester.pumpAndSettle();
+      expect(tester.widget<SwitchListTile>(toggle).value, isFalse);
+      expect(controller.isAnimating, isFalse);
+      final stopped = controller.value;
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(controller.value, stopped);
+
+      for (final brightness in [Brightness.light, Brightness.dark]) {
+        if (brightness == Brightness.dark) {
+          await tester.tap(find.byTooltip('Toggle theme'));
+          await tester.pumpAndSettle();
+        }
+        final control = tester.widget<Switch>(find.byType(Switch));
+        expect(Theme.of(tester.element(toggle)).brightness, brightness);
+        for (final states in [
+          <WidgetState>{},
+          {WidgetState.selected},
+        ]) {
+          final thumb = control.thumbColor!.resolve(states)!.computeLuminance();
+          final track = control.trackColor!.resolve(states)!.computeLuminance();
+          final contrast =
+              (math.max(thumb, track) + .05) / (math.min(thumb, track) + .05);
+          expect(
+            contrast,
+            greaterThanOrEqualTo(3),
+            reason: '$brightness $states',
+          );
+        }
+      }
+
+      await tester.tap(toggle);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(tester.widget<SwitchListTile>(toggle).value, isTrue);
+      expect(controller.isAnimating, isTrue);
+    },
+    pauseAnimation: false,
   );
 
   exampleTest('request, input, animation and theme work on mobile', (
