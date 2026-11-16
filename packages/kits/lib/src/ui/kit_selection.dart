@@ -7,21 +7,54 @@ final kitSelectionControls = _KitSelectionControls();
 
 class _KitSelectionControls extends EmptyTextSelectionControls
     with TextSelectionHandleControls {
+  static const _handleSize = 18.0;
+  static const _touchTargetSize = 48.0;
+  static const _inset = (_touchTargetSize - _handleSize) / 2;
+
   @override
-  Size getHandleSize(double textLineHeight) => const Size(18, 18);
+  Size getHandleSize(double textLineHeight) =>
+      const Size.square(_touchTargetSize);
   @override
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) =>
-      const Offset(9, 0);
+      switch (type) {
+        .left => const Offset(_inset + _handleSize, _inset),
+        .right => const Offset(_inset, _inset),
+        .collapsed => const Offset(_touchTargetSize / 2, _inset),
+      };
   @override
   Widget buildHandle(
     BuildContext context,
     TextSelectionHandleType type,
     double textLineHeight, [
     VoidCallback? onTap,
-  ]) => GestureDetector(
-    onTap: onTap,
-    child: const DecoratedBox(
-      decoration: BoxDecoration(color: KitStyle.accent, shape: .circle),
+  ]) => SizedBox.square(
+    // Match the overlay's advertised size under loose constraints. Make the
+    // entire target hit-testable, including the space around the visual handle,
+    // so a near-edge grab stays inside the selection's TapRegion.
+    dimension: _touchTargetSize,
+    child: GestureDetector(
+      behavior: .opaque,
+      onTap: onTap,
+      child: Center(
+        child: SizedBox.square(
+          dimension: _handleSize,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: KitStyle.accent,
+              borderRadius: BorderRadius.only(
+                topLeft: type == .right
+                    ? .zero
+                    : const .circular(_handleSize / 2),
+                topRight: type == .left
+                    ? .zero
+                    : const .circular(_handleSize / 2),
+                bottomLeft: const .circular(_handleSize / 2),
+                bottomRight: const .circular(_handleSize / 2),
+              ),
+            ),
+          ),
+        ),
+      ),
     ),
   );
 }
