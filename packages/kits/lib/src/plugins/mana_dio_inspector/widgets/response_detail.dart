@@ -29,7 +29,7 @@ class _ResponseDetailState extends State<ResponseDetail> {
     return KitDetail(
       title: '${request.uri}',
       onClose: widget.onClose,
-      actions: [ResponseCopyMenu(response: response)],
+      trailing: ResponseCopyMenu(response: response),
       child: KitScaffold(
         header: KitTabs(
           values: const [0, 1, 2],

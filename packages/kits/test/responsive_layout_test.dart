@@ -182,11 +182,11 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
-    final copyMenu = find.byWidgetPredicate(
-      (widget) => widget is ManaButton && widget.tooltip == 'Copy',
+    final moreMenu = find.byWidgetPredicate(
+      (widget) => widget is ManaButton && widget.tooltip == 'More actions',
     );
-    await tester.ensureVisible(copyMenu);
-    await tester.tap(copyMenu);
+    await tester.ensureVisible(moreMenu);
+    await tester.tap(moreMenu);
     await tester.pumpAndSettle();
     await tester.ensureVisible(button('Copy HTTP'));
     await tester.pumpAndSettle();
