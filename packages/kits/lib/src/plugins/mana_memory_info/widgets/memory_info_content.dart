@@ -95,7 +95,7 @@ class _MemoryInfoContentState extends State<MemoryInfoContent> {
                   }),
                   KitField(
                     controller: _query,
-                    label: kitText(context, 'common.search'),
+                    hintText: kitText(context, 'common.search'),
                     onChanged: (_) => setState(() {}),
                   ),
                   KitToggle(
