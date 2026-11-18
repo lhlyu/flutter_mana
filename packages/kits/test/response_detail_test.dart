@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'support/host.dart';
 
 Finder get copyMenu => find.byWidgetPredicate(
-  (widget) => widget is ManaButton && widget.tooltip == 'Copy',
+  (widget) => widget is ManaButton && widget.tooltip == 'More actions',
 );
 
 Finder copyAction(String label) => find.byWidgetPredicate(
@@ -56,6 +56,32 @@ void main() {
     ),
     scale: scale,
   );
+
+  testWidgets('header gives the URL all space between the two icon buttons', (
+    tester,
+  ) async {
+    response.requestOptions.path =
+        'https://example.test/a/very/long/request/path/that/must/be/truncated';
+    await tester.pumpWidget(detail(width: 180));
+
+    final back = find.byWidgetPredicate(
+      (widget) => widget is KitButton && widget.icon == KitIcon.back,
+    );
+    final title = find.text(response.requestOptions.uri.toString()).first;
+    final backRect = tester.getRect(back);
+    final titleRect = tester.getRect(title);
+    final moreRect = tester.getRect(copyMenu);
+    expect(backRect.width, moreRect.width);
+    expect(titleRect.left, backRect.right);
+    expect(titleRect.right, moreRect.left);
+    expect(titleRect.width, greaterThan(moreRect.width));
+    expect(tester.widget<Text>(title).maxLines, 1);
+    expect(tester.widget<Text>(title).overflow, TextOverflow.ellipsis);
+    expect(
+      tester.widget<ManaButton>(copyMenu).child,
+      isA<KitGlyph>().having((glyph) => glyph.icon, 'icon', KitIcon.more),
+    );
+  });
 
   testWidgets('exports are grouped in the header instead of a footer', (
     tester,

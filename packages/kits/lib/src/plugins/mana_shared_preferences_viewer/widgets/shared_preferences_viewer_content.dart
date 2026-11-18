@@ -45,7 +45,7 @@ class _SharedPreferencesViewerContentState
       header: _filter
           ? KitField(
               controller: _query,
-              label: kitText(context, 'common.search'),
+              hintText: kitText(context, 'common.search'),
               onChanged: (_) => setState(() {}),
             )
           : null,
@@ -61,6 +61,7 @@ class _SharedPreferencesViewerContentState
             return KitMessage(kitText(context, 'common.empty'));
           }
           return ListView.separated(
+            padding: .zero,
             itemCount: items.length,
             itemBuilder: (context, i) => PreferenceTile(
               entry: items[i],

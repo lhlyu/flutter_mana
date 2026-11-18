@@ -98,6 +98,32 @@ void main() {
     controller.dispose();
   });
 
+  testWidgets('search hint is inside the input and only shown when empty', (
+    tester,
+  ) async {
+    final controller = TextEditingController();
+    await tester.pumpWidget(
+      testHost(KitField(controller: controller, hintText: 'Search')),
+    );
+    final hint = find.text('Search');
+    final input = find.byType(EditableText);
+    expect(hint, findsOneWidget);
+    expect(tester.getTopLeft(hint), tester.getTopLeft(input));
+
+    await tester.tap(hint);
+    await tester.pump();
+    expect(tester.widget<EditableText>(input).focusNode.hasFocus, isTrue);
+    await tester.enterText(input, 'query');
+    await tester.pump();
+    expect(hint, findsNothing);
+
+    controller.clear();
+    await tester.pump();
+    expect(hint, findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+    controller.dispose();
+  });
+
   testWidgets(
     'pending saves run once, retain the editor on failure and allow retry',
     (tester) async {

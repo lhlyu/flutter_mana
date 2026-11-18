@@ -94,13 +94,15 @@ class KitField extends StatefulWidget {
   const KitField({
     super.key,
     required this.controller,
-    required this.label,
+    this.label,
+    this.hintText,
     this.onChanged,
     this.maxLines = 1,
     this.readOnly = false,
   });
   final TextEditingController controller;
-  final String label;
+  final String? label;
+  final String? hintText;
   final ValueChanged<String>? onChanged;
   final int? maxLines;
   final bool readOnly;
@@ -117,46 +119,73 @@ class _KitFieldState extends State<KitField> {
   }
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const .all(8),
-    child: Column(
-      crossAxisAlignment: .stretch,
-      spacing: 4,
-      children: [
-        Text(
-          widget.label,
-          style: const TextStyle(fontSize: 12, color: KitStyle.muted),
-        ),
-        Container(
-          padding: const .all(10),
-          decoration: BoxDecoration(
-            color: KitStyle.subtle,
-            border: Border.all(color: KitStyle.border),
-            borderRadius: .circular(4),
-          ),
-          child: Semantics(
-            textField: true,
-            label: widget.label,
-            child: EditableText(
-              controller: widget.controller,
-              focusNode: _focus,
-              style: DefaultTextStyle.of(context).style
-                  .merge(ManaStyle.textStyle),
-              cursorColor: KitStyle.accent,
-              backgroundCursorColor: KitStyle.muted,
-              maxLines: widget.maxLines,
-              readOnly: widget.readOnly,
-              selectionColor: KitStyle.accent.withValues(alpha: .2),
-              selectionControls: kitSelectionControls,
-              contextMenuBuilder: (context, state) => KitSelectionMenu(
-                anchors: state.contextMenuAnchors,
-                items: state.contextMenuButtonItems,
-              ),
-              onChanged: widget.onChanged,
+  Widget build(BuildContext context) {
+    final style = DefaultTextStyle.of(context).style.merge(ManaStyle.textStyle);
+    final input = EditableText(
+      controller: widget.controller,
+      focusNode: _focus,
+      style: style,
+      cursorColor: KitStyle.accent,
+      backgroundCursorColor: KitStyle.muted,
+      maxLines: widget.maxLines,
+      readOnly: widget.readOnly,
+      selectionColor: KitStyle.accent.withValues(alpha: .2),
+      selectionControls: kitSelectionControls,
+      contextMenuBuilder: (context, state) => KitSelectionMenu(
+        anchors: state.contextMenuAnchors,
+        items: state.contextMenuButtonItems,
+      ),
+      onChanged: widget.onChanged,
+    );
+    final hintText = widget.hintText;
+    return Padding(
+      padding: const .all(8),
+      child: Column(
+        crossAxisAlignment: .stretch,
+        spacing: 4,
+        children: [
+          if (widget.label case final label?)
+            Text(
+              label,
+              style: const TextStyle(fontSize: 12, color: KitStyle.muted),
+            ),
+          Container(
+            padding: const .all(10),
+            decoration: BoxDecoration(
+              color: KitStyle.subtle,
+              border: Border.all(color: KitStyle.border),
+              borderRadius: .circular(4),
+            ),
+            child: Semantics(
+              textField: true,
+              label: widget.label ?? hintText,
+              child: hintText == null
+                  ? input
+                  : Stack(
+                      alignment: .topStart,
+                      children: [
+                        ValueListenableBuilder<TextEditingValue>(
+                          valueListenable: widget.controller,
+                          builder: (context, value, child) =>
+                              value.text.isEmpty ? child! : const SizedBox(),
+                          child: IgnorePointer(
+                            child: ExcludeSemantics(
+                              child: Text(
+                                hintText,
+                                style: style.copyWith(color: KitStyle.muted),
+                                maxLines: 1,
+                                overflow: .ellipsis,
+                              ),
+                            ),
+                          ),
+                        ),
+                        input,
+                      ],
+                    ),
             ),
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 }

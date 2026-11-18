@@ -29,6 +29,7 @@ class _ResponseCopyMenuState extends State<ResponseCopyMenu> {
 
   @override
   Widget build(BuildContext context) {
+    final moreActions = kitText(context, 'common.more_actions');
     final copy = kitText(context, 'common.copy');
     final request = widget.response.requestOptions;
     return RawMenuAnchor(
@@ -43,33 +44,14 @@ class _ResponseCopyMenuState extends State<ResponseCopyMenu> {
         });
       },
       builder: (context, controller, _) => Semantics(
-        label: copy,
+        label: moreActions,
         expanded: controller.isOpen,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final showLabel =
-                constraints.maxWidth >=
-                100 * (MediaQuery.textScalerOf(context).scale(13) / 13);
-            return ManaButton(
-              focusNode: _anchorFocus,
-              tooltip: copy,
-              constraints: const BoxConstraints(minHeight: 40),
-              padding: const .symmetric(horizontal: 4),
-              onPressed: () =>
-                  controller.isOpen ? controller.close() : controller.open(),
-              child: Row(
-                mainAxisSize: .min,
-                spacing: 6,
-                children: [
-                  const KitGlyph(.copy, size: 16),
-                  if (showLabel) ...[
-                    Text(copy, style: const TextStyle(fontSize: 13)),
-                    const KitGlyph(.chevronDown, size: 12),
-                  ],
-                ],
-              ),
-            );
-          },
+        child: ManaButton(
+          focusNode: _anchorFocus,
+          tooltip: moreActions,
+          onPressed: () =>
+              controller.isOpen ? controller.close() : controller.open(),
+          child: const KitGlyph(.more),
         ),
       ),
       overlayBuilder: (context, info) => CustomSingleChildLayout(
@@ -84,7 +66,7 @@ class _ResponseCopyMenuState extends State<ResponseCopyMenu> {
             scopesRoute: true,
             namesRoute: true,
             explicitChildNodes: true,
-            label: copy,
+            label: moreActions,
             role: .menu,
             child: Shortcuts(
               shortcuts: const {
