@@ -34,7 +34,7 @@ class _InfoPageState extends State<InfoPage> {
       return KitDetail(
         title: entry.name,
         onClose: () => setState(() => _selected = null),
-        actions: [KitCopyButton(entry.text)],
+        trailing: KitCopyButton(entry.text),
         child: SingleChildScrollView(child: KitCode(entry.text)),
       );
     }

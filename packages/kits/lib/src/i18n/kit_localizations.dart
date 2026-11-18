@@ -16,6 +16,7 @@ const _strings = {
   'common.retry': (en: 'Retry', zh: '重试'),
   'common.refresh': (en: 'Refresh', zh: '刷新'),
   'common.copy': (en: 'Copy', zh: '复制'),
+  'common.more_actions': (en: 'More actions', zh: '更多操作'),
   'common.back': (en: 'Back', zh: '返回'),
   'common.clear': (en: 'Clear', zh: '清空'),
   'common.confirm_clear': (en: 'Clear all preferences', zh: '清空全部偏好'),
