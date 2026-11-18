@@ -80,7 +80,7 @@ class _LicenseState extends State<License> {
         return KitScaffold(
           header: KitField(
             controller: _query,
-            label: kitText(context, 'common.search'),
+            hintText: kitText(context, 'common.search'),
             onChanged: (_) => setState(() {}),
           ),
           body: keys.isEmpty

@@ -48,7 +48,7 @@ class _InfoPageState extends State<InfoPage> {
       child: KitScaffold(
         header: KitField(
           controller: _search,
-          label: kitText(context, 'common.search'),
+          hintText: kitText(context, 'common.search'),
           onChanged: (_) => setState(() {}),
         ),
         body: entries.isEmpty

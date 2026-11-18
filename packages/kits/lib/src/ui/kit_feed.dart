@@ -104,7 +104,7 @@ class _KitFeedState<T> extends State<KitFeed<T>> {
           if (_filter)
             KitField(
               controller: _query,
-              label: kitText(context, 'common.search'),
+              hintText: kitText(context, 'common.search'),
               onChanged: (_) => setState(() {}),
             ),
           const KitDivider(),
