@@ -23,6 +23,22 @@ Finder button(String label) => find.byWidgetPredicate(
   (widget) => widget is KitButton && widget.label == label,
 );
 
+class _NamedPreferences extends PreferencesRepository {
+  _NamedPreferences(this.name);
+  final String name;
+  final saved = <PreferenceEntry>[];
+
+  @override
+  Future<List<PreferenceEntry>> load() async => [
+    PreferenceEntry(name, 'value', .string),
+  ];
+
+  @override
+  Future<void> save(PreferenceEntry? previous, PreferenceEntry next) async {
+    saved.add(next);
+  }
+}
+
 class _PendingPreferences extends PreferencesRepository {
   final saved = Completer<void>();
   @override
@@ -35,6 +51,34 @@ class _PendingPreferences extends PreferencesRepository {
 }
 
 void main() {
+  testWidgets(
+    'replacing preferences repository reloads data and cancels the old editor',
+    (tester) async {
+      final first = _NamedPreferences('first repository');
+      final second = _NamedPreferences('second repository');
+      Widget host(PreferencesRepository repository) =>
+          testHost(SharedPreferencesViewerContent(repository: repository));
+      await tester.pumpWidget(host(first));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(first.name));
+      await tester.pumpAndSettle();
+      expect(find.byType(PreferenceEditor), findsOneWidget);
+
+      await tester.pumpWidget(host(second));
+      await tester.pumpAndSettle();
+      expect(find.byType(PreferenceEditor), findsNothing);
+      expect(find.text(second.name), findsOneWidget);
+      expect(find.text(first.name), findsNothing);
+      await tester.tap(find.text(second.name));
+      await tester.pumpAndSettle();
+      await tester.tap(button('Save'));
+      await tester.pumpAndSettle();
+      expect(first.saved, isEmpty);
+      expect(second.saved.single.key, second.name);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets(
     'returning from request details preserves search and method filters',
     (tester) async {

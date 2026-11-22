@@ -32,7 +32,7 @@ class _ShowCodeContentState extends State<ShowCodeContent> {
 
   @override
   Widget build(BuildContext context) => KitAsync<PageSource?>(
-    key: ValueKey((_service, widget.root)),
+    loadKey: (_service, widget.root),
     load: () => _service.currentPage(widget.root),
     builder: (context, page) {
       if (page == null) {

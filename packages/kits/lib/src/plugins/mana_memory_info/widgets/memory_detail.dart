@@ -19,6 +19,7 @@ class MemoryDetail extends StatelessWidget {
     title: detail.classRef?.name ?? '',
     onClose: onClose,
     child: KitAsync<Class?>(
+      loadKey: (service, detail.classRef?.id),
       load: () => service.classDetails(detail.classRef?.id ?? ''),
       builder: (context, info) {
         if (info == null) {
