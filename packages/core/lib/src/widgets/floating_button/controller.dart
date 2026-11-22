@@ -10,6 +10,7 @@ class FloatingButtonController {
     : runtime = ManaScope.read(context),
       _windowSize = MediaQuery.sizeOf(context) {
     _lastButtonSize = _buttonSize;
+    _lastPosition = runtime.state.settings.buttonPosition;
     runtime.addListener(_settingsChanged);
     offset.value =
         runtime.state.settings.buttonPosition ??
@@ -23,6 +24,7 @@ class FloatingButtonController {
   final ManaController runtime;
   Size _windowSize;
   late double _lastButtonSize;
+  Offset? _lastPosition;
   final offset = ValueNotifier(Offset.zero);
   double get _buttonSize => runtime.state.settings.buttonSize;
 
@@ -32,8 +34,12 @@ class FloatingButtonController {
   }
 
   void _settingsChanged() {
-    if (_buttonSize == _lastButtonSize) return;
+    final position = runtime.state.settings.buttonPosition;
+    final moved = position != _lastPosition;
+    if (_buttonSize == _lastButtonSize && !moved) return;
     _lastButtonSize = _buttonSize;
+    _lastPosition = position;
+    if (moved && position != null) offset.value = position;
     _clampAndUpdate();
   }
 

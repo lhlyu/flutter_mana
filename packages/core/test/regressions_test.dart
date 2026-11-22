@@ -97,7 +97,7 @@ void main() {
       await mount(tester);
       await runtime.activatePlugin(plugin.name);
       await tester.pumpAndSettle();
-      await tester.tap(control('最小化'));
+      await tester.tap(control('Minimize'));
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('barrier')), findsOneWidget);
       expect(runtime.handleBack(), isTrue);
@@ -116,7 +116,7 @@ void main() {
     await runtime.activatePlugin(plugin.name);
     runtime.openPluginPanel();
     await tester.pumpAndSettle();
-    await tester.tap(control('关闭').last);
+    await tester.tap(control('Close').last);
     await tester.pumpAndSettle();
     expect(runtime.state.pluginPanelVisible, isFalse);
     expect(runtime.state.activePluginId, plugin.name);
@@ -131,7 +131,7 @@ void main() {
     await mount(tester);
     runtime.openPluginPanel();
     await tester.pumpAndSettle();
-    await tester.tap(control('设置'));
+    await tester.tap(control('Settings'));
     await tester.pumpAndSettle();
     expect(find.text('Float Button Size'), findsOneWidget);
     tester.platformDispatcher.localesTestValue = [const Locale('zh')];
@@ -348,7 +348,7 @@ void main() {
       );
       await runtime.activatePlugin(plugin.name);
       await tester.pumpAndSettle();
-      await tester.tap(control('最小化'));
+      await tester.tap(control('Minimize'));
       await tester.pumpAndSettle();
       await tester.tapAt(const Offset(400, 300));
       expect(hostTaps, 1);

@@ -98,7 +98,7 @@ activatePlugin(id)
 业务 Logger → ManaLogCollector ┘
 ```
 
-业务和工具必须使用**同一采集器实例**。采集器基于 [BoundedCollector](../packages/kits/lib/src/data/bounded_collector.dart)，默认保留 1000 条记录，超出容量淘汰最早数据；数据未变化时复用只读列表快照。隐藏工具时继续采集，列表恢复显示时读取最新数据；网络详情返回列表时保留筛选和滚动位置。
+业务和工具共享采集器实例。[BoundedCollector](../packages/kits/lib/src/data/bounded_collector.dart) 按条数和内容预算保留快照，超限截断或淘汰旧记录。隐藏工具时继续采集，恢复显示时读取最新数据；从网络详情返回时保留筛选和滚动位置。
 
 设备、包、偏好等工具直接访问对应平台服务；内存和源码通过 VM Service 读取当前应用。共享实例的组装与清理可参考 [DemoSession](../packages/example/lib/demo_session.dart)。
 

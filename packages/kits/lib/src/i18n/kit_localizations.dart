@@ -9,6 +9,7 @@ String kitText(BuildContext context, String key) {
 }
 
 const _strings = {
+  'common.truncated': (en: 'Content truncated.', zh: '内容已截断。'),
   'common.all': (en: 'All', zh: '全部'),
   'common.empty': (en: 'No items', zh: '暂无数据'),
   'common.loading': (en: 'Loading…', zh: '加载中…'),

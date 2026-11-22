@@ -56,6 +56,8 @@ class ResponseTile extends StatelessWidget {
           if (response.extra[ManaDioCollector.errorKey] case final error?)
             Text(
               '$error',
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(color: KitStyle.danger, fontSize: 12),
             ),
         ],

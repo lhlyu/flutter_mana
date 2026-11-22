@@ -9,46 +9,19 @@ import 'window_controls.dart';
 
 @immutable
 class FloatingWindow extends StatefulWidget {
-  /// 名称
   final String name;
-
-  /// 内容区域
   final Widget? content;
-
-  /// 遮罩层
   final Widget? barrier;
-
-  /// 设置页组件
   final Widget? setting;
-
-  /// 初始宽度
   final double? initialWidth;
-
-  /// 初始高度
   final double? initialHeight;
-
-  /// 初始位置类型
   final PositionType position;
-
-  /// 自定义初始坐标
   final Offset? initialPosition;
-
-  /// 是否展示控制栏
   final bool showControls;
-
-  /// 是否显示遮罩
   final bool showBarrier;
-
-  /// 主体隐藏时是否保留主体的子树，默认是true - 保留
   final bool maintainContent;
-
-  /// 是否允许拖拽
   final bool drag;
-
-  /// 关闭回调
   final VoidCallback? onClose;
-
-  /// 最小化回调
   final VoidCallback? onMinimize;
 
   const FloatingWindow({
@@ -111,42 +84,48 @@ class _FloatingWindowState extends State<FloatingWindow> {
             : .circular(8),
         boxShadow: const [BoxShadow(color: ManaStyle.shadow, blurRadius: 16)],
       ),
-      child: SafeArea(
-        left: fullscreen,
-        top: fullscreen || widget.initialHeight == double.infinity,
-        right: fullscreen,
-        bottom: fullscreen || widget.position == .bottom,
-        child: LayoutBuilder(
-          builder: (context, constraints) => Column(
-            children: [
-              if (widget.showControls)
-                SizedBox(
-                  height: constraints.maxHeight.clamp(0, 40),
-                  child: WindowControls(
-                    drag: widget.drag,
-                    isFullscreen: fullscreen,
-                    showSettingButton: widget.setting != null,
-                    onPanUpdate: controller.onPanUpdate,
-                    onToggleSetting: controller.onToggleSetting,
-                    onFullscreen: controller.onFullscreen,
-                    onMinimize: () => controller.onMinimize(widget.onMinimize),
-                    onClose: () => controller.onClose(widget.onClose),
+      child: MediaQuery.removePadding(
+        context: context,
+        removeLeft: true,
+        removeTop: true,
+        removeRight: true,
+        removeBottom: true,
+        child: Padding(
+          padding: fullscreen ? controller.safePadding : EdgeInsets.zero,
+          child: LayoutBuilder(
+            builder: (context, constraints) => Column(
+              children: [
+                if (widget.showControls)
+                  SizedBox(
+                    height: constraints.maxHeight.clamp(0, 40),
+                    child: WindowControls(
+                      drag: widget.drag,
+                      isFullscreen: fullscreen,
+                      showSettingButton: widget.setting != null,
+                      onPanUpdate: controller.onPanUpdate,
+                      onToggleSetting: controller.onToggleSetting,
+                      onFullscreen: controller.onFullscreen,
+                      onMinimize: () =>
+                          controller.onMinimize(widget.onMinimize),
+                      onClose: () => controller.onClose(widget.onClose),
+                    ),
+                  ),
+                Expanded(
+                  child: Stack(
+                    fit: .expand,
+                    children: [
+                      widget.content ?? const SizedBox.shrink(),
+                      if (controller.showSetting.value &&
+                          widget.setting != null)
+                        ColoredBox(
+                          color: ManaStyle.surface,
+                          child: widget.setting!,
+                        ),
+                    ],
                   ),
                 ),
-              Expanded(
-                child: Stack(
-                  fit: .expand,
-                  children: [
-                    widget.content ?? const SizedBox.shrink(),
-                    if (controller.showSetting.value && widget.setting != null)
-                      ColoredBox(
-                        color: ManaStyle.surface,
-                        child: widget.setting!,
-                      ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -89,7 +89,6 @@ class KitToggle extends StatelessWidget {
   );
 }
 
-/// Raw editable input with a Widgets-only selection toolbar.
 class KitField extends StatefulWidget {
   const KitField({
     super.key,
@@ -149,39 +148,44 @@ class _KitFieldState extends State<KitField> {
               label,
               style: const TextStyle(fontSize: 12, color: KitStyle.muted),
             ),
-          Container(
-            padding: const .all(10),
-            decoration: BoxDecoration(
-              color: KitStyle.subtle,
-              border: Border.all(color: KitStyle.border),
-              borderRadius: .circular(4),
-            ),
-            child: Semantics(
-              textField: true,
-              label: widget.label ?? hintText,
-              child: hintText == null
-                  ? input
-                  : Stack(
-                      alignment: .topStart,
-                      children: [
-                        ValueListenableBuilder<TextEditingValue>(
-                          valueListenable: widget.controller,
-                          builder: (context, value, child) =>
-                              value.text.isEmpty ? child! : const SizedBox(),
-                          child: IgnorePointer(
-                            child: ExcludeSemantics(
-                              child: Text(
-                                hintText,
-                                style: style.copyWith(color: KitStyle.muted),
-                                maxLines: 1,
-                                overflow: .ellipsis,
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            excludeFromSemantics: true,
+            onTap: _focus.requestFocus,
+            child: Container(
+              padding: const .all(10),
+              decoration: BoxDecoration(
+                color: KitStyle.subtle,
+                border: Border.all(color: KitStyle.border),
+                borderRadius: .circular(4),
+              ),
+              child: Semantics(
+                textField: true,
+                label: widget.label ?? hintText,
+                child: hintText == null
+                    ? input
+                    : Stack(
+                        alignment: .topStart,
+                        children: [
+                          ValueListenableBuilder<TextEditingValue>(
+                            valueListenable: widget.controller,
+                            builder: (context, value, child) =>
+                                value.text.isEmpty ? child! : const SizedBox(),
+                            child: IgnorePointer(
+                              child: ExcludeSemantics(
+                                child: Text(
+                                  hintText,
+                                  style: style.copyWith(color: KitStyle.muted),
+                                  maxLines: 1,
+                                  overflow: .ellipsis,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        input,
-                      ],
-                    ),
+                          input,
+                        ],
+                      ),
+              ),
             ),
           ),
         ],

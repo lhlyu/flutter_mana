@@ -95,7 +95,7 @@ void main() {
       Finder control(String label) => find.byWidgetPredicate(
         (widget) => widget is ManaButton && widget.tooltip == label,
       );
-      await tester.tap(control('设置'));
+      await tester.tap(control('Settings'));
       await tester.pumpAndSettle();
       expect(find.byType(ManaSlider), findsNWidgets(2));
       final slider = find.byType(ManaSlider).first;
@@ -103,7 +103,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(runtime.preferences.read('mana_floating_button_size'), 100);
 
-      await tester.tap(control('设置'));
+      await tester.tap(control('Settings'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Test plugin'));
       await tester.pumpAndSettle();
@@ -197,7 +197,7 @@ void main() {
         ),
       );
       final fullscreen = find.byWidgetPredicate(
-        (widget) => widget is ManaButton && widget.tooltip == '全屏',
+        (widget) => widget is ManaButton && widget.tooltip == 'Fullscreen',
       );
       final detector = tester.widget<FocusableActionDetector>(
         find.descendant(
@@ -261,14 +261,14 @@ void main() {
     await tester.tap(find.byType(FloatingButton));
     await tester.pumpAndSettle();
     final settings = find.byWidgetPredicate(
-      (widget) => widget is ManaButton && widget.tooltip == '设置',
+      (widget) => widget is ManaButton && widget.tooltip == 'Settings',
     );
     final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await mouse.addPointer(location: Offset.zero);
     await mouse.moveTo(tester.getCenter(settings));
     await tester.pump(const Duration(milliseconds: 600));
     await tester.pumpAndSettle();
-    expect(find.text('设置'), findsOneWidget);
+    expect(find.text('Settings'), findsOneWidget);
     await mouse.removePointer();
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);

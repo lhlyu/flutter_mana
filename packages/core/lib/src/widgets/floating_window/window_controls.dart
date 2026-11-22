@@ -4,32 +4,18 @@ import 'package:flutter/widgets.dart';
 
 import '../mana_button.dart';
 import '../mana_icon.dart';
+import '../mana_i18n.dart';
 import '../mana_style.dart';
 
 @immutable
 class WindowControls extends StatefulWidget {
-  /// 是否启用拖动把手
   final bool drag;
-
-  /// 当前是否处于全屏状态
   final bool isFullscreen;
-
-  /// 是否显示设置按钮
   final bool showSettingButton;
-
-  /// 拖动中位移回调
   final GestureDragUpdateCallback onPanUpdate;
-
-  /// 设置按钮点击回调
   final VoidCallback onToggleSetting;
-
-  /// 全屏 / 退出全屏 回调
   final VoidCallback onFullscreen;
-
-  /// 最小化回调
   final VoidCallback onMinimize;
-
-  /// 关闭窗口回调
   final VoidCallback onClose;
 
   const WindowControls({
@@ -48,7 +34,7 @@ class WindowControls extends StatefulWidget {
   State<WindowControls> createState() => _WindowControlsState();
 }
 
-class _WindowControlsState extends State<WindowControls> {
+class _WindowControlsState extends State<WindowControls> with ManaI18n {
   bool _isHandlePressed = false;
 
   Widget _buildIconButton({
@@ -85,7 +71,6 @@ class _WindowControlsState extends State<WindowControls> {
       builder: (context, constraints) {
         final showHandle =
             widget.drag && !widget.isFullscreen && constraints.maxWidth >= 184;
-        // 极窄窗口允许横向滚动控制栏，而不是让按钮溢出。
         return SingleChildScrollView(
           scrollDirection: .horizontal,
           child: SizedBox(
@@ -94,12 +79,20 @@ class _WindowControlsState extends State<WindowControls> {
               children: [
                 _buildIconButton(
                   icon: widget.isFullscreen ? .exitFullscreen : .fullscreen,
-                  tooltip: widget.isFullscreen ? '退出全屏' : '全屏',
+                  tooltip: t(
+                    widget.isFullscreen
+                        ? 'window_exit_fullscreen'
+                        : 'window_fullscreen',
+                    locale: Localizations.localeOf(context),
+                  ),
                   onPressed: widget.onFullscreen,
                 ),
                 _buildIconButton(
                   icon: .minimize,
-                  tooltip: '最小化',
+                  tooltip: t(
+                    'window_minimize',
+                    locale: Localizations.localeOf(context),
+                  ),
                   onPressed: widget.onMinimize,
                 ),
                 Expanded(
@@ -112,13 +105,19 @@ class _WindowControlsState extends State<WindowControls> {
                   maintainState: true,
                   child: _buildIconButton(
                     icon: .settings,
-                    tooltip: '设置',
+                    tooltip: t(
+                      'window_settings',
+                      locale: Localizations.localeOf(context),
+                    ),
                     onPressed: widget.onToggleSetting,
                   ),
                 ),
                 _buildIconButton(
                   icon: .close,
-                  tooltip: '关闭',
+                  tooltip: t(
+                    'window_close',
+                    locale: Localizations.localeOf(context),
+                  ),
                   onPressed: widget.onClose,
                 ),
               ],
@@ -130,7 +129,6 @@ class _WindowControlsState extends State<WindowControls> {
   );
 }
 
-/// 拖动把手视觉
 class _DragHandle extends StatelessWidget {
   final bool isPressed;
 

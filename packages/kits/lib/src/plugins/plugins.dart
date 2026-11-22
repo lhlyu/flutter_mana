@@ -8,7 +8,8 @@ export 'mana_fps_monitor/index.dart' show ManaFpsMonitor;
 export 'mana_grid/index.dart' show ManaGrid;
 export 'mana_license/index.dart' show ManaLicense;
 export 'mana_log_viewer/index.dart' show ManaLogViewer;
-export 'mana_log_viewer/mana_log_collector.dart' show ManaLogCollector;
+export 'mana_log_viewer/mana_log_collector.dart'
+    show ManaLogCollector, CapturedLogEvent;
 export 'mana_memory_info/index.dart' show ManaMemoryInfo;
 export 'mana_package_info/index.dart' show ManaPackageInfo;
 export 'mana_screen_info/index.dart' show ManaScreenInfo;

@@ -151,7 +151,8 @@ void main() {
       collector.onError(error, handler);
       expect(handler.received, same(error));
       final record = collector.data.single;
-      expect(record.requestOptions, same(request));
+      expect(record.requestOptions, isNot(same(request)));
+      expect(record.requestOptions.uri, request.uri);
       expect(record.statusCode, isNull);
       expect(record.extra[ManaDioCollector.errorKey], 'timeout');
       expect(request.extra[ManaDioCollector.startTimeKey], isA<DateTime>());
