@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
@@ -7,7 +8,6 @@ import '../../runtime/mana_plugin_manager.dart';
 import '../../runtime/mana_scope.dart';
 import 'enum.dart';
 
-/// Window-local geometry only. Runtime session transitions belong to ManaController.
 class FloatingWindowController {
   FloatingWindowController(
     BuildContext context, {
@@ -18,7 +18,7 @@ class FloatingWindowController {
     this.initialHeight,
     bool hasBarrier = false,
   }) : runtime = ManaScope.read(context) {
-    _resize(MediaQuery.sizeOf(context));
+    _resize(context);
     final x =
         initialPosition?.dx ?? (_screenSize.width - _windowSize.width) / 2;
     final y = switch (position) {
@@ -43,6 +43,8 @@ class FloatingWindowController {
   late final VoidCallback _unregister;
   Size _screenSize = .zero;
   Size _windowSize = .zero;
+  EdgeInsets _safePadding = .zero;
+  EdgeInsets get safePadding => _safePadding;
   bool _closing = false;
 
   Size get screenSize => _screenSize;
@@ -65,14 +67,40 @@ class FloatingWindowController {
   }
 
   void update(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
-    if (size == _screenSize) return;
-    _resize(size);
+    _resize(context);
     offset.value = _clamp(offset.value);
   }
 
-  void _resize(Size size) {
+  void _resize(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final size = media.size;
+    var padding = media.padding;
+    final root = runtime.rootKey.currentContext?.findRenderObject();
+    if (root is RenderBox && root.attached && root.hasSize) {
+      final origin = root.localToGlobal(Offset.zero);
+      final view = View.of(context);
+      final viewport = view.physicalSize / view.devicePixelRatio;
+      padding = EdgeInsets.fromLTRB(
+        math.max(0, padding.left - origin.dx),
+        math.max(0, padding.top - origin.dy),
+        math.max(0, padding.right - (viewport.width - origin.dx - size.width)),
+        math.max(
+          0,
+          padding.bottom - (viewport.height - origin.dy - size.height),
+        ),
+      );
+    }
     _screenSize = size;
+    _safePadding = EdgeInsets.fromLTRB(
+      padding.left.clamp(0, size.width),
+      padding.top.clamp(0, size.height),
+      padding.right.clamp(0, math.max(0, size.width - padding.left)),
+      padding.bottom.clamp(0, math.max(0, size.height - padding.top)),
+    );
+    final available = Size(
+      math.max(0, size.width - _safePadding.horizontal),
+      math.max(0, size.height - _safePadding.vertical),
+    );
     final width = initialWidth ?? (size.width * 0.6).clamp(300, 600);
     final height = switch (initialHeight) {
       null => size.height * 0.6,
@@ -80,14 +108,26 @@ class FloatingWindowController {
       final value => value,
     };
     _windowSize = Size(
-      width.clamp(0, size.width),
-      height.clamp(0, size.height),
+      width.clamp(0, available.width),
+      height.clamp(0, available.height),
     );
   }
 
   Offset _clamp(Offset value) => Offset(
-    value.dx.clamp(0, _screenSize.width - _windowSize.width),
-    value.dy.clamp(0, _screenSize.height - _windowSize.height),
+    value.dx.clamp(
+      _safePadding.left,
+      math.max(
+        _safePadding.left,
+        _screenSize.width - _safePadding.right - _windowSize.width,
+      ),
+    ),
+    value.dy.clamp(
+      _safePadding.top,
+      math.max(
+        _safePadding.top,
+        _screenSize.height - _safePadding.bottom - _windowSize.height,
+      ),
+    ),
   );
 
   void onPanUpdate(DragUpdateDetails details) =>

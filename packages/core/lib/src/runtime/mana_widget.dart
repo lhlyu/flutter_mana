@@ -9,7 +9,7 @@ import 'mana_controller.dart';
 import 'mana_pluggable.dart';
 import 'mana_scope.dart';
 
-/// Default: standalone wrapper. .builder: reuse the host app's environment.
+/// Standalone host; use .builder inside an existing app.
 class ManaWidget extends StatefulWidget {
   final Widget child;
   final ManaController? controller;
@@ -29,8 +29,7 @@ class ManaWidget extends StatefulWidget {
   }) : _embedded = false,
        backButtonDispatcher = null;
 
-  /// Use in WidgetsApp/MaterialApp/CupertinoApp.builder. Router hosts should pass
-  /// their BackButtonDispatcher so debug UI gets first refusal of system back.
+  /// Router hosts must pass their BackButtonDispatcher.
   const ManaWidget.builder({
     super.key,
     required this.child,
@@ -76,7 +75,7 @@ class _ManaWidgetState extends State<ManaWidget> with WidgetsBindingObserver {
   }
 
   void _start() {
-    // The controller reports failures and exposes initializationError for retry UI.
+    // initialize() reports errors through the controller.
     unawaited(_controller.initialize().catchError((Object _) {}));
   }
 

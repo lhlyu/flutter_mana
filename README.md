@@ -45,6 +45,17 @@ flutter pub add flutter_mana_kits
 | [重新截图](docs/screenshots.md) | 原生截图流程、采集脚本与文件命名约定。 |
 | [项目缘起与参考](docs/references.md) | 项目背景、参考项目及文章。 |
 
+## 开发与验证
+
+在仓库根目录运行：
+
+```bash
+dart scripts/check.dart        # 格式、静态分析、发布脚本与三个包的全部测试
+dart scripts/check.dart --web  # 同时验证示例应用的 Web Release 构建
+```
+
+脚本会从各包目录运行测试，确保示例的 shader 等资源正确加载。主分支、发布分支和 Pull Request 使用相同入口执行 CI 检查。
+
 ## 预览图
 
 当前 example 的原生 Debug 截图（2026-11-15 更新），已同步紧凑分段标签栏与最新工具界面。

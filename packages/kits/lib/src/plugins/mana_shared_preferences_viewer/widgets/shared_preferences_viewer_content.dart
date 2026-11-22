@@ -16,13 +16,26 @@ class SharedPreferencesViewerContent extends StatefulWidget {
 
 class _SharedPreferencesViewerContentState
     extends State<SharedPreferencesViewerContent> {
-  late final _repository = widget.repository ?? PreferencesRepository();
+  late PreferencesRepository _repository =
+      widget.repository ?? PreferencesRepository();
   final _query = TextEditingController();
   int _revision = 0;
   bool _filter = false;
   bool _editing = false;
   bool _confirmClear = false;
   PreferenceEntry? _selected;
+
+  @override
+  void didUpdateWidget(SharedPreferencesViewerContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.repository == widget.repository) return;
+    _repository = widget.repository ?? PreferencesRepository();
+    _selected = null;
+    _editing = false;
+    _confirmClear = false;
+    _revision++;
+  }
+
   @override
   void dispose() {
     _query.dispose();
@@ -45,7 +58,7 @@ class _SharedPreferencesViewerContentState
       header: _filter
           ? KitField(
               controller: _query,
-              label: kitText(context, 'common.search'),
+              hintText: kitText(context, 'common.search'),
               onChanged: (_) => setState(() {}),
             )
           : null,
@@ -61,6 +74,7 @@ class _SharedPreferencesViewerContentState
             return KitMessage(kitText(context, 'common.empty'));
           }
           return ListView.separated(
+            padding: .zero,
             itemCount: items.length,
             itemBuilder: (context, i) => PreferenceTile(
               entry: items[i],

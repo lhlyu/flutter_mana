@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 
 import 'mana_style.dart';
 
-/// Small font-independent symbols used only by the debug UI.
 enum ManaSymbol {
   fullscreen,
   exitFullscreen,

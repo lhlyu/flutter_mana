@@ -174,21 +174,24 @@ final controller = ManaController(
 | API | 说明 |
 | --- | --- |
 | `loadAllPlugins({ManaDioCollector? dioCollector, ManaLogCollector? logCollector, bool captureDebugPrint = false})` | 每次返回新建的 16 个插件；传入与业务共享的采集器，不会自动接管业务 Dio / Logger。 |
-| `ManaDioCollector({int capacity = 1000})` | Dio 拦截器，挂到 `dio.interceptors`，同时传给 `ManaDioInspector(collector: ...)`。 |
+| `ManaDioCollector({capacity = 1000, maxBytes = 8388608, maxEntryBytes = 262144})` | Dio 与网络工具共享的采集器。 |
 | `ManaDioCollector.addResponse(response)` | 手动添加响应并记录结束时间。 |
-| `ManaLogCollector({int capacity = 1000})` | Logger 的 `output`，同时传给 `ManaLogViewer(collector: ...)`。 |
+| `ManaLogCollector({capacity = 1000, maxBytes = 4194304, maxEntryBytes = 65536})` | Logger 与日志工具共享的采集器。 |
 | `ManaLogCollector.captureDebugPrint()` → `VoidCallback` | 开始采集 `debugPrint`，返回可重复调用的解除采集回调。 |
 
 两种采集器共有：
 
 | 成员 | 说明 |
 | --- | --- |
-| `data` | 按时间顺序排列的只读数据列表。 |
-| `capacity` / `isDisposed` | 最大容量（至少 1）/ 是否已释放。 |
-| `add(value)` | 添加一条数据，满容量时丢弃最早记录。 |
+| `data` | 按时间排列的只读快照列表。 |
+| `capacity` / `isDisposed` | 最大条数（至少 1）/ 是否已释放。 |
+| `maxBytes` / `maxEntryBytes` / `retainedBytes` | 总预算 / 单条预算 / 已保留内容估算字节数；预算至少 256。 |
+| `add(value)` | 保存快照；单条超限截断，总量超限淘汰旧记录。 |
 | `clear()` | 清空记录。 |
 | `addListener(...)` / `removeListener(...)` | 监听数据变化。 |
 | `dispose()` | 释放并清空；后续生产者回调会被忽略。日志采集器还会解除其 `debugPrint` 采集。 |
+
+预算为保留内容估算值，非堆内存测量。网络截断标记为 `extra[ManaDioCollector.truncatedKey]`，日志为 `CapturedLogEvent.truncated`；复制仅含保留部分。请求不完整或使用自定义编码器时禁止导出。导出采用 Dio 默认转换规则，不支持流、二进制及带文件的 multipart；无文件 multipart 仅支持 cURL。
 
 外部传入的采集器由调用方释放，先关闭插件 / controller，再释放共享采集器。插件自行创建的采集器由插件释放。
 

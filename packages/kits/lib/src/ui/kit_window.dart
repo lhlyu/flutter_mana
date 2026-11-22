@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_mana/flutter_mana.dart';
 
-/// Shared keyboard avoidance and horizontal panning for exceptionally narrow hosts.
 class KitWindow extends StatelessWidget {
   const KitWindow({
     super.key,
@@ -72,8 +71,6 @@ class _CompactViewport extends StatelessWidget {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
-      // Real window height is passed through to responsive list/detail layouts.
-      // At widths below 160, preserve usable controls via horizontal scrolling.
       return SingleChildScrollView(
         scrollDirection: .horizontal,
         child: SizedBox(

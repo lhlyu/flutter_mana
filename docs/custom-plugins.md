@@ -4,7 +4,7 @@
 
 ## 最小可运行示例
 
-安装 `flutter_mana`，实现 `ManaPluggable` 并注册到宿主。不设置图标时使用 Mana 默认图标。
+实现 `ManaPluggable` 并注册到宿主：
 
 ```dart
 import 'package:flutter/widgets.dart';
@@ -37,7 +37,7 @@ void main() => runApp(ManaWidget(
 
 ### 图片资源
 
-覆盖 `iconImageProvider`，返回 `AssetImage`、`NetworkImage` 或 `MemoryImage`，无需转为 base64：
+覆盖 `iconImageProvider`：
 
 ```dart
 @override
@@ -63,7 +63,7 @@ Widget buildIcon(BuildContext context, {double size = 40}) =>
     SvgPicture.asset('assets/my_plugin.svg', width: size, height: size);
 ```
 
-图标用于面板和悬浮入口，应遵循宿主传入的 `size`。也可返回 `CustomPaint` 等自绘 Widget；第三方插件不受内置图标风格限制。
+图标应遵循传入的 `size`，也可返回自绘 Widget。
 
 ## 展示方式与平台限制
 
@@ -79,14 +79,7 @@ Widget buildIcon(BuildContext context, {double size = 40}) =>
 
 ## 生命周期与动态注册
 
-| 方法 | 职责 |
-| --- | --- |
-| `initialize()` | 初始化非 UI 资源，成功后不会在每次打开时重复执行。 |
-| `onTrigger()` | 启动本次激活所需的工作。 |
-| `deactivate()` | 停止当前会话的工作，例如切换或关闭工具时停止订阅。 |
-| `dispose()` | 最终释放插件拥有的资源。 |
-
-生命周期方法支持同步或异步实现。不要在 `buildWidget` 中创建长期订阅；外部共享资源由宿主释放。
+生命周期见 [ManaPluggable](../packages/core/lib/src/runtime/mana_pluggable.dart)。关闭会话调用 `deactivate()`，最终释放调用 `dispose()`；外部共享资源由宿主释放。
 
 动态管理插件：
 
@@ -97,8 +90,6 @@ await controller.closePlugin();
 await controller.unregisterPlugin('my_tool');
 ```
 
-完整协议见 [ManaPluggable](../packages/core/lib/src/runtime/mana_pluggable.dart)。
-
 ## 为仓库新增内置 kit
 
 在仓库根目录运行：
@@ -107,6 +98,6 @@ await controller.unregisterPlugin('my_tool');
 dart run scripts/plugin.dart http_inspector 网络检查器
 ```
 
-脚本生成工具、内容、说明及导出，不覆盖已有目录，也不自动加入 `loadAllPlugins()`。图标、文案和布局约定见 [Kits 说明](../packages/kits/README.md)，实现可参考 [Demo](../packages/kits/lib/src/plugins/demo/index.dart)。
+脚本生成工具与导出，不覆盖已有目录，需手动加入 `loadAllPlugins()`。约定见 [Kits 说明](../packages/kits/README.md)，参考 [Demo](../packages/kits/lib/src/plugins/demo/index.dart)。
 
 `BuiltinKit` / `KitWindow` 是仓库内部实现；第三方插件只需依赖公开的 `ManaPluggable`。

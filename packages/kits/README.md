@@ -14,15 +14,14 @@ import 'package:flutter_mana_kits/flutter_mana_kits.dart';
 
 final network = ManaDioCollector();
 final logs = ManaLogCollector();
-// 业务侧复用：dio.interceptors.add(network); Logger(output: logs);
 final controller = ManaController(plugins: loadAllPlugins(
   dioCollector: network,
   logCollector: logs,
-  captureDebugPrint: true, // 默认关闭
+  captureDebugPrint: true,
 ));
 ```
 
-将 `controller` 传给 `ManaWidget.builder`。业务和插件须共享采集器；默认各保留 1000 条记录，可通过 `capacity` 调整。外部注入的采集器由宿主释放，详见 [采集与资源释放](../../docs/getting-started.md#网络与日志采集)。
+将 `controller` 传给 `ManaWidget.builder`。业务 Dio / Logger 必须复用这些采集器，注入的资源由宿主释放。见 [接线示例](../../docs/getting-started.md#网络与日志采集) 和 [容量配置](../../docs/api.md#内置工具与采集器)。
 
 ## 新增内置工具
 
@@ -32,7 +31,7 @@ final controller = ManaController(plugins: loadAllPlugins(
 dart run scripts/plugin.dart http_inspector 网络检查器
 ```
 
-脚本生成 `BuiltinKit`、`KitWindow` / `KitScaffold` 内容及说明，更新导出并格式化，拒绝覆盖已有目录。支持 snake_case、camelCase 和 PascalCase。
+脚本生成工具与导出，已有目录不会覆盖。
 
 - 为 `PluginIcon.demo` 占位图标补充专属 SVG。
 - 使用 `kitText` 维护文案。
@@ -48,4 +47,4 @@ dart run scripts/plugin.dart http_inspector 网络检查器
 - **窄窗口**：宽度不足 160 logical px 时允许横向滚动，不缩小字体或隐藏操作。数据表、偏好和内存条目按宽度换行。
 - **状态**：键盘弹出、缩放和切换语言时保留焦点与选中状态。
 
-布局回归见 [responsive_layout_test.dart](test/responsive_layout_test.dart)，覆盖窄窗、低高度、大字体、中英文、RTL 和动态缩放。
+布局测试：[responsive_layout_test.dart](test/responsive_layout_test.dart)。

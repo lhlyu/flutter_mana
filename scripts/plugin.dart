@@ -5,7 +5,6 @@ const _usage =
     '用法: dart run scripts/plugin.dart <plugin_name> [中文名称]\n'
     '示例: dart run scripts/plugin.dart http_inspector 网络检查器';
 
-/// Creates a Widgets-only kit and exports it without changing loadAllPlugins.
 void main(List<String> args) {
   if (args.length == 1 && ['--help', '-h'].contains(args.single)) {
     stdout.writeln(_usage);
@@ -18,7 +17,6 @@ void main(List<String> args) {
   }
 
   try {
-    // Resolve from the script, not the caller's working directory.
     final root = File.fromUri(Platform.script).parent.parent;
     final target = createPlugin(
       root,
@@ -51,7 +49,6 @@ void main(List<String> args) {
   }
 }
 
-/// Refuses existing paths and validates all inputs before writing any files.
 Directory createPlugin(Directory root, String name, {String? chineseName}) {
   if (!RegExp(r'^[a-zA-Z][a-zA-Z0-9 _-]*$').hasMatch(name.trim())) {
     throw ArgumentError('插件名须以英文字母开头，仅支持字母、数字、空格、下划线或连字符。');
@@ -139,7 +136,7 @@ String _capitalize(String word) => word[0].toUpperCase() + word.substring(1);
 
 String _dartString(String value) => jsonEncode(value).replaceAll(r'$', r'\$');
 
-// One pass keeps placeholder-like user text from being substituted again.
+// Substitute once; replacement text may contain placeholders.
 String renderTemplate(String content, Map<String, String> replacements) =>
     content.replaceAllMapped(
       RegExp(r'\{\{(\w+)\}\}'),
@@ -198,10 +195,7 @@ void main() => runApp(
 );
 ```
 
-`ManaWidget` 管理内部 Controller 的生命周期。已有应用可在 builder 中使用
-`ManaWidget.builder`，并由宿主释放传入的 Controller。
+通过 `ManaWidget.builder` 接入已有应用，宿主负责释放传入的 Controller。
 
-内容使用 `KitScaffold` 和 `kitText`；新增文案放在 `src/i18n/kit_localizations.dart`。
-图标暂用 `PluginIcon.demo`；请在 `src/icons/plugin_icons.dart` 添加专属 SVG。
-插件已导出，但不会自动加入 `loadAllPlugins()`。
+使用 `kitText` 维护文案，替换 `PluginIcon.demo` 占位图标，按需加入 `loadAllPlugins()`。
 ''';

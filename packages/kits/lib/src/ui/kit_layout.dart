@@ -7,8 +7,6 @@ import 'kit_style.dart';
 import 'kit_button.dart';
 import 'kit_selection.dart';
 
-/// Bounded list/detail layout. Normal chrome keeps its natural height; in a
-/// short window it scrolls independently instead of taking space from the body.
 class KitScaffold extends StatelessWidget {
   const KitScaffold({super.key, this.header, required this.body, this.footer});
   final Widget? header;
@@ -172,12 +170,12 @@ class KitDetail extends StatelessWidget {
     required this.title,
     required this.child,
     required this.onClose,
-    this.actions = const [],
+    this.trailing,
   });
   final String title;
   final Widget child;
   final VoidCallback onClose;
-  final List<Widget> actions;
+  final Widget? trailing;
   @override
   Widget build(BuildContext context) => ColoredBox(
     color: KitStyle.surface,
@@ -203,10 +201,7 @@ class KitDetail extends StatelessWidget {
                     style: const TextStyle(fontWeight: .bold),
                   ),
                 ),
-                if (actions.isNotEmpty)
-                  Flexible(
-                    child: Wrap(alignment: .end, children: actions),
-                  ),
+                ?trailing,
               ],
             ),
           ),

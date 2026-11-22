@@ -135,7 +135,6 @@ Future<void> main(List<String> args) async {
           break;
         case 'mana_fps_monitor':
           state = await command('/tap', {'text': '动画'});
-          // Collect real frame timing while the sample rotates.
           await Future<void>.delayed(const Duration(seconds: 3));
           break;
         case 'mana_show_code':

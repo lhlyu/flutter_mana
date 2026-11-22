@@ -17,7 +17,7 @@ final class _WindowRegistration {
   const _WindowRegistration(this.hasBarrier, this.dismissSettings);
 }
 
-/// Owns one runtime, its plugins and its preferences. No process-wide mutable state.
+/// Owns the registered plugins and preferences.
 final class ManaController extends ChangeNotifier {
   final ManaPreferences preferences;
   final ManaErrorHandler? onError;
@@ -40,6 +40,7 @@ final class ManaController extends ChangeNotifier {
   Future<void>? _saving;
   bool _savePending = false;
   int _generation = 0;
+  var _activationChanged = Completer<void>();
   ManaWindowMode _restoreMode = .normal;
 
   ManaController({
@@ -53,6 +54,13 @@ final class ManaController extends ChangeNotifier {
 
   void _reportError(Object error, StackTrace stack) =>
       reportManaError(error, stack, onError);
+
+  int _nextGeneration() {
+    final previous = _activationChanged;
+    _activationChanged = Completer<void>();
+    previous.complete();
+    return ++_generation;
+  }
 
   void attach(Object host) {
     if (_closed) throw StateError('ManaController is closed.');
@@ -86,7 +94,6 @@ final class ManaController extends ChangeNotifier {
       _state = _state.copyWith(settings: settings);
       _ready = true;
       notifyListeners();
-      // A slow plugin never delays the debug shell or its peers.
       unawaited(_plugins.initialize());
     } catch (error, stack) {
       _initializationError = error;
@@ -99,7 +106,7 @@ final class ManaController extends ChangeNotifier {
   void _registryChanged() {
     if (_closed) return;
     if (_state.activePluginId case final id? when _plugins[id] == null) {
-      _generation++;
+      _nextGeneration();
       _state = _state.copyWith(clearActivePlugin: true, windowMode: .normal);
     }
     notifyListeners();
@@ -117,8 +124,7 @@ final class ManaController extends ChangeNotifier {
 
   Future<void> unregisterPlugin(String id) async {
     if (_closed) throw StateError('ManaController is closed.');
-    // Invalidate pending activations before disposing any registry resources.
-    _generation++;
+    _nextGeneration();
     if (_state.activePluginId == id) {
       await closePlugin();
     } else {
@@ -129,15 +135,20 @@ final class ManaController extends ChangeNotifier {
 
   Future<bool> activatePlugin(String id) {
     if (_closed) return Future.value(false);
-    final generation = ++_generation;
+    final generation = _nextGeneration();
+    final superseded = _activationChanged.future;
     final result = (_sessionWork ?? Future.value()).then(
-      (_) => _activate(id, generation),
+      (_) => _activate(id, generation, superseded),
     );
     _sessionWork = result.then((_) {});
     return result;
   }
 
-  Future<bool> _activate(String id, int generation) async {
+  Future<bool> _activate(
+    String id,
+    int generation,
+    Future<void> superseded,
+  ) async {
     ManaPluggable? started;
     bool cancelled() => _closed || generation != _generation;
     try {
@@ -151,7 +162,7 @@ final class ManaController extends ChangeNotifier {
         return false;
       }
       try {
-        await _plugins.ensureReady(id);
+        await Future.any([_plugins.ensureReady(id), superseded]);
       } catch (_) {
         if (_plugins[id]?.status == .failed || cancelled()) return false;
         rethrow;
@@ -200,9 +211,7 @@ final class ManaController extends ChangeNotifier {
     }
   }
 
-  /// Toggles the entire debug overlay, or explicitly sets [visible].
-  /// Hiding preserves plugin/widget state and does not stop data collection.
-  /// Visibility is runtime-only and is not persisted to preferences.
+  /// Preserves sessions and capture when hidden; visibility is not persisted.
   void toggleOverlay({bool? visible}) {
     if (_closed) return;
     final next = visible ?? !_state.overlayVisible;
@@ -241,7 +250,7 @@ final class ManaController extends ChangeNotifier {
 
   Future<void> closePlugin() {
     if (_closed) return Future.value();
-    _generation++;
+    _nextGeneration();
     final id = _state.activePluginId;
     _update(_state.copyWith(clearActivePlugin: true, windowMode: .normal));
     if (id == null) return _sessionWork ?? Future.value();
@@ -371,7 +380,7 @@ final class ManaController extends ChangeNotifier {
     if (_closed) return;
     final active = _state.activePluginId;
     _closed = true;
-    _generation++;
+    _nextGeneration();
     _plugins.removeListener(_registryChanged);
     super.dispose();
     _closing = _shutdown(active);

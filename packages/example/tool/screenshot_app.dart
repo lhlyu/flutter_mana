@@ -1,5 +1,4 @@
-// Debug-only entry point driven by scripts/screenshots.dart on an iOS simulator.
-// The normal example entry point never starts this loopback control server.
+// Debug screenshot server for scripts/screenshots.dart.
 import 'dart:convert';
 import 'dart:io';
 
@@ -52,7 +51,6 @@ Future<void> main() async {
           session.controller.closePluginPanel();
           FocusManager.instance.primaryFocus?.unfocus();
           await driver.pump(const Duration(milliseconds: 300));
-          // Return the demo page to its initial scroll position.
           final scroll = find.byType(SingleChildScrollView).first;
           await driver.drag(scroll, const Offset(0, 1000));
           await driver.pump(const Duration(milliseconds: 500));

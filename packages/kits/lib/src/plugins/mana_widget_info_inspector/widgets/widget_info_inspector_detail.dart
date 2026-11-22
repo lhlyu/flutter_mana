@@ -34,7 +34,7 @@ class _InfoPageState extends State<InfoPage> {
       return KitDetail(
         title: entry.name,
         onClose: () => setState(() => _selected = null),
-        actions: [KitCopyButton(entry.text)],
+        trailing: KitCopyButton(entry.text),
         child: SingleChildScrollView(child: KitCode(entry.text)),
       );
     }
@@ -48,7 +48,7 @@ class _InfoPageState extends State<InfoPage> {
       child: KitScaffold(
         header: KitField(
           controller: _search,
-          label: kitText(context, 'common.search'),
+          hintText: kitText(context, 'common.search'),
           onChanged: (_) => setState(() {}),
         ),
         body: entries.isEmpty

@@ -4,6 +4,7 @@ import 'package:flutter_mana/flutter_mana.dart';
 import 'package:flutter_mana_kits/flutter_mana_kits.dart';
 import 'package:flutter_mana_kits/src/plugins/mana_dio_inspector/widgets/response_detail.dart';
 import 'package:flutter_mana_kits/src/plugins/mana_shared_preferences_viewer/widgets/preference_editor.dart';
+import 'package:flutter_mana_kits/src/plugins/mana_shared_preferences_viewer/widgets/preference_tile.dart';
 import 'package:flutter_mana_kits/src/plugins/mana_shared_preferences_viewer/widgets/shared_preferences_viewer_content.dart';
 import 'package:flutter_mana_kits/src/ui/kit_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -181,11 +182,11 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
-    final copyMenu = find.byWidgetPredicate(
-      (widget) => widget is ManaButton && widget.tooltip == 'Copy',
+    final moreMenu = find.byWidgetPredicate(
+      (widget) => widget is ManaButton && widget.tooltip == 'More actions',
     );
-    await tester.ensureVisible(copyMenu);
-    await tester.tap(copyMenu);
+    await tester.ensureVisible(moreMenu);
+    await tester.tap(moreMenu);
     await tester.pumpAndSettle();
     await tester.ensureVisible(button('Copy HTTP'));
     await tester.pumpAndSettle();
@@ -193,6 +194,19 @@ void main() {
     expect(button('Copy HTTP').hitTestable(), findsOneWidget);
     expect(tester.getSize(find.byType(KitScaffold).first).height, 100);
     await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('preference list ignores inherited top safe-area padding', (
+    tester,
+  ) async {
+    tester.view.padding = const FakeViewPadding(top: 48);
+    addTearDown(tester.view.resetPadding);
+    await tester.pumpWidget(testHost(const SharedPreferencesViewerContent()));
+    await tester.pumpAndSettle();
+
+    final list = find.byType(ListView);
+    final firstRow = find.byType(PreferenceTile).first;
+    expect(tester.getTopLeft(firstRow).dy, tester.getTopLeft(list).dy);
   });
 
   testWidgets(

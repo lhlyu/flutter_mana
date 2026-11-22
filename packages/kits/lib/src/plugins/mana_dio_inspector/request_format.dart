@@ -4,6 +4,8 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 
+import '../../data/capture_budget.dart';
+
 String formatBody(Object? data, {bool pretty = true}) {
   if (data == null) return '';
   if (data is String) return data;
@@ -24,18 +26,26 @@ String formatBody(Object? data, {bool pretty = true}) {
 
 String _requestBody(RequestOptions request) {
   final data = request.data;
-  if (data is Map<String, dynamic> &&
-      !Transformer.isJsonMimeType(request.contentType)) {
-    return Transformer.urlEncodeMap(data, request.listFormat);
-  }
-  return formatBody(data, pretty: false);
+  if (data is FormData) return formatBody(data, pretty: false);
+  return Transformer.defaultTransformRequest(request, jsonEncode) as String;
 }
 
 String _shellQuote(String value) => "'${value.replaceAll("'", "'\"'\"'")}'";
 
-/// Quotes every shell argument and keeps strings as their original body.
+void _checkCapturedRequest(RequestOptions request) {
+  if (request.extra[captureExportUnavailableKey] == true) {
+    throw UnsupportedError(
+      'Cannot export incomplete or custom-encoded requests',
+    );
+  }
+}
+
 String formatCurl(RequestOptions request) {
+  _checkCapturedRequest(request);
   final data = request.data;
+  if (request.requestEncoder != null) {
+    throw UnsupportedError('cURL unavailable for a custom request encoder');
+  }
   if (data is Stream ||
       data is TypedData ||
       (data is FormData && data.files.isNotEmpty)) {
@@ -68,9 +78,20 @@ String formatCurl(RequestOptions request) {
   return parts.join(' ');
 }
 
-String formatHttp(RequestOptions request) => [
-  '${request.method} ${request.uri} HTTP/1.1',
-  for (final entry in request.headers.entries) '${entry.key}: ${entry.value}',
-  '',
-  _requestBody(request),
-].join('\r\n');
+String formatHttp(RequestOptions request) {
+  _checkCapturedRequest(request);
+  if (request.requestEncoder != null ||
+      request.data is Stream ||
+      request.data is TypedData ||
+      request.data is FormData) {
+    throw UnsupportedError(
+      'HTTP export unavailable for custom encoding, streamed, binary or multipart bodies',
+    );
+  }
+  return [
+    '${request.method} ${request.uri} HTTP/1.1',
+    for (final entry in request.headers.entries) '${entry.key}: ${entry.value}',
+    '',
+    _requestBody(request),
+  ].join('\r\n');
+}

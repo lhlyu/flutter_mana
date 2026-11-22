@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
 
-/// Core's neutral debug UI palette, independent of the host design system.
 abstract final class ManaStyle {
   static const surface = Color(0xFFFFFFFF);
   static const text = Color(0xFF212121);

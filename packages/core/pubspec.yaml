@@ -1,6 +1,6 @@
 name: flutter_mana
 description: "Mana is an in-app debug kits platform for Flutter. Flutter应用内调试工具平台"
-version: 2.0.0-rc.2
+version: 2.0.0-rc.3
 homepage: https://github.com/lhlyu/flutter_mana
 repository: https://github.com/lhlyu/flutter_mana
 documentation: https://github.com/lhlyu/flutter_mana
@@ -25,4 +25,5 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  shared_preferences_platform_interface: ^2.4.2
 

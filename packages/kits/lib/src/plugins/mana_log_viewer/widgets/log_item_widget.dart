@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:logger/logger.dart';
 
 import '../../../ui/kit_ui.dart';
+import '../mana_log_collector.dart';
 
 String formatLog(OutputEvent event, {required bool verbose}) {
   final message = event.origin.message;
@@ -65,6 +66,11 @@ class LogItemWidget extends StatelessWidget {
               KitCopyButton(text),
             ],
           ),
+          if (log is CapturedLogEvent && (log as CapturedLogEvent).truncated)
+            Text(
+              kitText(context, 'common.truncated'),
+              style: const TextStyle(color: KitStyle.warning, fontSize: 12),
+            ),
           KitSelection(child: Text(text, style: KitStyle.code)),
         ],
       ),

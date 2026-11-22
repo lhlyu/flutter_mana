@@ -7,7 +7,6 @@ import 'floating_window/index.dart';
 import 'mana_panel.dart';
 import 'mana_setting_panel.dart';
 
-/// Presentation only; the controller owns state and resources.
 class ManaOverlay extends StatelessWidget {
   const ManaOverlay({super.key});
 

@@ -1,12 +1,33 @@
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 
 import '../../data/bounded_collector.dart';
+import '../../data/capture_budget.dart';
+
+class CapturedLogEvent extends OutputEvent {
+  CapturedLogEvent(
+    super.origin,
+    super.lines, {
+    required this.truncated,
+    required this.capturedBytes,
+  });
+  final bool truncated;
+  final int capturedBytes;
+}
 
 /// Attach the same instance to Logger.output and ManaLogViewer.
 class ManaLogCollector extends BoundedCollector<OutputEvent>
     implements LogOutput {
-  ManaLogCollector({super.capacity});
+  ManaLogCollector({
+    super.capacity,
+    super.maxBytes = 4 * 1024 * 1024,
+    this.maxEntryBytes = 64 * 1024,
+  }) {
+    CaptureBudget(math.min(maxEntryBytes, maxBytes));
+  }
+  final int maxEntryBytes;
   final _captures = <VoidCallback>{};
   @override
   Future<void> init() async {}
@@ -14,6 +35,44 @@ class ManaLogCollector extends BoundedCollector<OutputEvent>
   Future<void> destroy() async {}
   @override
   void output(OutputEvent event) => add(event);
+
+  @override
+  void add(OutputEvent value, {int sizeBytes = 0}) {
+    if (isDisposed) return;
+    final budget = CaptureBudget(math.min(maxEntryBytes, maxBytes));
+    final source = value.origin;
+    final message = source.message is Function
+        ? budget.lines(value.lines).replaceAll(RegExp(r'\x1B\[[0-9;]*m'), '')
+        : budget.copy(source.message);
+    final error = budget.copy(source.error);
+    final stack = source.stackTrace == null
+        ? null
+        : StackTrace.fromString(budget.text(source.stackTrace.toString()));
+    final lines = <String>[];
+    if (source.message is! Function) {
+      for (final line in value.lines) {
+        if (budget.remaining < 32) {
+          budget.truncated = true;
+          break;
+        }
+        lines.add(budget.text(line));
+      }
+    }
+    final record = CapturedLogEvent(
+      LogEvent(
+        value.level,
+        message,
+        time: source.time,
+        error: error,
+        stackTrace: stack,
+      ),
+      List.unmodifiable(lines),
+      truncated:
+          budget.truncated || (value is CapturedLogEvent && value.truncated),
+      capturedBytes: budget.usedBytes,
+    );
+    super.add(record, sizeBytes: budget.usedBytes);
+  }
 
   /// Returns an idempotent release callback. Multiple viewers may capture together.
   VoidCallback captureDebugPrint() {

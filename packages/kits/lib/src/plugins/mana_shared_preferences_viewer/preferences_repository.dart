@@ -2,7 +2,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'preference_entry.dart';
 
-/// Owns validation and write ordering, independently of the editor UI.
 class PreferencesRepository {
   Future<List<PreferenceEntry>> load() async {
     final prefs = await SharedPreferences.getInstance();

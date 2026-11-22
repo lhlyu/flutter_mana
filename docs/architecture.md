@@ -20,7 +20,7 @@ flowchart LR
 | `packages/core` | 插件协议、控制器、存储、悬浮界面及可选诊断能力。 |
 | `packages/kits` | 16 个内置工具、网络 / 日志采集器、通用工具布局和图标。 |
 | `packages/example` | 组装控制器与共享采集器，提供演示数据和交互场景。 |
-| `scripts` | 生成工具、采集截图，不参与正常应用运行。 |
+| `scripts` | 全仓验证、发布校验、生成工具和采集截图，不参与正常应用运行。 |
 
 **core 不依赖 kits**，第三方插件只需实现 `ManaPluggable`。core 与 kits 的界面基于基础 Widgets，不依赖 Material / Cupertino；示例应用自行选择设计系统。
 
@@ -80,7 +80,7 @@ activatePlugin(id)
 ```
 
 - 同一控制器最多有一个活动插件，插件面板可独立打开。
-- 激活与关闭操作串行衔接，并用代次标识取消过期请求，防止异步操作覆盖新状态。
+- 激活与关闭操作串行衔接，并用代次标识取消过期请求，防止异步操作覆盖新状态。被取消的初始化等待不会阻塞后续工具；初始化任务仍由注册表跟踪并在关闭时等待清理。
 - **最小化不等于关闭**：最小化不结束插件会话，默认保留窗口内容状态并暂停其动画、键盘焦点及列表刷新；自定义覆盖层可继续显示。关闭或切换时执行 `deactivate()`。
 - `action` 插件执行后即结束，不保留活动界面；最终注销或关闭运行时时执行 `dispose()`。
 
@@ -98,7 +98,7 @@ activatePlugin(id)
 业务 Logger → ManaLogCollector ┘
 ```
 
-业务和工具必须使用**同一采集器实例**。采集器基于 [BoundedCollector](../packages/kits/lib/src/data/bounded_collector.dart)，默认保留 1000 条记录，超出容量淘汰最早数据；数据未变化时复用只读列表快照。隐藏工具时继续采集，列表恢复显示时读取最新数据；网络详情返回列表时保留筛选和滚动位置。
+业务和工具共享采集器实例。[BoundedCollector](../packages/kits/lib/src/data/bounded_collector.dart) 按条数和内容预算保留快照，超限截断或淘汰旧记录。隐藏工具时继续采集，恢复显示时读取最新数据；从网络详情返回时保留筛选和滚动位置。
 
 设备、包、偏好等工具直接访问对应平台服务；内存和源码通过 VM Service 读取当前应用。共享实例的组装与清理可参考 [DemoSession](../packages/example/lib/demo_session.dart)。
 
@@ -125,5 +125,7 @@ VM 诊断通过条件导出区分原生实现与 Web 占位实现；导入接口
 - [core/test](../packages/core/test)：运行时、存储、宿主集成、返回行为及诊断。
 - [kits/test](../packages/kits/test)：数据采集、覆盖层、偏好编辑、VM 界面、响应式布局与生成器。
 - [example/test](../packages/example/test)：共享数据、交互、语言 / 主题切换和资源释放。
+
+在仓库根目录运行 `dart scripts/check.dart` 可统一检查格式、静态分析、发布脚本及三个包的测试；加上 `--web` 同时验证示例 Web Release 构建。测试从各包目录启动，以正确加载包内资源。
 
 接入步骤见 [使用指南](getting-started.md)，扩展协议见 [自定义插件](custom-plugins.md)。

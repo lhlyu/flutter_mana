@@ -17,7 +17,6 @@ final class ManaPluginInfo {
   const ManaPluginInfo(this.plugin, this.status, {this.error, this.stackTrace});
 }
 
-/// Observable read-only view. Runtime mutations go through ManaController.
 abstract interface class ManaPluginRegistry implements Listenable {
   List<ManaPluginInfo> get entries;
   Map<String, ManaPluggable> get pluginsMap;
@@ -38,7 +37,6 @@ class _PluginEntry {
       ManaPluginInfo(plugin, status, error: error, stackTrace: stack);
 }
 
-/// Instance-owned, observable registry. A plugin failure does not fail its peers.
 final class ManaPluginManager extends ChangeNotifier
     implements ManaPluginRegistry {
   static const name = 'mana_plugin_manager';

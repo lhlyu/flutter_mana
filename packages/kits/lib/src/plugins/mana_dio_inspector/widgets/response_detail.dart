@@ -29,20 +29,33 @@ class _ResponseDetailState extends State<ResponseDetail> {
     return KitDetail(
       title: '${request.uri}',
       onClose: widget.onClose,
-      actions: [ResponseCopyMenu(response: response)],
+      trailing: ResponseCopyMenu(response: response),
       child: KitScaffold(
-        header: KitTabs(
-          values: const [0, 1, 2],
-          value: _tab,
-          label: (tab) => kitText(
-            context,
-            [
-              'dio_inspector.detail',
-              'dio_inspector.request',
-              'dio_inspector.response',
-            ][tab],
-          ),
-          onChanged: (value) => setState(() => _tab = value),
+        header: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (response.extra[ManaDioCollector.truncatedKey] == true)
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Text(
+                  kitText(context, 'common.truncated'),
+                  style: const TextStyle(color: KitStyle.warning, fontSize: 12),
+                ),
+              ),
+            KitTabs(
+              values: const [0, 1, 2],
+              value: _tab,
+              label: (tab) => kitText(
+                context,
+                [
+                  'dio_inspector.detail',
+                  'dio_inspector.request',
+                  'dio_inspector.response',
+                ][tab],
+              ),
+              onChanged: (value) => setState(() => _tab = value),
+            ),
+          ],
         ),
         body: SingleChildScrollView(
           child: switch (_tab) {

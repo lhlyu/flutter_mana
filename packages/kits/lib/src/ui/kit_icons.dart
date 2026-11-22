@@ -79,8 +79,6 @@ class _GlyphPainter extends CustomPainter {
         canvas.drawCircle(const Offset(10, 10), 6, p);
         line(15, 15, 21, 21);
       case .refresh:
-        // End the clockwise arc at the arrow tip. The two wings straddle
-        // its down-right tangent instead of floating above the circle.
         final tip = Offset(12 + 8 / math.sqrt2, 12 - 8 / math.sqrt2);
         canvas.drawPath(
           Path()

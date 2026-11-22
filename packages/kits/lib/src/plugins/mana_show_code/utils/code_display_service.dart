@@ -24,8 +24,6 @@ class CodeDisplayService {
   final VmInspector inspector;
   final String? Function(Object) _objectId;
 
-  /// Resolve the actual widget class, not its creation site (often main.dart)
-  /// or a class-name match in the application's loaded scripts.
   Future<PageSource?> currentPage(BuildContext? root) async {
     if (root is! Element || !root.mounted) return null;
     final candidates = _pageWidgets(root);
@@ -72,9 +70,7 @@ class CodeDisplayService {
   Future<void> close() => inspector.disconnect();
 }
 
-/// ModalRoute.of normally subscribes its context to route changes. Inspection
-/// must only read: subscribing arbitrary elements (especially the route's own
-/// InheritedElement) can corrupt the host's dependency graph.
+/// Read routes without adding dependencies to inspected elements.
 class _RouteLookup implements BuildContext {
   _RouteLookup(this.context);
   final BuildContext context;
@@ -95,14 +91,12 @@ class _RouteLookup implements BuildContext {
     Object? aspect,
   }) => ancestor.widget as InheritedWidget;
 
-  // This read-only adapter supports only inherited lookup, not widget building.
   @override
   dynamic noSuchMethod(Invocation invocation) =>
       throw UnsupportedError('Route lookup only supports inherited reads.');
 }
 
-/// Only walk the host tree, never Mana's sibling overlays. Prefer the innermost
-/// visible route over app/shell widgets, and ignore retained inactive pages.
+/// Prefer the innermost visible host route.
 List<Widget> _pageWidgets(Element root) {
   final candidates = <({Widget widget, int depth})>[];
   var hasRoute = false;
@@ -121,8 +115,7 @@ List<Widget> _pageWidgets(Element root) {
     if (widget is IndexedStack) {
       final index = widget.index;
       if (index == null) return;
-      // IndexedStack inserts framework wrappers; Offstage is not used for its
-      // inactive children. Visit only the selected child's element subtree.
+      // IndexedStack retains inactive children without Offstage.
       final selected = widget.children[index];
       void findSelected(Element child) {
         if (identical(child.widget, selected)) {

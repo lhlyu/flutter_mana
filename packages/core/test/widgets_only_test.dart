@@ -95,7 +95,7 @@ void main() {
       Finder control(String label) => find.byWidgetPredicate(
         (widget) => widget is ManaButton && widget.tooltip == label,
       );
-      await tester.tap(control('设置'));
+      await tester.tap(control('Settings'));
       await tester.pumpAndSettle();
       expect(find.byType(ManaSlider), findsNWidgets(2));
       final slider = find.byType(ManaSlider).first;
@@ -103,7 +103,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(runtime.preferences.read('mana_floating_button_size'), 100);
 
-      await tester.tap(control('设置'));
+      await tester.tap(control('Settings'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Test plugin'));
       await tester.pumpAndSettle();
@@ -118,6 +118,59 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  for (final (language, label, hint, settingsLabel) in [
+    (
+      'en',
+      'Show debug overlay',
+      'Hide for this session; shown again on next launch.',
+      'Settings',
+    ),
+    ('zh', '显示调试浮层', '关闭后本次隐藏，下次启动自动显示。', '设置'),
+  ]) {
+    testRuntimeWidgets(
+      'settings hide the overlay until the next session ($language)',
+      (tester) async {
+        tester.platformDispatcher.localesTestValue = [Locale(language)];
+        addTearDown(tester.platformDispatcher.clearLocalesTestValue);
+        final preferences = runtime.preferences;
+        Widget host() =>
+            ManaWidget(controller: runtime, child: const Text('Host'));
+        await tester.pumpWidget(host());
+        await tester.pumpAndSettle();
+        runtime.updateSettings(buttonSize: 60);
+        await tester.tap(find.byType(FloatingButton));
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.byWidgetPredicate(
+            (widget) => widget is ManaButton && widget.tooltip == settingsLabel,
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text(hint), findsOneWidget);
+
+        await tester.tap(find.text(label));
+        await tester.pumpAndSettle();
+        expect(find.byType(FloatingButton), findsNothing);
+        expect(find.byType(ManaOverlay), findsNothing);
+        expect(find.text('Host'), findsOneWidget);
+        expect(runtime.handleBack(), isFalse);
+
+        await tester.pumpWidget(host());
+        await tester.pumpAndSettle();
+        expect(find.byType(FloatingButton), findsNothing);
+
+        await tester.pumpWidget(const SizedBox());
+        await runtime.close();
+        runtime = ManaController(preferences: preferences);
+        await tester.pumpWidget(host());
+        await tester.pumpAndSettle();
+        expect(find.byType(FloatingButton), findsOneWidget);
+        expect(runtime.state.settings.buttonSize, 60);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 
   testRuntimeWidgets('sliders support drag, keyboard, endpoints and RTL', (
     tester,
@@ -197,7 +250,7 @@ void main() {
         ),
       );
       final fullscreen = find.byWidgetPredicate(
-        (widget) => widget is ManaButton && widget.tooltip == '全屏',
+        (widget) => widget is ManaButton && widget.tooltip == 'Fullscreen',
       );
       final detector = tester.widget<FocusableActionDetector>(
         find.descendant(
@@ -261,14 +314,14 @@ void main() {
     await tester.tap(find.byType(FloatingButton));
     await tester.pumpAndSettle();
     final settings = find.byWidgetPredicate(
-      (widget) => widget is ManaButton && widget.tooltip == '设置',
+      (widget) => widget is ManaButton && widget.tooltip == 'Settings',
     );
     final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await mouse.addPointer(location: Offset.zero);
     await mouse.moveTo(tester.getCenter(settings));
     await tester.pump(const Duration(milliseconds: 600));
     await tester.pumpAndSettle();
-    expect(find.text('设置'), findsOneWidget);
+    expect(find.text('Settings'), findsOneWidget);
     await mouse.removePointer();
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);

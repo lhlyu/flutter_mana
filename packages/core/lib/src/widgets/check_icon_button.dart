@@ -6,14 +6,10 @@ import 'mana_button.dart';
 import 'mana_icon.dart';
 import 'mana_style.dart';
 
-/// 点击成功后显示确认图标，等待 [resetDuration] 后恢复。
-///
-/// [onPressed] 返回 Future 时，等待完成后再显示确认状态。
-/// 不依赖 Material；通过 [padding]、[constraints] 和 [decoration] 自定义布局。
+/// 操作成功后显示确认图标，持续 [resetDuration]。
 class CheckIconButton extends StatefulWidget {
   final IconData initialIcon;
 
-  /// 留空时绘制确认符号，不依赖 MaterialIcons 字体。
   final IconData? changedIcon;
   final Color? iconColor;
   final double? size;

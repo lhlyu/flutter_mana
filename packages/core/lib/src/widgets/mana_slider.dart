@@ -5,7 +5,6 @@ import 'package:flutter/widgets.dart';
 
 import 'mana_style.dart';
 
-/// A discrete slider built from gestures, focus and semantics.
 class ManaSlider extends StatefulWidget {
   final double value;
   final double min;

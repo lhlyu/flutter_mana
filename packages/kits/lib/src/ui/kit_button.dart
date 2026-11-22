@@ -7,7 +7,6 @@ import '../i18n/kit_localizations.dart';
 import 'kit_style.dart';
 import 'kit_icons.dart';
 
-/// Handles an action once at a time and exposes recoverable failures inline.
 class KitButton extends StatefulWidget {
   const KitButton({
     super.key,
