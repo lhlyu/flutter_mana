@@ -2,8 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import 'mana_controller.dart';
 
-/// Navigator 1 integration: consume debug back actions before popping host routes.
-/// Router hosts should instead pass their BackButtonDispatcher to ManaWidget.builder.
+/// Handles debug back actions before host navigation; Router uses BackButtonDispatcher.
 final class ManaNavigatorObserver extends NavigatorObserver {
   final ManaController controller;
   ModalRoute<dynamic>? _route;

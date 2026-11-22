@@ -15,7 +15,7 @@ flutter pub add flutter_mana_kits
 
 ## 接入已有应用
 
-在应用的 `builder` 中使用 `ManaWidget.builder`，复用主题和本地化环境。以下 Material 示例需先执行 `flutter pub add material_ui`；`WidgetsApp` / `CupertinoApp` 接入方式相同，无需额外引入 Material。
+在应用 `builder` 中接入。以下示例需安装 `material_ui`；`WidgetsApp` / `CupertinoApp` 接入方式相同。
 
 ```dart
 import 'package:flutter/foundation.dart';
@@ -56,22 +56,18 @@ class _AppState extends State<App> {
 }
 ```
 
-点击 Mana 悬浮按钮选择工具。窗口支持拖动、最小化和全屏；入口大小、透明度和位置可在设置中调整。
+点击悬浮按钮选择工具，入口外观可在设置中调整。
 
 ### 代码控制与临时隐藏
 
-持有传给宿主的 `controller`，即可由业务代码控制调试界面：
-
 ```dart
-controller.toggleOverlay();               // 切换整个调试层的显隐
-controller.toggleOverlay(visible: false); // 隐藏，包括悬浮入口
-controller.toggleOverlay(visible: true);  // 恢复
-await controller.closePlugin();           // 只关闭当前插件
+controller.toggleOverlay();
+controller.toggleOverlay(visible: false);
+controller.toggleOverlay(visible: true);
+await controller.closePlugin();
 ```
 
-隐藏保留插件和窗口状态，不影响业务页面，也不停止网络 / 日志采集；恢复应由业务按钮或外部代码触发。显隐不持久化。录屏前如需等待隐藏绘制完成，可自行等待 `await WidgetsBinding.instance.endOfFrame`。
-
-所有控制方法及区别见 [公开 API 速查](api.md)。
+隐藏保留状态和采集，需由业务入口恢复；显隐不持久化。录屏前可等待 `WidgetsBinding.instance.endOfFrame`。其他方法见 [API](api.md)。
 
 ### 返回行为与 Router
 
@@ -80,8 +76,6 @@ await controller.closePlugin();           // 只关闭当前插件
 - **设计系统**：通过 `overlayBuilder` 为调试层补充 Theme / Provider 等祖先。
 
 ### 独立宿主与按需加载
-
-独立宿主可直接注册所需工具：
 
 ```dart
 import 'package:flutter/widgets.dart';
@@ -98,7 +92,7 @@ void main() => runApp(ManaWidget(
 
 ## 网络与日志采集
 
-**业务和插件必须共享采集器**，`loadAllPlugins()` 不会自动接管 Dio / Logger。先执行 `flutter pub add dio logger`，再将以下对象放在 State 或服务类中统一管理：
+安装 `dio logger`，在 State 或服务类中创建共享实例：
 
 ```dart
 import 'package:dio/dio.dart';
@@ -106,8 +100,8 @@ import 'package:flutter_mana/flutter_mana.dart';
 import 'package:flutter_mana_kits/flutter_mana_kits.dart';
 import 'package:logger/logger.dart';
 
-final network = ManaDioCollector(capacity: 1000);
-final logs = ManaLogCollector(capacity: 1000);
+final network = ManaDioCollector();
+final logs = ManaLogCollector();
 final dio = Dio()..interceptors.add(network);
 final logger = Logger(output: logs);
 final controller = ManaController(
@@ -121,11 +115,9 @@ final controller = ManaController(
 
 把 `controller` 传给 `ManaWidget.builder`，业务使用同一组 `dio` / `logger`。
 
-- 每个采集器默认保留 1000 条记录，`capacity` 可调整容量。
-- `captureDebugPrint` 默认关闭，插件释放时恢复原行为。
-- 外部注入的采集器由宿主释放；插件自行创建的由插件释放。
+采集器容量见 [API](api.md#内置工具与采集器)。`captureDebugPrint` 默认关闭；外部注入资源由宿主释放。
 
-需要等待关闭完成时，在业务服务中异步清理：
+异步清理：
 
 ```dart
 Future<void> closeDebugTools() async {

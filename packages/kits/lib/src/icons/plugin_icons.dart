@@ -4,8 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-/// Transparent, saturated tool silhouettes; never add a shared tile or backdrop.
-/// Keep details bold enough for the 24 px compact and 40 px panel sizes.
 enum PluginIcon {
   ruler('#00B878', '''
     <path d="M10 9h15v30h30v15H10z" fill="currentColor" stroke="none"/>
@@ -122,7 +120,6 @@ enum PluginIcon {
 
 typedef PluginIconKey = ({PluginIcon icon, double size, double scale});
 
-/// Rasterizes the SVG at its display resolution and uses Flutter's image cache.
 class PluginIconImage extends ImageProvider<PluginIconKey> {
   const PluginIconImage(this.icon);
   final PluginIcon icon;

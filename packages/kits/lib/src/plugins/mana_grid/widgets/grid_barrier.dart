@@ -56,7 +56,6 @@ class _GridPainter extends CustomPainter {
       textAlign: TextAlign.left,
     );
 
-    // 垂直线
     for (double x = 0; x <= size.width; x += gap) {
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), gridPaint);
       if (showNumbers) {
@@ -69,7 +68,6 @@ class _GridPainter extends CustomPainter {
       }
     }
 
-    // 水平线
     for (double y = 0; y <= size.height; y += gap) {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
       if (showNumbers) {
@@ -82,11 +80,9 @@ class _GridPainter extends CustomPainter {
       }
     }
 
-    // 中心参考线
     final centerX = size.width / 2;
     final centerY = size.height / 2;
 
-    // 垂直中心线
     canvas.drawLine(
       Offset(centerX, 0),
       Offset(centerX, size.height),
@@ -101,7 +97,6 @@ class _GridPainter extends CustomPainter {
       textPainter.paint(canvas, Offset(centerX + 2, 2));
     }
 
-    // 水平中心线
     canvas.drawLine(
       Offset(0, centerY),
       Offset(size.width, centerY),

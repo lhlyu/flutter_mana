@@ -21,8 +21,6 @@ class ManaPanel extends StatelessWidget {
       padding: const .all(8),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          // Let text determine each run's height: fonts, fractional scaling and
-          // fallback glyphs cannot reliably be reduced to a fixed line height.
           const spacing = 4.0;
           final preferredWidth =
               72 *

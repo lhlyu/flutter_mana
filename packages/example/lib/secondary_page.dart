@@ -2,7 +2,6 @@ import 'package:material_ui/material_ui.dart';
 
 import 'demo_session.dart';
 
-/// A second host route using the app's existing session, not a new Mana layer.
 class SecondaryPage extends StatefulWidget {
   const SecondaryPage({super.key, required this.session});
 

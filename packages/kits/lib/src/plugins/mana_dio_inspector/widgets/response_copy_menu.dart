@@ -5,7 +5,6 @@ import 'package:flutter/widgets.dart';
 import '../../../ui/kit_ui.dart';
 import '../request_format.dart';
 
-/// Request-wide exports live in the detail header, not in the reading area.
 class ResponseCopyMenu extends StatefulWidget {
   const ResponseCopyMenu({super.key, required this.response});
 
@@ -121,8 +120,6 @@ class _ResponseCopyMenuState extends State<ResponseCopyMenu> {
                                 label: '$copy $label',
                                 icon: .copy,
                                 onPressed: () async {
-                                  // Format lazily so unsupported bodies report an
-                                  // inline error without breaking the detail view.
                                   await Clipboard.setData(
                                     ClipboardData(text: value()),
                                   );

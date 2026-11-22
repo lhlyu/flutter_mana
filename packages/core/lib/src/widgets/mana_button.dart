@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 
 import 'mana_style.dart';
 
-/// A keyboard- and accessibility-aware button without a Material ancestor.
 class ManaButton extends StatefulWidget {
   final Widget child;
   final VoidCallback? onPressed;

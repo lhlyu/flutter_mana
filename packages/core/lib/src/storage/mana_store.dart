@@ -3,7 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'mana_preferences.dart';
 import 'mana_settings.dart';
 
-/// Default preferences adapter. No singleton or publicly exposed SharedPreferences handle.
 final class ManaStore implements ManaPreferences {
   SharedPreferences? _prefs;
   final String namespace;

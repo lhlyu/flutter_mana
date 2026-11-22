@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 
 import '../../../ui/kit_ui.dart';
 
-/// Stateless highlighting: every token covers a contiguous part of the source.
 TextSpan highlightDart(String source) {
   final spans = <TextSpan>[];
   var index = 0;

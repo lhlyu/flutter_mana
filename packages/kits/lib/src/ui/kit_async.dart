@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import '../i18n/kit_localizations.dart';
 import 'kit_layout.dart';
 
-/// Caches each load, shows failures and retries without rebuilding a Future.
 class KitAsync<T> extends StatefulWidget {
   const KitAsync({super.key, required this.load, required this.builder});
   final Future<T> Function() load;

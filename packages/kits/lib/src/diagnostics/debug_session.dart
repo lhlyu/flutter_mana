@@ -3,7 +3,7 @@ import 'package:flutter/scheduler.dart';
 
 enum DebugFlag { layout, repaint, images, animation }
 
-/// Global Flutter switches are leased so closing one kit preserves other owners.
+/// Leases global Flutter debug flags across tools.
 class DebugSession {
   final _token = Object();
   final _flags = <DebugFlag>{};

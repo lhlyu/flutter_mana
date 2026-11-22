@@ -28,9 +28,7 @@ class _KitSelectionControls extends EmptyTextSelectionControls
     double textLineHeight, [
     VoidCallback? onTap,
   ]) => SizedBox.square(
-    // Match the overlay's advertised size under loose constraints. Make the
-    // entire target hit-testable, including the space around the visual handle,
-    // so a near-edge grab stays inside the selection's TapRegion.
+    // Keep the padded handle inside the selection TapRegion.
     dimension: _touchTargetSize,
     child: GestureDetector(
       behavior: .opaque,

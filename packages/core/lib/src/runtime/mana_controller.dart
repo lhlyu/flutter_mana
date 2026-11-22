@@ -17,7 +17,7 @@ final class _WindowRegistration {
   const _WindowRegistration(this.hasBarrier, this.dismissSettings);
 }
 
-/// Owns one runtime, its plugins and its preferences. No process-wide mutable state.
+/// Owns the registered plugins and preferences.
 final class ManaController extends ChangeNotifier {
   final ManaPreferences preferences;
   final ManaErrorHandler? onError;
@@ -86,7 +86,6 @@ final class ManaController extends ChangeNotifier {
       _state = _state.copyWith(settings: settings);
       _ready = true;
       notifyListeners();
-      // A slow plugin never delays the debug shell or its peers.
       unawaited(_plugins.initialize());
     } catch (error, stack) {
       _initializationError = error;
@@ -117,7 +116,6 @@ final class ManaController extends ChangeNotifier {
 
   Future<void> unregisterPlugin(String id) async {
     if (_closed) throw StateError('ManaController is closed.');
-    // Invalidate pending activations before disposing any registry resources.
     _generation++;
     if (_state.activePluginId == id) {
       await closePlugin();
@@ -200,9 +198,7 @@ final class ManaController extends ChangeNotifier {
     }
   }
 
-  /// Toggles the entire debug overlay, or explicitly sets [visible].
-  /// Hiding preserves plugin/widget state and does not stop data collection.
-  /// Visibility is runtime-only and is not persisted to preferences.
+  /// Preserves sessions and capture when hidden; visibility is not persisted.
   void toggleOverlay({bool? visible}) {
     if (_closed) return;
     final next = visible ?? !_state.overlayVisible;

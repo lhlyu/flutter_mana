@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart';
 
 import '../widgets/floating_button/icon.dart' as mana;
 
-/// Presentation intent, independent of any design system.
 enum ManaPresentation { window, overlay, action }
 
 abstract class ManaPluggable {
@@ -12,22 +11,21 @@ abstract class ManaPluggable {
   String getLocalizedDisplayName(Locale locale);
   ImageProvider get iconImageProvider => mana.iconImage;
 
-  /// Override for SVG or custom widgets; existing image providers still work.
   Widget buildIcon(BuildContext context, {double size = 40}) =>
       Image(image: iconImageProvider, width: size, height: size, fit: .contain);
   bool get isSupported => true;
   ManaPresentation get presentation => .window;
 
-  /// Initialize non-visual resources. Each registry entry runs this once.
+  /// Initialize resources before activation.
   FutureOr<void> initialize() {}
 
-  /// Called on explicit activation, after initialization succeeds.
+  /// Start the active session.
   FutureOr<void> onTrigger() {}
 
-  /// Stop work associated with the active session (not final resource disposal).
+  /// Stop the session; retain resources until dispose().
   FutureOr<void> deactivate() {}
 
-  /// Release subscriptions, connections and other resources owned by this plugin.
+  /// Release owned resources.
   FutureOr<void> dispose() {}
 
   /// Action-only plugins do not need to implement a widget.

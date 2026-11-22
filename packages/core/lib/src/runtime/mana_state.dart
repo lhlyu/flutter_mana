@@ -4,7 +4,6 @@ import '../storage/mana_settings.dart';
 
 enum ManaWindowMode { normal, minimized, fullscreen }
 
-/// Read-only runtime snapshot. Mutations go through ManaController commands.
 @immutable
 final class ManaState {
   final String? activePluginId;

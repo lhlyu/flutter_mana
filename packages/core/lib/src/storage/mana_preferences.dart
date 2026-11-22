@@ -1,6 +1,6 @@
 import 'mana_settings.dart';
 
-/// Storage owned by a single ManaController. Custom adapters need no plugin/UI dependencies.
+/// Owned and closed by ManaController.
 abstract interface class ManaPreferences {
   Future<ManaSettings> load();
   Future<void> save(ManaSettings settings);

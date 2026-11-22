@@ -7,8 +7,6 @@ import 'kit_style.dart';
 import 'kit_button.dart';
 import 'kit_selection.dart';
 
-/// Bounded list/detail layout. Normal chrome keeps its natural height; in a
-/// short window it scrolls independently instead of taking space from the body.
 class KitScaffold extends StatelessWidget {
   const KitScaffold({super.key, this.header, required this.body, this.footer});
   final Widget? header;

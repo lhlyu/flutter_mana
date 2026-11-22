@@ -18,7 +18,6 @@ Duration _tabDuration(BuildContext context) =>
     ? Duration.zero
     : const Duration(milliseconds: 180);
 
-// Reserve the same text width in both states, including at large text scales.
 List<double> _choiceWidths(
   BuildContext context,
   List<String> labels, {
@@ -41,7 +40,6 @@ List<double> _choiceWidths(
   return width;
 }).toList();
 
-/// Compact iOS-style segmented tabs, with one shared rail and sliding thumb.
 class KitTabs<T> extends StatelessWidget {
   const KitTabs({
     super.key,
@@ -69,7 +67,6 @@ class KitTabs<T> extends StatelessWidget {
   );
 }
 
-/// A labelled form value: segments when they fit, a menu otherwise.
 class KitChoiceField<T> extends StatelessWidget {
   const KitChoiceField({
     super.key,
@@ -175,7 +172,7 @@ class _ChoiceStripState<T> extends State<_ChoiceStrip<T>> {
   void _reveal(GlobalKey key) {
     final target = key.currentContext?.findRenderObject();
     if (!mounted || !_scroll.hasClients || target == null) return;
-    // Only move this horizontal strip, never a surrounding form/header scroll.
+    // Reveal within this strip without scrolling the surrounding form.
     _scroll.position.ensureVisible(target, alignmentPolicy: .keepVisibleAtEnd);
     _scroll.position.ensureVisible(
       target,
@@ -310,8 +307,6 @@ class _ChoiceStripState<T> extends State<_ChoiceStrip<T>> {
   );
 }
 
-/// One rectangular thumb beneath the labels, not an individual pill per item.
-/// It shares the labels' scroll coordinate space, including in RTL layouts.
 class _TabIndicatorTrack extends StatelessWidget {
   const _TabIndicatorTrack({
     required this.widths,
