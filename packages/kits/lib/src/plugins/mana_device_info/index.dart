@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../builtin_kit.dart';
 import '../../ui/kit_ui.dart';
 import 'utils/get_device_info.dart';
+import 'widgets/device_info_content.dart';
 
 class ManaDeviceInfo extends BuiltinKit {
   ManaDeviceInfo()
@@ -18,8 +19,7 @@ class ManaDeviceInfo extends BuiltinKit {
     showBarrier: false,
     content: KitAsync<Map<String, Object?>>(
       load: getDeviceInfo,
-      builder: (context, data) =>
-          SingleChildScrollView(child: KitDataTable(data)),
+      builder: (context, data) => DeviceInfoContent(data: data),
     ),
   );
 }

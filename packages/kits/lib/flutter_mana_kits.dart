@@ -13,24 +13,31 @@ List<ManaPluggable> loadAllPlugins({
   bool captureDebugPrint = false,
 }) {
   return [
-    ManaAlignRuler(),
-    ManaColorSucker(),
-    ManaDeviceInfo(),
+    // 常用排查
     ManaDioInspector(collector: dioCollector),
-    ManaFpsMonitor(),
-    ManaGrid(),
-    ManaLicense(),
     ManaLogViewer(
       collector: logCollector,
       captureDebugPrint: captureDebugPrint,
     ),
-    ManaMemoryInfo(),
-    ManaPackageInfo(),
-    ManaScreenInfo(),
     ManaSharedPreferencesViewer(),
-    ManaShowCode(),
-    ManaTouchIndicator(),
-    ManaVisualHelper(),
+
+    // 性能诊断
+    ManaFpsMonitor(),
+    ManaMemoryInfo(),
+
+    // 界面调试
     ManaWidgetInfoInspector(),
+    ManaShowCode(),
+    ManaVisualHelper(),
+    ManaAlignRuler(),
+    ManaGrid(),
+    ManaColorSucker(),
+    ManaTouchIndicator(),
+
+    // 环境信息
+    ManaDeviceInfo(),
+    ManaScreenInfo(),
+    ManaPackageInfo(),
+    ManaLicense(),
   ];
 }

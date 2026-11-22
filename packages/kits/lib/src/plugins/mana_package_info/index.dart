@@ -3,6 +3,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import '../builtin_kit.dart';
 import '../../ui/kit_ui.dart';
+import 'widgets/package_info_content.dart';
 
 class ManaPackageInfo extends BuiltinKit {
   ManaPackageInfo()
@@ -18,18 +19,7 @@ class ManaPackageInfo extends BuiltinKit {
     showBarrier: false,
     content: KitAsync<PackageInfo>(
       load: PackageInfo.fromPlatform,
-      builder: (context, info) => SingleChildScrollView(
-        child: KitDataTable({
-          'appName': info.appName,
-          'packageName': info.packageName,
-          'version': info.version,
-          'buildNumber': info.buildNumber,
-          'buildSignature': info.buildSignature,
-          'installerStore': info.installerStore,
-          'installTime': info.installTime,
-          'updateTime': info.updateTime,
-        }),
-      ),
+      builder: (context, info) => PackageInfoContent(info: info),
     ),
   );
 }
