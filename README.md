@@ -58,11 +58,11 @@ dart scripts/check.dart --web  # 同时验证示例应用的 Web Release 构建
 
 ## 预览图
 
-当前 example 的原生 Debug 截图（2026-11-15 更新），已同步紧凑分段标签栏与最新工具界面。
+当前 example 的原生 Debug 截图（2026-11-22 更新），覆盖面板及 16 个工具的当前界面。
 
 | 面板 | 网络检查 | 内存信息 |
 |:---:|:---:|:---:|
-| <img width="200" src="screenshots/2026-11-15_mana_preview.png" alt="面板"> | <img width="200" src="screenshots/2026-11-15_mana_dio_inspector.png" alt="Dio 网络检查器"> | <img width="200" src="screenshots/2026-11-15_mana_memory_info.png" alt="内存信息"> |
+| <img width="200" src="screenshots/2026-11-22_mana_preview.png" alt="面板"> | <img width="200" src="screenshots/2026-11-22_mana_dio_inspector.png" alt="Dio 网络检查器"> | <img width="200" src="screenshots/2026-11-22_mana_memory_info.png" alt="内存信息"> |
 
 [查看全部工具截图 →](docs/previews.md)
 
