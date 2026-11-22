@@ -110,7 +110,7 @@ void main() {
     expect(hint, findsOneWidget);
     expect(tester.getTopLeft(hint), tester.getTopLeft(input));
 
-    await tester.tap(hint);
+    await tester.tapAt(tester.getCenter(hint));
     await tester.pump();
     expect(tester.widget<EditableText>(input).focusNode.hasFocus, isTrue);
     await tester.enterText(input, 'query');

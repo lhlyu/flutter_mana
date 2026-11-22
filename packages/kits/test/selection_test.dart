@@ -56,7 +56,9 @@ void main() {
       });
       expect(kitSelectionControls.getHandleSize(20), const Size(48, 48));
       await tester.tap(find.byKey(key));
-      await tester.tapAt(tester.getTopLeft(find.byKey(key)) + const Offset(2, 2));
+      await tester.tapAt(
+        tester.getTopLeft(find.byKey(key)) + const Offset(2, 2),
+      );
       expect(taps, 2);
     });
   }
