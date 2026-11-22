@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -8,7 +9,62 @@ import 'package:flutter_mana_kits/src/plugins/mana_log_viewer/widgets/log_item_w
 import 'package:flutter_test/flutter_test.dart';
 import 'package:logger/logger.dart';
 
+class _UnreadableMap extends MapBase<String, Object?> {
+  @override
+  Iterable<String> get keys => ['broken'];
+  @override
+  Object? operator [](Object? key) => throw StateError('Payload unavailable');
+  @override
+  void operator []=(String key, Object? value) =>
+      throw UnsupportedError('Read only');
+  @override
+  void clear() => throw UnsupportedError('Read only');
+  @override
+  Object? remove(Object? key) => throw UnsupportedError('Read only');
+}
+
 void main() {
+  test('unreadable response bodies do not interrupt the Dio pipeline', () {
+    final collector = ManaDioCollector();
+    addTearDown(collector.dispose);
+    final response = Response<dynamic>(
+      requestOptions: RequestOptions(path: '/'),
+      data: _UnreadableMap(),
+    );
+    final handler = ResponseInterceptorHandler();
+    collector.onResponse(response, handler);
+    expect(handler.isCompleted, isTrue);
+    final record = collector.data.single;
+    expect(record.statusCode, response.statusCode);
+    expect(record.extra[ManaDioCollector.truncatedKey], isTrue);
+    expect(record.data, contains('omitted'));
+    expect(response.data, isA<_UnreadableMap>());
+  });
+
+  test('unreadable request data cannot be exported as a complete request', () {
+    final collector = ManaDioCollector();
+    addTearDown(collector.dispose);
+    collector.addResponse(
+      Response<dynamic>(
+        requestOptions: RequestOptions(path: '/', data: _UnreadableMap()),
+      ),
+    );
+    final record = collector.data.single;
+    expect(record.extra[ManaDioCollector.truncatedKey], isTrue);
+    expect(() => formatCurl(record.requestOptions), throwsUnsupportedError);
+    expect(() => formatHttp(record.requestOptions), throwsUnsupportedError);
+  });
+
+  test('unreadable log values preserve subsequent capture', () {
+    final collector = ManaLogCollector();
+    addTearDown(collector.dispose);
+    collector.output(OutputEvent(LogEvent(Level.info, _UnreadableMap()), []));
+    collector.output(OutputEvent(LogEvent(Level.info, 'next'), []));
+    expect(collector.data, hasLength(2));
+    expect((collector.data.first as CapturedLogEvent).truncated, isTrue);
+    expect(formatLog(collector.data.first, verbose: true), contains('omitted'));
+    expect(collector.data.last.origin.message, 'next');
+  });
   test(
     'network snapshots detach application bodies, headers and callbacks',
     () {

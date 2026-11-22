@@ -54,6 +54,16 @@ class CaptureBudget {
   }
 
   Object? copy(Object? value, [int depth = 0]) {
+    try {
+      return _copy(value, depth);
+    } catch (_) {
+      // Application collections may throw while being inspected.
+      truncated = true;
+      return text('[Unreadable data omitted]');
+    }
+  }
+
+  Object? _copy(Object? value, int depth) {
     if (value == null) return null;
     if (value is String) return text(value);
     if (value is num || value is bool || value is DateTime) {
