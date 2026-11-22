@@ -63,6 +63,78 @@ void main() {
     expect(errors, hasLength(1));
   });
 
+  test(
+    'a newer activation does not wait for an obsolete plugin initialization',
+    () async {
+      final initializing = Completer<void>();
+      final gate = Completer<void>();
+      final slow = TestPlugin(
+        name: 'slow',
+        initializeAction: () {
+          initializing.complete();
+          return gate.future;
+        },
+      );
+      final ready = TestPlugin(name: 'ready');
+      final runtime = ManaController(
+        plugins: [slow, ready],
+        preferences: MemoryManaPreferences(),
+      );
+      addTearDown(runtime.close);
+      final pending = runtime.activatePlugin(slow.name);
+      await initializing.future;
+      try {
+        final latest = runtime.activatePlugin(ready.name);
+        expect(await latest.timeout(const Duration(seconds: 1)), isTrue);
+        expect(await pending, isFalse);
+        expect(runtime.state.activePluginId, ready.name);
+        expect(slow.triggerCount, 0);
+        expect(slow.disposeCount, 0);
+      } finally {
+        gate.complete();
+      }
+      await runtime.close();
+      expect(slow.disposeCount, 1);
+      expect(ready.deactivateCount, 1);
+    },
+  );
+
+  test('cancelled initialization reports late failures and is awaited during shutdown', () async {
+    final started = Completer<void>();
+    final initialization = Completer<void>();
+    final errors = <Object>[];
+    final plugin = TestPlugin(
+      initializeAction: () {
+        started.complete();
+        return initialization.future;
+      },
+    );
+    final runtime = ManaController(
+      plugins: [plugin],
+      preferences: MemoryManaPreferences(),
+      onError: (error, _) => errors.add(error),
+    );
+    try {
+      final activation = runtime.activatePlugin(plugin.name);
+      await started.future;
+      await runtime.closePlugin().timeout(const Duration(seconds: 1));
+      expect(await activation, isFalse);
+      var closed = false;
+      final closing = runtime.close().then((_) => closed = true);
+      await Future<void>.delayed(.zero);
+      expect(closed, isFalse);
+      expect(plugin.disposeCount, 0);
+      initialization.completeError(StateError('Late initialization failure'));
+      await closing;
+      expect(errors, hasLength(1));
+      expect(plugin.triggerCount, 0);
+      expect(plugin.disposeCount, 1);
+    } finally {
+      if (!initialization.isCompleted) initialization.complete();
+      await runtime.close();
+    }
+  });
+
   test('closing a pending activation waits for its cleanup', () async {
     final started = Completer<void>();
     final trigger = Completer<void>();

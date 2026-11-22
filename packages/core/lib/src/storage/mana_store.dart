@@ -5,6 +5,7 @@ import 'mana_settings.dart';
 
 final class ManaStore implements ManaPreferences {
   SharedPreferences? _prefs;
+  final _savedValues = <String, double?>{};
   final String namespace;
 
   ManaStore({this.namespace = ''});
@@ -18,17 +19,21 @@ final class ManaStore implements ManaPreferences {
   Future<ManaSettings> load() async {
     final storage = _prefs ??= await SharedPreferences.getInstance();
     return ManaSettings.fromMap({
-      for (final key in storage.getKeys())
-        if (namespace.isEmpty || key.startsWith('$namespace.'))
-          (namespace.isEmpty ? key : key.substring(namespace.length + 1)):
-              storage.get(key),
+      for (final key in const ManaSettings().toMap().keys)
+        key: storage.get(_key(key)),
     });
   }
 
   @override
   Future<void> save(ManaSettings settings) async {
     for (final entry in settings.toMap().entries) {
+      if (_savedValues.containsKey(entry.key) &&
+          _savedValues[entry.key] == entry.value &&
+          read(entry.key) == entry.value) {
+        continue;
+      }
       await write(entry.key, entry.value);
+      _savedValues[entry.key] = entry.value;
     }
   }
 
@@ -37,6 +42,8 @@ final class ManaStore implements ManaPreferences {
 
   @override
   Future<void> write(String key, Object? value) async {
+    // SharedPreferences updates its cache even when the platform write fails.
+    _savedValues.remove(key);
     key = _key(key);
     final success = await switch (value) {
       null => _storage.remove(key),
@@ -55,5 +62,8 @@ final class ManaStore implements ManaPreferences {
   }
 
   @override
-  Future<void> close() async => _prefs = null;
+  Future<void> close() async {
+    _prefs = null;
+    _savedValues.clear();
+  }
 }
