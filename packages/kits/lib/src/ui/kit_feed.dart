@@ -60,7 +60,11 @@ class _KitFeedState<T> extends State<KitFeed<T>> {
       if (!mounted || !_active) return;
       setState(() {});
       binding.addPostFrameCallback((_) {
-        if (mounted && _active && !_locked && _scroll.hasClients) {
+        if (mounted &&
+            _active &&
+            !_locked &&
+            _scroll.hasClients &&
+            !_scroll.position.isScrollingNotifier.value) {
           _scroll.jumpTo(_scroll.position.maxScrollExtent);
         }
       });
@@ -114,6 +118,8 @@ class _KitFeedState<T> extends State<KitFeed<T>> {
           ? KitMessage(kitText(context, 'common.empty'))
           : ListView.separated(
               controller: _scroll,
+              primary: false,
+              physics: const ClampingScrollPhysics(),
               itemCount: items.length,
               padding: const .only(bottom: 8),
               itemBuilder: (context, index) =>

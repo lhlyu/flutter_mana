@@ -23,7 +23,102 @@ class _TopWindow extends TestPlugin {
   );
 }
 
+class _EditableWindow extends TestPlugin {
+  final text = TextEditingController(text: 'content');
+  final focus = FocusNode();
+  @override
+  Widget buildWidget(BuildContext context) => ManaFloatingWindow(
+    name: name,
+    showBarrier: false,
+    content: Column(
+      children: [
+        EditableText(
+          controller: text,
+          focusNode: focus,
+          style: const TextStyle(color: Color(0xFF000000)),
+          cursorColor: const Color(0xFF000000),
+          backgroundCursorColor: const Color(0xFF000000),
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: 100,
+            itemBuilder: (_, i) => SizedBox(height: 30, child: Text('row $i')),
+          ),
+        ),
+      ],
+    ),
+    setting: const Text('Settings only'),
+  );
+}
+
 void main() {
+  testWidgets(
+    'settings exclude hidden content focus and primary scroll inheritance without losing state',
+    (tester) async {
+      final plugin = _EditableWindow();
+      final runtime = ManaController(
+        plugins: [plugin],
+        preferences: MemoryManaPreferences(),
+      );
+      final outer = ScrollController();
+      await tester.pumpWidget(
+        WidgetsApp(
+          color: const Color(0xFFFFFFFF),
+          builder: (context, _) => PrimaryScrollController(
+            controller: outer,
+            child: ManaWidget.builder(
+              controller: runtime,
+              child: ListView.builder(
+                primary: true,
+                itemCount: 100,
+                itemBuilder: (_, i) =>
+                    SizedBox(height: 50, child: Text('host $i')),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await runtime.activatePlugin(plugin.name);
+      await tester.pumpAndSettle();
+      final field = find.byType(EditableText);
+      await tester.enterText(field, 'kept query');
+      await tester.pumpAndSettle();
+      expect(plugin.focus.hasFocus, isTrue);
+      expect(outer.positions, hasLength(1));
+      final list = find.descendant(
+        of: find.byType(ManaFloatingWindow),
+        matching: find.byType(ListView),
+      );
+      final listPosition = tester
+          .state<ScrollableState>(
+            find.descendant(of: list, matching: find.byType(Scrollable)),
+          )
+          .position;
+      listPosition.jumpTo(60);
+      await tester.pumpAndSettle();
+      final settings = find.byWidgetPredicate(
+        (widget) => widget is ManaButton && widget.tooltip == 'Settings',
+      );
+      await tester.tap(settings);
+      await tester.pumpAndSettle();
+      expect(plugin.focus.hasFocus, isFalse);
+      expect(field, findsNothing);
+      expect(find.text('Settings only'), findsOneWidget);
+      await tester.tap(settings);
+      await tester.pumpAndSettle();
+      expect(field, findsOneWidget);
+      expect(plugin.text.text, 'kept query');
+      expect(listPosition.pixels, 60);
+      expect(outer.offset, 0);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      await runtime.close();
+      plugin.text.dispose();
+      plugin.focus.dispose();
+      outer.dispose();
+    },
+  );
   testWidgets('external button position changes reach the screen and storage', (
     tester,
   ) async {

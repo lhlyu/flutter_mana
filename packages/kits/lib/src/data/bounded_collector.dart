@@ -12,6 +12,7 @@ class BoundedCollector<T> extends ChangeNotifier {
   final int maxBytes;
   int _retainedBytes = 0;
   int get retainedBytes => _retainedBytes;
+  int get length => _items.length;
   final _items = ListQueue<({T value, int bytes})>();
   List<T>? _snapshot;
   bool _disposed = false;

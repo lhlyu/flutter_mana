@@ -187,7 +187,7 @@ void main() {
       await tester.pumpAndSettle();
       await runtime.activatePlugin('mana_widget_info_inspector');
       await tester.pumpAndSettle();
-      expect(find.text('Widget').hitTestable(), findsOneWidget);
+      expect(find.text('No widget selected').hitTestable(), findsOneWidget);
       runtime.minimizeWindow();
       await tester.pumpAndSettle();
       await tester.tapAt(
@@ -197,7 +197,10 @@ void main() {
       expect(taps, 0, reason: 'The inspector must intercept taps on the host.');
       runtime.restoreWindow();
       await tester.pumpAndSettle();
-      expect(find.textContaining('ColoredBox').hitTestable(), findsOneWidget);
+      expect(
+        find.textContaining('ColoredBox').first.hitTestable(),
+        findsOneWidget,
+      );
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
       await runtime.close();
@@ -253,6 +256,49 @@ void main() {
       }
     },
   );
+
+  for (final (name, pluginFactory) in <(String, ManaPluggable Function())>[
+    ('network', ManaDioInspector.new),
+    ('logs', ManaLogViewer.new),
+    ('preferences', ManaSharedPreferencesViewer.new),
+    ('grid', ManaGrid.new),
+    ('ruler', ManaAlignRuler.new),
+    ('touch', ManaTouchIndicator.new),
+  ]) {
+    testWidgets('$name passes host taps after minimizing its panel', (
+      tester,
+    ) async {
+      var taps = 0;
+      final plugin = pluginFactory();
+      final runtime = ManaController(
+        plugins: [plugin],
+        preferences: MemoryManaPreferences(),
+      );
+      await tester.pumpWidget(
+        testHost(
+          ManaWidget.builder(
+            controller: runtime,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => taps++,
+              child: const SizedBox.expand(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await runtime.activatePlugin(plugin.name);
+      await tester.pumpAndSettle();
+      runtime.minimizeWindow();
+      await tester.pumpAndSettle();
+      await tester.tapAt(const Offset(20, 20));
+      await tester.pumpAndSettle();
+      expect(taps, 1);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      await runtime.close();
+    });
+  }
 
   testWidgets('keyboard resizes a bottom kit above the obscured region', (
     tester,

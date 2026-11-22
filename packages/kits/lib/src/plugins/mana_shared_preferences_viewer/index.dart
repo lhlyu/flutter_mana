@@ -1,8 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../builtin_kit.dart';
-import '../../ui/kit_ui.dart';
-import 'widgets/shared_preferences_viewer_content.dart';
+import 'widgets/shared_preferences_viewer.dart';
 
 class ManaSharedPreferencesViewer extends BuiltinKit {
   ManaSharedPreferencesViewer()
@@ -13,12 +12,6 @@ class ManaSharedPreferencesViewer extends BuiltinKit {
         icon: .preferences,
       );
   @override
-  Widget buildWidget(BuildContext context) => KitWindow(
-    name: name,
-    initialWidth: double.infinity,
-    position: .bottom,
-    drag: false,
-    showBarrier: false,
-    content: const SharedPreferencesViewerContent(),
-  );
+  Widget buildWidget(BuildContext context) =>
+      SharedPreferencesViewer(name: name);
 }

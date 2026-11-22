@@ -44,6 +44,10 @@ class _LogViewerState extends State<LogViewer> {
     setting: SingleChildScrollView(
       child: Column(
         children: [
+          KitCollectorStatistics(
+            collector: widget.collector,
+            countLabel: kitText(context, 'statistics.logs'),
+          ),
           KitToggle(
             label: kitText(context, 'log_viewer.verbose_logs'),
             value: _verbose,

@@ -14,6 +14,45 @@ Widget frame(Widget child, {double width = 360}) => Align(
 );
 
 void main() {
+  testWidgets('choice menus close when their page becomes inactive', (
+    tester,
+  ) async {
+    var active = true;
+    late StateSetter rebuild;
+    await tester.pumpWidget(
+      testHost(
+        StatefulBuilder(
+          builder: (context, setState) {
+            rebuild = setState;
+            return TickerMode(
+              enabled: active,
+              child: frame(
+                KitChoiceField(
+                  fieldLabel: 'Type',
+                  values: const ['one', 'two', 'three'],
+                  value: 'one',
+                  onChanged: (_) {},
+                ),
+                width: 160,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(choice('one'));
+    await tester.pumpAndSettle();
+    expect(choice('two').hitTestable(), findsOneWidget);
+    rebuild(() => active = false);
+    await tester.pumpAndSettle();
+    expect(choice('two'), findsNothing);
+    rebuild(() => active = true);
+    await tester.pumpAndSettle();
+    expect(choice('two'), findsNothing);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+  });
   testWidgets(
     'tabs share one compact iOS-style rail and navigation semantics',
     (tester) async {

@@ -12,6 +12,7 @@ class KitWindow extends StatelessWidget {
     this.setting,
     this.initialWidth,
     this.initialHeight,
+    this.height,
     this.position = .normal,
     this.drag = true,
     this.showBarrier = true,
@@ -23,6 +24,7 @@ class KitWindow extends StatelessWidget {
   final Widget? setting;
   final double? initialWidth;
   final double? initialHeight;
+  final double? height;
   final PositionType position;
   final bool drag;
   final bool showBarrier;
@@ -53,6 +55,7 @@ class KitWindow extends StatelessWidget {
         name: name,
         initialWidth: initialWidth,
         initialHeight: initialHeight,
+        height: height,
         position: position,
         drag: drag,
         showBarrier: showBarrier,
