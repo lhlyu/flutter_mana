@@ -119,6 +119,59 @@ void main() {
     },
   );
 
+  for (final (language, label, hint, settingsLabel) in [
+    (
+      'en',
+      'Show debug overlay',
+      'Hide for this session; shown again on next launch.',
+      'Settings',
+    ),
+    ('zh', '显示调试浮层', '关闭后本次隐藏，下次启动自动显示。', '设置'),
+  ]) {
+    testRuntimeWidgets(
+      'settings hide the overlay until the next session ($language)',
+      (tester) async {
+        tester.platformDispatcher.localesTestValue = [Locale(language)];
+        addTearDown(tester.platformDispatcher.clearLocalesTestValue);
+        final preferences = runtime.preferences;
+        Widget host() =>
+            ManaWidget(controller: runtime, child: const Text('Host'));
+        await tester.pumpWidget(host());
+        await tester.pumpAndSettle();
+        runtime.updateSettings(buttonSize: 60);
+        await tester.tap(find.byType(FloatingButton));
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.byWidgetPredicate(
+            (widget) => widget is ManaButton && widget.tooltip == settingsLabel,
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text(hint), findsOneWidget);
+
+        await tester.tap(find.text(label));
+        await tester.pumpAndSettle();
+        expect(find.byType(FloatingButton), findsNothing);
+        expect(find.byType(ManaOverlay), findsNothing);
+        expect(find.text('Host'), findsOneWidget);
+        expect(runtime.handleBack(), isFalse);
+
+        await tester.pumpWidget(host());
+        await tester.pumpAndSettle();
+        expect(find.byType(FloatingButton), findsNothing);
+
+        await tester.pumpWidget(const SizedBox());
+        await runtime.close();
+        runtime = ManaController(preferences: preferences);
+        await tester.pumpWidget(host());
+        await tester.pumpAndSettle();
+        expect(find.byType(FloatingButton), findsOneWidget);
+        expect(runtime.state.settings.buttonSize, 60);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   testRuntimeWidgets('sliders support drag, keyboard, endpoints and RTL', (
     tester,
   ) async {
