@@ -13,6 +13,13 @@ class LogViewerContent extends StatelessWidget {
   });
   final ManaLogCollector collector;
   final bool verboseLogs;
+
+  static String _categoryOf(OutputEvent event) =>
+      event.level.name.toUpperCase();
+
+  static String _searchText(OutputEvent event) =>
+      formatLog(event, verbose: true);
+
   @override
   Widget build(BuildContext context) => KitFeed<OutputEvent>(
     collector: collector,
@@ -27,8 +34,8 @@ class LogViewerContent extends StatelessWidget {
       ])
         level.name.toUpperCase(),
     ],
-    categoryOf: (event) => event.level.name.toUpperCase(),
-    searchText: (event) => formatLog(event, verbose: true),
+    categoryOf: _categoryOf,
+    searchText: _searchText,
     itemBuilder: (context, event) =>
         LogItemWidget(log: event, verboseLogs: verboseLogs),
   );

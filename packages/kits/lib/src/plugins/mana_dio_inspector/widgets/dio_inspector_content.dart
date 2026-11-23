@@ -15,6 +15,13 @@ class DioInspectorContent extends StatefulWidget {
 
 class _DioInspectorContentState extends State<DioInspectorContent> {
   Response<dynamic>? _selected;
+
+  static String _categoryOf(Response<dynamic> response) =>
+      response.requestOptions.method.toUpperCase();
+
+  static String _searchText(Response<dynamic> response) =>
+      '${response.requestOptions.uri} ${response.statusCode} ${response.extra[ManaDioCollector.errorKey] ?? ''}';
+
   @override
   void didUpdateWidget(DioInspectorContent oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -41,10 +48,8 @@ class _DioInspectorContentState extends State<DioInspectorContent> {
               'HEAD',
               'OPTIONS',
             ],
-            categoryOf: (response) =>
-                response.requestOptions.method.toUpperCase(),
-            searchText: (response) =>
-                '${response.requestOptions.uri} ${response.statusCode} ${response.extra[ManaDioCollector.errorKey] ?? ''}',
+            categoryOf: _categoryOf,
+            searchText: _searchText,
             itemBuilder: (context, response) => ResponseTile(
               response: response,
               onTap: () => setState(() => _selected = response),

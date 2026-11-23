@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/widgets.dart';
 
 import '../data/bounded_collector.dart';
@@ -29,6 +31,11 @@ class _KitFeedState<T> extends State<KitFeed<T>> {
   bool _locked = false;
   bool _updateScheduled = false;
   bool _active = true;
+  final _matches = HashMap<T, bool>.identity();
+  List<T>? _filteredSource;
+  List<T>? _filteredItems;
+  String _filteredQuery = '';
+  String? _filteredCategory;
 
   @override
   void didChangeDependencies() {
@@ -49,6 +56,46 @@ class _KitFeedState<T> extends State<KitFeed<T>> {
       old.collector.removeListener(_changed);
       widget.collector.addListener(_changed);
     }
+    if (old.collector != widget.collector ||
+        old.categoryOf != widget.categoryOf ||
+        old.searchText != widget.searchText) {
+      _invalidateFilter();
+    }
+  }
+
+  void _invalidateFilter() {
+    _matches.clear();
+    _filteredSource = null;
+    _filteredItems = null;
+  }
+
+  List<T> _filterItems(String query) {
+    if (_filteredQuery != query || _filteredCategory != _category) {
+      _invalidateFilter();
+      _filteredQuery = query;
+      _filteredCategory = _category;
+    }
+    final data = widget.collector.data;
+    if (_category == null && query.isEmpty) return data;
+    if (identical(data, _filteredSource)) return _filteredItems!;
+
+    // Captured records are snapshots. Reuse matches while the filter is stable,
+    // retaining only entries still owned by the collector.
+    final retained = HashSet<T>.identity()..addAll(data);
+    _matches.removeWhere((item, _) => !retained.contains(item));
+    final items = data
+        .where(
+          (item) => _matches.putIfAbsent(
+            item,
+            () =>
+                (_category == null || widget.categoryOf(item) == _category) &&
+                (query.isEmpty ||
+                    widget.searchText(item).toLowerCase().contains(query)),
+          ),
+        )
+        .toList(growable: false);
+    _filteredSource = data;
+    return _filteredItems = items;
   }
 
   void _changed() {
@@ -83,18 +130,7 @@ class _KitFeedState<T> extends State<KitFeed<T>> {
   @override
   Widget build(BuildContext context) {
     final query = _filter ? _query.text.trim().toLowerCase() : '';
-    final data = widget.collector.data;
-    final items = _category == null && query.isEmpty
-        ? data
-        : data
-              .where(
-                (item) =>
-                    (_category == null ||
-                        widget.categoryOf(item) == _category) &&
-                    (query.isEmpty ||
-                        widget.searchText(item).toLowerCase().contains(query)),
-              )
-              .toList();
+    final items = _filterItems(query);
     return KitScaffold(
       header: Column(
         mainAxisSize: .min,
