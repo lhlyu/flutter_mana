@@ -25,7 +25,9 @@ class ManaDioCollector extends BoundedCollector<Response<dynamic>>
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    options.extra[startTimeKey] = DateTime.now();
+    if (!isDisposed) {
+      options.extra = {...options.extra, startTimeKey: DateTime.now()};
+    }
     handler.next(options);
   }
 
@@ -56,8 +58,7 @@ class ManaDioCollector extends BoundedCollector<Response<dynamic>>
     if (isDisposed) return;
     final budget = CaptureBudget(math.min(maxEntryBytes, maxBytes));
     final source = response.requestOptions;
-    final rawPath = budget.text(source.uri.toString());
-    final path = Uri.tryParse(rawPath) == null ? '' : rawPath;
+    final path = _requestPath(source, budget);
     final method = budget.text(source.method);
     final headers = budget.copy(source.headers) as Map<String, dynamic>? ?? {};
     final data = _body(source.data, budget);
@@ -110,6 +111,22 @@ class ManaDioCollector extends BoundedCollector<Response<dynamic>>
       },
     );
     super.add(record, sizeBytes: budget.usedBytes);
+  }
+
+  String _requestPath(RequestOptions source, CaptureBudget budget) {
+    String rawPath;
+    try {
+      rawPath = source.uri.toString();
+    } catch (_) {
+      // Failed requests may have invalid URLs or unreadable query values.
+      // Keep a parseable path preview without replacing the business error.
+      budget.truncated = true;
+      rawPath = Uri(path: source.path).toString();
+    }
+    final path = budget.text(rawPath);
+    if (Uri.tryParse(path) != null) return path;
+    budget.truncated = true;
+    return '';
   }
 
   Object? _body(Object? value, CaptureBudget budget) {

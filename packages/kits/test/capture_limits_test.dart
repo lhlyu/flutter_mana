@@ -9,6 +9,11 @@ import 'package:flutter_mana_kits/src/plugins/mana_log_viewer/widgets/log_item_w
 import 'package:flutter_test/flutter_test.dart';
 import 'package:logger/logger.dart';
 
+class _UnprintableQueryValue {
+  @override
+  String toString() => throw StateError('Query value unavailable');
+}
+
 class _UnreadableMap extends MapBase<String, Object?> {
   @override
   Iterable<String> get keys => ['broken'];
@@ -24,6 +29,95 @@ class _UnreadableMap extends MapBase<String, Object?> {
 }
 
 void main() {
+  test('invalid request URLs preserve the original network error', () async {
+    final collector = ManaDioCollector();
+    addTearDown(collector.dispose);
+    final request = RequestOptions(path: 'https://[invalid', method: 'POST');
+    final error = DioException(
+      requestOptions: request,
+      message: 'Invalid request URL',
+    );
+    final dio = Dio()
+      ..interceptors.addAll([
+        collector,
+        InterceptorsWrapper(
+          onRequest: (_, handler) => handler.reject(error, true),
+        ),
+      ]);
+    addTearDown(() => dio.close(force: true));
+
+    await expectLater(dio.fetch<dynamic>(request), throwsA(same(error)));
+    final record = collector.data.single;
+    expect(() => record.requestOptions.uri, returnsNormally);
+    expect(record.requestOptions.method, 'POST');
+    expect(record.extra[ManaDioCollector.errorKey], 'Invalid request URL');
+    expect(record.extra[ManaDioCollector.truncatedKey], isTrue);
+    expect(() => formatCurl(record.requestOptions), throwsUnsupportedError);
+    expect(() => formatHttp(record.requestOptions), throwsUnsupportedError);
+    expect(request.path, 'https://[invalid');
+  });
+
+  test(
+    'unreadable query values do not interrupt successful responses',
+    () async {
+      final collector = ManaDioCollector();
+      addTearDown(collector.dispose);
+      final response = Response<dynamic>(
+        requestOptions: RequestOptions(
+          path: '/items',
+          queryParameters: {'value': _UnprintableQueryValue()},
+        ),
+        statusCode: 200,
+        data: 'response body',
+      );
+      final dio = Dio()
+        ..interceptors.addAll([
+          collector,
+          InterceptorsWrapper(
+            onRequest: (_, handler) => handler.resolve(response, true),
+          ),
+        ]);
+      addTearDown(() => dio.close(force: true));
+
+      expect(await dio.fetch<dynamic>(response.requestOptions), same(response));
+      final record = collector.data.single;
+      expect(() => record.requestOptions.uri, returnsNormally);
+      expect(record.statusCode, 200);
+      expect(record.data, 'response body');
+      expect(record.extra[ManaDioCollector.truncatedKey], isTrue);
+      expect(() => formatCurl(record.requestOptions), throwsUnsupportedError);
+    },
+  );
+
+  test(
+    'request timing accepts immutable extras without changing their map',
+    () {
+      final collector = ManaDioCollector();
+      addTearDown(collector.dispose);
+      const extra = <String, dynamic>{'business': 'value'};
+      final request = RequestOptions(path: '/items', extra: extra);
+      final handler = RequestInterceptorHandler();
+
+      collector.onRequest(request, handler);
+
+      expect(handler.isCompleted, isTrue);
+      expect(request.extra['business'], 'value');
+      expect(request.extra[ManaDioCollector.startTimeKey], isA<DateTime>());
+      expect(extra, {'business': 'value'});
+    },
+  );
+
+  test('disposed request interceptors forward without modifying extras', () {
+    final collector = ManaDioCollector()..dispose();
+    final request = RequestOptions(path: '/items');
+    final handler = RequestInterceptorHandler();
+
+    collector.onRequest(request, handler);
+
+    expect(handler.isCompleted, isTrue);
+    expect(request.extra, isEmpty);
+  });
+
   test('unreadable response bodies do not interrupt the Dio pipeline', () {
     final collector = ManaDioCollector();
     addTearDown(collector.dispose);
