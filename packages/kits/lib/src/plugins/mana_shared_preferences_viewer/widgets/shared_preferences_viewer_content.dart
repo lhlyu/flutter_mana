@@ -7,8 +7,13 @@ import 'preference_editor.dart';
 import 'preference_tile.dart';
 
 class SharedPreferencesViewerContent extends StatefulWidget {
-  const SharedPreferencesViewerContent({super.key, this.repository});
+  const SharedPreferencesViewerContent({
+    super.key,
+    this.repository,
+    this.onStatisticsChanged,
+  });
   final PreferencesRepository? repository;
+  final ValueChanged<AsyncSnapshot<int>>? onStatisticsChanged;
   @override
   State<SharedPreferencesViewerContent> createState() =>
       _SharedPreferencesViewerContentState();
@@ -34,6 +39,36 @@ class _SharedPreferencesViewerContentState
     _editing = false;
     _confirmClear = false;
     _revision++;
+  }
+
+  void _reportStatistics(AsyncSnapshot<int> snapshot, int revision) {
+    if (!mounted || revision != _revision) return;
+    final binding = WidgetsBinding.instance;
+    binding.addPostFrameCallback((_) {
+      if (mounted && revision == _revision) {
+        widget.onStatisticsChanged?.call(snapshot);
+      }
+    });
+    binding.ensureVisualUpdate();
+  }
+
+  Future<List<PreferenceEntry>> _load() async {
+    final revision = _revision;
+    _reportStatistics(const AsyncSnapshot.waiting(), revision);
+    try {
+      final entries = await _repository.load();
+      _reportStatistics(
+        AsyncSnapshot.withData(ConnectionState.done, entries.length),
+        revision,
+      );
+      return entries;
+    } catch (error, stack) {
+      _reportStatistics(
+        AsyncSnapshot.withError(ConnectionState.done, error, stack),
+        revision,
+      );
+      rethrow;
+    }
   }
 
   @override
@@ -64,7 +99,7 @@ class _SharedPreferencesViewerContentState
           : null,
       body: KitAsync<List<PreferenceEntry>>(
         key: ValueKey(_revision),
-        load: _repository.load,
+        load: _load,
         builder: (context, entries) {
           final query = _filter ? _query.text.toLowerCase() : '';
           final items = entries

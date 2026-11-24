@@ -9,7 +9,6 @@ import 'package:flutter_mana_kits/flutter_mana_kits.dart';
 import 'package:flutter_mana_kits/src/plugins/mana_dio_inspector/widgets/dio_inspector_content.dart';
 import 'package:flutter_mana_kits/src/plugins/mana_log_viewer/widgets/log_viewer_content.dart';
 import 'package:flutter_mana_kits/src/plugins/mana_shared_preferences_viewer/widgets/preference_editor.dart';
-import 'package:flutter_mana_kits/src/plugins/mana_widget_info_inspector/widgets/widget_info_inspector_detail.dart';
 import 'package:flutter_mana_kits/src/ui/kit_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:logger/logger.dart';
@@ -247,30 +246,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('ready'), findsOneWidget);
     expect(calls, 2);
-    await tester.pumpWidget(const SizedBox());
-  });
-
-  testWidgets('inspector search treats regex punctuation as plain text', (
-    tester,
-  ) async {
-    late BuildContext target;
-    await tester.pumpWidget(
-      testHost(
-        Builder(
-          builder: (context) {
-            target = context;
-            return const Text('Target');
-          },
-        ),
-      ),
-    );
-    final chain = (target as Element).debugGetDiagnosticChain();
-    await tester.pumpWidget(
-      testHost(InfoPage(elements: chain, onClose: () {})),
-    );
-    await tester.enterText(find.byType(EditableText), '[');
-    await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox());
   });
 

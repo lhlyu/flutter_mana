@@ -22,7 +22,10 @@ class _CodeWidgetState extends State<CodeWidget> {
   Widget build(BuildContext context) => SizedBox(
     width: double.infinity,
     child: SingleChildScrollView(
+      primary: false,
+      physics: const ClampingScrollPhysics(),
       child: SingleChildScrollView(
+        primary: false,
         scrollDirection: .horizontal,
         padding: const .all(12),
         child: KitSelection(child: Text.rich(_span, softWrap: false)),

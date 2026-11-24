@@ -15,6 +15,9 @@ class FloatingWindow extends StatefulWidget {
   final Widget? setting;
   final double? initialWidth;
   final double? initialHeight;
+
+  /// Optional live height, used by panels that can collapse without losing state.
+  final double? height;
   final PositionType position;
   final Offset? initialPosition;
   final bool showControls;
@@ -32,6 +35,7 @@ class FloatingWindow extends StatefulWidget {
     this.setting,
     this.initialWidth,
     this.initialHeight,
+    this.height,
     this.position = PositionType.normal,
     this.initialPosition,
     this.showControls = true,
@@ -53,7 +57,7 @@ class _FloatingWindowState extends State<FloatingWindow> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_controller case final controller?) {
-      controller.update(context);
+      controller.update(context, height: widget.height);
     } else {
       _controller = FloatingWindowController(
         context,
@@ -64,6 +68,17 @@ class _FloatingWindowState extends State<FloatingWindow> {
         initialHeight: widget.initialHeight,
         hasBarrier: widget.barrier != null || widget.content == null,
       );
+      if (widget.height != null) {
+        _controller!.update(context, height: widget.height);
+      }
+    }
+  }
+
+  @override
+  void didUpdateWidget(FloatingWindow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.height != widget.height) {
+      _controller?.update(context, height: widget.height);
     }
   }
 
@@ -75,6 +90,8 @@ class _FloatingWindowState extends State<FloatingWindow> {
 
   Widget _content(FloatingWindowController controller) {
     final fullscreen = controller.isFullscreen;
+    final showingSettings =
+        controller.showSetting.value && widget.setting != null;
     return Container(
       clipBehavior: .antiAlias,
       decoration: BoxDecoration(
@@ -111,17 +128,27 @@ class _FloatingWindowState extends State<FloatingWindow> {
                     ),
                   ),
                 Expanded(
-                  child: Stack(
-                    fit: .expand,
-                    children: [
-                      widget.content ?? const SizedBox.shrink(),
-                      if (controller.showSetting.value &&
-                          widget.setting != null)
-                        ColoredBox(
-                          color: ManaStyle.surface,
-                          child: widget.setting!,
+                  child: PrimaryScrollController.none(
+                    child: Stack(
+                      fit: .expand,
+                      children: [
+                        Offstage(
+                          offstage: showingSettings,
+                          child: TickerMode(
+                            enabled: !showingSettings,
+                            child: ExcludeFocus(
+                              excluding: showingSettings,
+                              child: widget.content ?? const SizedBox.shrink(),
+                            ),
+                          ),
                         ),
-                    ],
+                        if (showingSettings)
+                          ColoredBox(
+                            color: ManaStyle.surface,
+                            child: widget.setting!,
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               ],

@@ -31,5 +31,11 @@ class ManaDioInspector extends BuiltinKit {
     position: .bottom,
     drag: false,
     content: DioInspectorContent(collector: collector),
+    setting: SingleChildScrollView(
+      child: KitCollectorStatistics(
+        collector: collector,
+        countLabel: kitText(context, 'statistics.requests'),
+      ),
+    ),
   );
 }

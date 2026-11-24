@@ -473,6 +473,20 @@ class _ChoiceMenuState<T> extends State<_ChoiceMenu<T>> {
     _syncFocus();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!TickerMode.valuesOf(context).enabled) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted &&
+            !TickerMode.valuesOf(context).enabled &&
+            _controller.isOpen) {
+          _controller.close();
+        }
+      });
+    }
+  }
+
   void _syncFocus() {
     _itemFocus.removeWhere((value, node) {
       if (widget.values.contains(value)) return false;

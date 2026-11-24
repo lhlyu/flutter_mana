@@ -66,12 +66,23 @@ class FloatingWindowController {
     return true;
   }
 
-  void update(BuildContext context) {
-    _resize(context);
-    offset.value = _clamp(offset.value);
+  void update(BuildContext context, {double? height}) {
+    final previousHeight = _windowSize.height;
+    final previousScreenSize = _screenSize;
+    _resize(context, height: height);
+    final anchorBottom =
+        height != null &&
+        position == .bottom &&
+        (previousHeight != _windowSize.height ||
+            previousScreenSize != _screenSize);
+    offset.value = _clamp(
+      anchorBottom
+          ? Offset(offset.value.dx, _screenSize.height - _windowSize.height)
+          : offset.value,
+    );
   }
 
-  void _resize(BuildContext context) {
+  void _resize(BuildContext context, {double? height}) {
     final media = MediaQuery.of(context);
     final size = media.size;
     var padding = media.padding;
@@ -102,14 +113,14 @@ class FloatingWindowController {
       math.max(0, size.height - _safePadding.vertical),
     );
     final width = initialWidth ?? (size.width * 0.6).clamp(300, 600);
-    final height = switch (initialHeight) {
+    final resolvedHeight = switch (height ?? initialHeight) {
       null => size.height * 0.6,
       final value when value > 0 && value < 1 => size.height * value,
       final value => value,
     };
     _windowSize = Size(
       width.clamp(0, available.width),
-      height.clamp(0, available.height),
+      resolvedHeight.clamp(0, available.height),
     );
   }
 

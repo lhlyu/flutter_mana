@@ -138,11 +138,15 @@ Future<void> main(List<String> args) async {
           await Future<void>.delayed(const Duration(seconds: 3));
           break;
         case 'mana_show_code':
-          state = await command('/text', {'value': 'plugin_icons.dart'});
-          final script = (state['texts'] as List).cast<String>().firstWhere(
-            (text) => text.endsWith('/src/icons/plugin_icons.dart'),
-          );
-          state = await command('/tap', {'text': script});
+          final texts = (state['texts'] as List).cast<String>();
+          if (!texts.any(
+                (text) => text.contains('package:example/main.dart'),
+              ) ||
+              !texts.any((text) => text.contains('class ExampleApp'))) {
+            throw StateError(
+              'The source browser did not load the current page.',
+            );
+          }
           break;
         case 'mana_touch_indicator':
           final sample = state['sample'] as Map<String, dynamic>;

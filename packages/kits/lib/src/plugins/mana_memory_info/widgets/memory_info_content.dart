@@ -73,109 +73,117 @@ class _MemoryInfoContentState extends State<MemoryInfoContent> {
           };
           return _ascending ? result : -result;
         });
-        return CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Column(
+        return KitScaffold(
+          header: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              KitField(
+                controller: _query,
+                hintText: kitText(context, 'common.search'),
+                onChanged: (_) => setState(() {}),
+              ),
+              KitToggle(
+                label: kitText(context, 'memory_info.hide_private_classes'),
+                value: !_private,
+                onChanged: (value) => setState(() => _private = !value),
+              ),
+              KitToolbar(
                 children: [
-                  KitDataTable({
-                    'PID': snapshot.vm.pid,
-                    'CPU': snapshot.vm.hostCPU,
-                    'VM': snapshot.vm.version,
-                    'Heap': MemoryService.formatBytes(
-                      snapshot.usage.heapUsage ?? 0,
+                  for (final (field, key) in [
+                    ('Size', 'memory_info.size'),
+                    ('Count', 'memory_info.number'),
+                    ('Class', 'memory_info.class_name'),
+                  ])
+                    KitButton(
+                      label: kitText(context, key),
+                      selected: _sort == field,
+                      icon: _sort != field
+                          ? .sort
+                          : _ascending
+                          ? .sortAsc
+                          : .sortDesc,
+                      onPressed: () => setState(() {
+                        if (_sort == field) {
+                          _ascending = !_ascending;
+                        } else {
+                          _sort = field;
+                          _ascending = field == 'Class';
+                        }
+                      }),
                     ),
-                    'Capacity': MemoryService.formatBytes(
-                      snapshot.usage.heapCapacity ?? 0,
-                    ),
-                    'External': MemoryService.formatBytes(
-                      snapshot.usage.externalUsage ?? 0,
-                    ),
-                    'Classes': items.length,
-                  }),
-                  KitField(
-                    controller: _query,
-                    hintText: kitText(context, 'common.search'),
-                    onChanged: (_) => setState(() {}),
-                  ),
-                  KitToggle(
-                    label: kitText(context, 'memory_info.hide_private_classes'),
-                    value: !_private,
-                    onChanged: (value) => setState(() => _private = !value),
-                  ),
-                  KitToolbar(
-                    children: [
-                      for (final (field, key) in [
-                        ('Size', 'memory_info.size'),
-                        ('Count', 'memory_info.number'),
-                        ('Class', 'memory_info.class_name'),
-                      ])
-                        KitButton(
-                          label: kitText(context, key),
-                          selected: _sort == field,
-                          icon: _sort != field
-                              ? .sort
-                              : _ascending
-                              ? .sortAsc
-                              : .sortDesc,
-                          onPressed: () => setState(() {
-                            if (_sort == field) {
-                              _ascending = !_ascending;
-                            } else {
-                              _sort = field;
-                              _ascending = field == 'Class';
-                            }
-                          }),
-                        ),
-                      KitButton(
-                        label: kitText(context, 'common.refresh'),
-                        icon: .refresh,
-                        iconOnly: true,
-                        onPressed: () => setState(() => _revision++),
-                      ),
-                    ],
+                  KitButton(
+                    label: kitText(context, 'common.refresh'),
+                    icon: .refresh,
+                    iconOnly: true,
+                    onPressed: () => setState(() => _revision++),
                   ),
                 ],
               ),
-            ),
-            SliverList.builder(
-              itemCount: items.length,
-              itemBuilder: (context, index) {
-                final item = items[index];
-                return ManaButton(
-                  onPressed: () => setState(() => _selected = item),
-                  padding: const .all(10),
-                  child: Column(
-                    crossAxisAlignment: .stretch,
-                    spacing: 4,
-                    children: [
-                      Text(
-                        item.classRef?.name ?? '—',
-                        style: const TextStyle(fontSize: 13, fontWeight: .w600),
-                      ),
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 4,
-                        children: [
-                          Text(
-                            '${kitText(context, 'memory_info.number')}: ${item.instancesCurrent ?? 0}',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: KitStyle.muted,
-                            ),
-                          ),
-                          Text(
-                            MemoryService.formatBytes(item.bytesCurrent ?? 0),
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        ],
-                      ),
-                    ],
+            ],
+          ),
+          body: CustomScrollView(
+            primary: false,
+            physics: const ClampingScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(
+                child: KitDataTable({
+                  'PID': snapshot.vm.pid,
+                  'CPU': snapshot.vm.hostCPU,
+                  'VM': snapshot.vm.version,
+                  'Heap': MemoryService.formatBytes(
+                    snapshot.usage.heapUsage ?? 0,
                   ),
-                );
-              },
-            ),
-          ],
+                  'Capacity': MemoryService.formatBytes(
+                    snapshot.usage.heapCapacity ?? 0,
+                  ),
+                  'External': MemoryService.formatBytes(
+                    snapshot.usage.externalUsage ?? 0,
+                  ),
+                  'Classes': items.length,
+                }),
+              ),
+              SliverList.builder(
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  final item = items[index];
+                  return ManaButton(
+                    onPressed: () => setState(() => _selected = item),
+                    padding: const .all(10),
+                    child: Column(
+                      crossAxisAlignment: .stretch,
+                      spacing: 4,
+                      children: [
+                        Text(
+                          item.classRef?.name ?? '—',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: .w600,
+                          ),
+                        ),
+                        Wrap(
+                          spacing: 12,
+                          runSpacing: 4,
+                          children: [
+                            Text(
+                              '${kitText(context, 'memory_info.number')}: ${item.instancesCurrent ?? 0}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: KitStyle.muted,
+                              ),
+                            ),
+                            Text(
+                              MemoryService.formatBytes(item.bytesCurrent ?? 0),
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
         );
       },
     );

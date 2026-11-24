@@ -89,6 +89,23 @@ class _Vm extends VmInspector {
   }
 }
 
+class _ManyClasses extends MemoryService {
+  _ManyClasses() : super(inspector: _Vm());
+  @override
+  Future<MemorySnapshot> load() async => MemorySnapshot(
+    vm.VM(pid: 123, hostCPU: 'arm64', version: 'test'),
+    vm.MemoryUsage(heapUsage: 1024, heapCapacity: 2048, externalUsage: 0),
+    List.generate(
+      100,
+      (index) => vm.ClassHeapStats(
+        classRef: vm.ClassRef(id: 'class_$index', name: 'Class_$index'),
+        bytesCurrent: index * 100,
+        instancesCurrent: index,
+      ),
+    ),
+  );
+}
+
 class _Code extends CodeDisplayService {
   _Code(VmInspector inspector) : super(inspector: inspector);
 
@@ -233,6 +250,54 @@ void main() {
       await service.close();
     },
   );
+  testWidgets(
+    'memory class scrolling leaves filter and sort controls unchanged',
+    (tester) async {
+      final service = _ManyClasses();
+      await tester.pumpWidget(
+        testHost(
+          Center(
+            child: SizedBox(
+              width: 360,
+              height: 560,
+              child: MemoryInfoContent(service: service),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final header = find.byKey(const ValueKey('kit-header'));
+      final bounds = tester.getRect(header);
+      final headerPosition = tester
+          .state<ScrollableState>(
+            find.descendant(
+              of: header,
+              matching: find.byWidgetPredicate(
+                (widget) =>
+                    widget is Scrollable && widget.axis == Axis.vertical,
+              ),
+            ),
+          )
+          .position;
+      final offset = headerPosition.pixels;
+      final list = find.byType(CustomScrollView);
+      final scroll = tester
+          .state<ScrollableState>(
+            find.descendant(of: list, matching: find.byType(Scrollable)),
+          )
+          .position;
+      await tester.dragFrom(tester.getCenter(list), const Offset(0, -400));
+      await tester.pumpAndSettle();
+      expect(scroll.pixels, greaterThan(0));
+      expect(tester.getRect(header), bounds);
+      expect(headerPosition.pixels, offset);
+      expect(button('Refresh').hitTestable(), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      await service.close();
+    },
+  );
+
   testWidgets('memory errors are visible and retriable', (tester) async {
     final vm = _Vm()..fail = true;
     final service = MemoryService(inspector: vm);

@@ -18,15 +18,29 @@ class KitScaffold extends StatelessWidget {
     builder: (context, constraints) {
       Widget chrome(Widget child) => ConstrainedBox(
         constraints: BoxConstraints(maxHeight: constraints.maxHeight * .4),
-        child: SingleChildScrollView(child: child),
+        child: SingleChildScrollView(
+          primary: false,
+          physics: const ClampingScrollPhysics(),
+          child: child,
+        ),
       );
-      return Column(
-        crossAxisAlignment: .stretch,
-        children: [
-          if (header case final header?) chrome(header),
-          Expanded(child: body),
-          if (footer case final footer?) chrome(footer),
-        ],
+      return PrimaryScrollController.none(
+        child: Column(
+          crossAxisAlignment: .stretch,
+          children: [
+            if (header case final header?)
+              KeyedSubtree(
+                key: const ValueKey('kit-header'),
+                child: chrome(header),
+              ),
+            Expanded(key: const ValueKey('kit-body'), child: body),
+            if (footer case final footer?)
+              KeyedSubtree(
+                key: const ValueKey('kit-footer'),
+                child: chrome(footer),
+              ),
+          ],
+        ),
       );
     },
   );

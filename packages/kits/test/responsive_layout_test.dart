@@ -90,6 +90,29 @@ void main() {
           await runtime.activatePlugin(entry.plugin.name);
           await tester.pumpAndSettle();
           expect(tester.takeException(), isNull, reason: entry.plugin.name);
+          final settings = find
+              .byWidgetPredicate(
+                (widget) =>
+                    widget is ManaButton &&
+                    widget.tooltip == (language == 'zh' ? '设置' : 'Settings'),
+              )
+              .hitTestable();
+          if (settings.evaluate().isNotEmpty) {
+            await tester.tap(settings);
+            await tester.pumpAndSettle();
+            expect(
+              tester.takeException(),
+              isNull,
+              reason: '${entry.plugin.name} settings',
+            );
+            await tester.tap(settings);
+            await tester.pumpAndSettle();
+            expect(
+              tester.takeException(),
+              isNull,
+              reason: '${entry.plugin.name} settings closed',
+            );
+          }
           runtime.toggleFullscreen();
           await tester.pumpAndSettle();
           expect(

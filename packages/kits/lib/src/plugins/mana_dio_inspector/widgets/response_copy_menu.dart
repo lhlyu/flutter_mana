@@ -20,6 +20,20 @@ class _ResponseCopyMenuState extends State<ResponseCopyMenu> {
   final _menuFocus = FocusScopeNode();
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!TickerMode.valuesOf(context).enabled) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted &&
+            !TickerMode.valuesOf(context).enabled &&
+            _controller.isOpen) {
+          _controller.close();
+        }
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _anchorFocus.dispose();
     _menuFocus.dispose();
