@@ -587,6 +587,56 @@ void main() {
     expect(runtime.handleBack(), isFalse);
   });
 
+  test('unregistering an idle plugin keeps an unrelated activation', () async {
+    final started = Completer<void>();
+    final initialization = Completer<void>();
+    final slow = TestPlugin(
+      name: 'slow',
+      initializeAction: () {
+        started.complete();
+        return initialization.future;
+      },
+    );
+    final idle = TestPlugin(name: 'idle');
+    final runtime = ManaController(
+      plugins: [slow, idle],
+      preferences: MemoryManaPreferences(),
+    );
+    addTearDown(runtime.close);
+    final activation = runtime.activatePlugin(slow.name);
+    await started.future;
+    final unregistering = runtime.unregisterPlugin(idle.name);
+    initialization.complete();
+    await unregistering;
+    expect(await activation, isTrue);
+    expect(runtime.state.activePluginId, slow.name);
+  });
+
+  test('unregistering a pending activation cancels and disposes it', () async {
+    final started = Completer<void>();
+    final initialization = Completer<void>();
+    final plugin = TestPlugin(
+      initializeAction: () {
+        started.complete();
+        return initialization.future;
+      },
+    );
+    final runtime = ManaController(
+      plugins: [plugin],
+      preferences: MemoryManaPreferences(),
+    );
+    addTearDown(runtime.close);
+    final activation = runtime.activatePlugin(plugin.name);
+    await started.future;
+    final unregistering = runtime.unregisterPlugin(plugin.name);
+    expect(await activation, isFalse);
+    initialization.complete();
+    await unregistering;
+    expect(runtime.plugins.entries, isEmpty);
+    expect(plugin.triggerCount, 0);
+    expect(plugin.disposeCount, 1);
+  });
+
   test('unregistering an active plugin deactivates and disposes it', () async {
     final plugin = TestPlugin();
     final runtime = ManaController(

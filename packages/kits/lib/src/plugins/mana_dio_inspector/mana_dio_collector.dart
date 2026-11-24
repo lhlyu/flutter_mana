@@ -56,11 +56,23 @@ class ManaDioCollector extends BoundedCollector<Response<dynamic>>
 
   void _capture(Response<dynamic> response, {String? error}) {
     if (isDisposed) return;
+    try {
+      _captureSnapshot(response, error: error);
+    } catch (_) {
+      // Inspecting a response must never replace or interrupt business traffic.
+    }
+  }
+
+  void _captureSnapshot(Response<dynamic> response, {String? error}) {
     final budget = CaptureBudget(math.min(maxEntryBytes, maxBytes));
     final source = response.requestOptions;
     final path = _requestPath(source, budget);
     final method = budget.text(source.method);
-    final headers = budget.copy(source.headers) as Map<String, dynamic>? ?? {};
+    final capturedHeaders = budget.copy(source.headers);
+    final headers = capturedHeaders is Map<String, dynamic>
+        ? capturedHeaders
+        : <String, dynamic>{};
+    if (capturedHeaders is! Map<String, dynamic>) budget.truncated = true;
     final data = _body(source.data, budget);
     final request = RequestOptions(
       path: path,
@@ -84,14 +96,21 @@ class ManaDioCollector extends BoundedCollector<Response<dynamic>>
         : budget.text(response.statusMessage!);
     final capturedError = budget.copy(error ?? response.extra[errorKey]);
     final responseHeaders = <String, List<String>>{};
-    for (final entry in response.headers.map.entries) {
-      if (budget.remaining < 64) {
-        budget.truncated = true;
-        break;
+    try {
+      for (final entry in response.headers.map.entries) {
+        if (budget.remaining < 64) {
+          budget.truncated = true;
+          break;
+        }
+        final key = budget.text(entry.key);
+        final capturedValues = budget.copy(entry.value);
+        responseHeaders[key] = capturedValues is List
+            ? capturedValues.whereType<String>().toList()
+            : const [];
       }
-      final key = budget.text(entry.key);
-      final values = budget.copy(entry.value) as List? ?? [];
-      responseHeaders[key] = values.whereType<String>().toList();
+    } catch (_) {
+      // Custom or unreadable headers are non-essential to the request record.
+      budget.truncated = true;
     }
     final body = _body(response.data, budget);
     final record = Response<dynamic>(

@@ -28,6 +28,12 @@ class _UnreadableMap extends MapBase<String, Object?> {
   Object? remove(Object? key) => throw UnsupportedError('Read only');
 }
 
+class _UnreadableHeaders extends Headers {
+  _UnreadableHeaders();
+  @override
+  Map<String, List<String>> get map => throw StateError('Headers unavailable');
+}
+
 void main() {
   test('invalid request URLs preserve the original network error', () async {
     final collector = ManaDioCollector();
@@ -116,6 +122,33 @@ void main() {
 
     expect(handler.isCompleted, isTrue);
     expect(request.extra, isEmpty);
+  });
+
+  test('capture failures never replace the business response', () async {
+    final collector = ManaDioCollector();
+    addTearDown(collector.dispose);
+    final response = Response<dynamic>(
+      requestOptions: RequestOptions(path: '/ok'),
+      statusCode: 200,
+      headers: _UnreadableHeaders(),
+      data: 'business payload',
+    );
+    final dio = Dio()
+      ..interceptors.addAll([
+        collector,
+        InterceptorsWrapper(
+          onRequest: (_, handler) => handler.resolve(response, true),
+        ),
+      ]);
+    addTearDown(() => dio.close(force: true));
+
+    final result = await dio.fetch<dynamic>(response.requestOptions);
+    expect(result.data, 'business payload');
+    final record = collector.data.single;
+    expect(record.data, 'business payload');
+    expect(record.statusCode, 200);
+    expect(record.headers.map, isEmpty);
+    expect(record.extra[ManaDioCollector.truncatedKey], isTrue);
   });
 
   test('unreadable response bodies do not interrupt the Dio pipeline', () {

@@ -37,6 +37,8 @@ final class ManaController extends ChangeNotifier {
   Future<void>? _initialization;
   Future<void>? _closing;
   Future<void>? _sessionWork;
+  final _pendingActivations = <String, int>{};
+  final _sessionPlugins = <String, int>{};
   Future<void>? _saving;
   bool _savePending = false;
   int _generation = 0;
@@ -124,10 +126,15 @@ final class ManaController extends ChangeNotifier {
 
   Future<void> unregisterPlugin(String id) async {
     if (_closed) throw StateError('ManaController is closed.');
-    _nextGeneration();
+    // Only cancel work for the plugin being removed. Unregistering an idle
+    // plugin must not interrupt an activation of another plugin.
+    if (_state.activePluginId == id || _pendingActivations.containsKey(id)) {
+      _nextGeneration();
+    }
     if (_state.activePluginId == id) {
       await closePlugin();
-    } else {
+    } else if (_sessionPlugins.containsKey(id)) {
+      // A deactivation or activation touching this plugin is still in flight.
       await _sessionWork;
     }
     await _plugins.unregister(id);
@@ -137,11 +144,35 @@ final class ManaController extends ChangeNotifier {
     if (_closed) return Future.value(false);
     final generation = _nextGeneration();
     final superseded = _activationChanged.future;
+    _pendingActivations.update(id, (count) => count + 1, ifAbsent: () => 1);
     final result = (_sessionWork ?? Future.value()).then(
       (_) => _activate(id, generation, superseded),
     );
     _sessionWork = result.then((_) {});
-    return result;
+    return result.whenComplete(() => _releaseActivation(id));
+  }
+
+  void _releaseActivation(String id) {
+    final count = _pendingActivations[id];
+    if (count == null) return;
+    if (count > 1) {
+      _pendingActivations[id] = count - 1;
+    } else {
+      _pendingActivations.remove(id);
+    }
+  }
+
+  void _holdSession(String id) =>
+      _sessionPlugins.update(id, (count) => count + 1, ifAbsent: () => 1);
+
+  void _releaseSession(String id) {
+    final count = _sessionPlugins[id];
+    if (count == null) return;
+    if (count > 1) {
+      _sessionPlugins[id] = count - 1;
+    } else {
+      _sessionPlugins.remove(id);
+    }
   }
 
   Future<bool> _activate(
@@ -150,6 +181,8 @@ final class ManaController extends ChangeNotifier {
     Future<void> superseded,
   ) async {
     ManaPluggable? started;
+    String? previousId;
+    _holdSession(id);
     bool cancelled() => _closed || generation != _generation;
     try {
       if (cancelled()) return false;
@@ -173,7 +206,8 @@ final class ManaController extends ChangeNotifier {
         closePluginPanel();
         return true;
       }
-      final previousId = _state.activePluginId;
+      previousId = _state.activePluginId;
+      if (previousId != null) _holdSession(previousId);
       final previous = previousId == null ? null : _plugins[previousId]?.plugin;
       _update(_state.copyWith(clearActivePlugin: true, windowMode: .normal));
       if (previous != null) await _deactivate(previous);
@@ -200,6 +234,9 @@ final class ManaController extends ChangeNotifier {
       if (started != null) await _deactivate(started);
       _reportError(error, stack);
       return false;
+    } finally {
+      if (previousId != null) _releaseSession(previousId);
+      _releaseSession(id);
     }
   }
 
@@ -254,13 +291,16 @@ final class ManaController extends ChangeNotifier {
     final id = _state.activePluginId;
     _update(_state.copyWith(clearActivePlugin: true, windowMode: .normal));
     if (id == null) return _sessionWork ?? Future.value();
+    _holdSession(id);
     return _sessionWork = (_sessionWork ?? Future.value()).then((_) async {
-      final plugin = _plugins[id]?.plugin;
-      if (plugin == null) return;
       try {
+        final plugin = _plugins[id]?.plugin;
+        if (plugin == null) return;
         await Future<void>.sync(plugin.deactivate);
       } catch (error, stack) {
         _reportError(error, stack);
+      } finally {
+        _releaseSession(id);
       }
     });
   }
